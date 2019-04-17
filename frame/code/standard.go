@@ -2,6 +2,7 @@ package code
 
 import "google.golang.org/grpc/codes"
 
+// ...
 const (
 	OK                 = Code(codes.OK)
 	Canceled           = Code(codes.Canceled)
