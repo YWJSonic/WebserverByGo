@@ -17,22 +17,28 @@ func DeleteArrayElement(ElementIndex interface{}, array []interface{}) []interfa
 }
 
 // NewPlayerInfo Create a new PlayerInfo
-func NewPlayerInfo(id code.PlayerID) player.PlayerInfo {
+func NewPlayerInfo(id int64) player.PlayerInfo {
 	return player.PlayerInfo{
-		ID:    id,
-		Money: 10000,
-		Token: "1234567890",
+		ID:     id,
+		Money:  10000,
+		Token:  "1234567890",
+		InRoom: -1,
 	}
 }
 
 // GetPlayerInfo getplayerinfo
-func GetPlayerInfo(id code.PlayerID) player.PlayerInfo {
+func GetPlayerInfo(id int64) *player.PlayerInfo {
 	if player, ok := CachePlayer[id]; ok {
-		return *player
+		return player
 	}
 	player := NewPlayerInfo(id)
-	CachePlayer[id] = &player
-	return player
+	SavePlayerInfo(&player)
+	return &player
+}
+
+// SavePlayerInfo ...
+func SavePlayerInfo(playerInfo *player.PlayerInfo) {
+	CachePlayer[playerInfo.ID] = playerInfo
 }
 
 // JSONToString conver JsonStruct to JsonString
@@ -54,6 +60,11 @@ func InterfaceTofloat64(v interface{}) int {
 // InterfaceToInt ...
 func InterfaceToInt(v interface{}) int {
 	return int(InterfaceTofloat64(v))
+}
+
+// InterfaceToDynamicInt ...
+func InterfaceToDynamicInt(v interface{}) code.Code {
+	return code.Code(InterfaceTofloat64(v))
 }
 
 // InterfaceToString ...

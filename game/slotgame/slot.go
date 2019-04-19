@@ -15,18 +15,20 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// HandleURL ...
-// var HandleURL []frame.RESTfulUrl
+// ErrorNum
+const (
+	SelfNoInRoom int8 = iota
+)
 
 // SlotRoomInfo ...
 type SlotRoomInfo struct {
-	RoomInfo *game.RoomInfo
+	BaseInfo *game.RoomInfo
 }
 
 // SimpleGameRoomInfo ...
 type SimpleGameRoomInfo struct {
 	Lock   bool
-	Locker code.PlayerID
+	Locker int64
 }
 
 var gameRoomArray map[int]SlotRoomInfo // gameroom with array
@@ -44,99 +46,119 @@ func ServiceStart() []transmission.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	gameRoomArray = createGameRoomInArray(5)
+	gameRoomArray = addGameRoomInArray(20)
 
-	// HandleURL = append(HandleURL, frame.RESTfulUrl{RequestType: "POST", URL: "slotgame/", Fun: runa})
 	HandleURL = append(HandleURL, transmission.RESTfulURL{RequestType: "POST", URL: "slotgame/join", Fun: join})
 	HandleURL = append(HandleURL, transmission.RESTfulURL{RequestType: "POST", URL: "slotgame/leave", Fun: leave})
 	HandleURL = append(HandleURL, transmission.RESTfulURL{RequestType: "POST", URL: "slotgame/gameresult", Fun: gameresult})
-	HandleURL = append(HandleURL, transmission.RESTfulURL{RequestType: "POST", URL: "slotgame/bet", Fun: bet})
-	// HandleURL = append(HandleURL, transmission.RESTfulURL{RequestType: "POST", URL: "slotgame/GetGameRoomList", Fun: getGameRoomList})
 	return HandleURL
 }
 
-func createGameRoomInArray(RoomLimit int) map[int]SlotRoomInfo {
+func addGameRoomInArray(RoomLimit int) map[int]SlotRoomInfo {
 	var tmpRoom = make(map[int]SlotRoomInfo)
 	gameID := "slot"
 
-	for i := int(0); i < RoomLimit; i++ {
-		tmp := game.CreatedGameRoom(i, 1, gameID, gameID)
+	for i := 0; i < RoomLimit; i++ {
+		tmp := game.CreatedGameRoom(i+1, 1, gameID, gameID)
 		tmpRoom[i] = SlotRoomInfo{&tmp}
-		fmt.Println("Create", gameID, "game room", i)
+		fmt.Println("Create", gameID, "game room", tmp.ID())
 	}
 	return tmpRoom
 }
 
-// func createGameRoomInArray(RoomLimit int) []SlotRoomInfo {
-// 	var tmpRoom []SlotRoomInfo
-// 	fmt.Println(RoomLimit, len(tmpRoom))
-// 	for i := 0; i < RoomLimit; i++ {
-// 		tmpRoom = append(tmpRoom, SlotRoomInfo{RoomInfo: game.CreatedGameRoom(i, 1, "slot", "slot")})
-// 	}
-// 	return tmpRoom
-// }
 func join(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	// mu.Lock()
-	// defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
-	playerid := code.PlayerID(1)
+	POSTData := foundation.PostData(r)
+	playerID := foundation.InterfaceToInt(POSTData["playerid"])
+	playerid := playerID
 	player := foundation.GetPlayerInfo(playerid)
-
 	resoult := make(map[string]interface{})
 	// var roomStat int8
 	var err errorlog.ErrorMsg
-	for index := 0; index < 5; index++ {
-		_, err = gameRoomArray[index].RoomInfo.Join(&player)
+
+	if !player.IsInGameRoom() {
+		err.MsgNum = 4
+		err.Msg = "AlreadyInGame"
+		foundation.HTTPResponse(w, resoult, err)
+	}
+
+	RoomCount := len(gameRoomArray)
+	for index := 0; index < RoomCount; index++ {
+		_, err = gameRoomArray[index].BaseInfo.Join(player)
 		if err.MsgNum != game.OK {
 			continue
 		}
 
-		resoult["roomState"] = gameRoomArray[index].RoomInfo.Status()
-		resoult["roomid"] = gameRoomArray[index].RoomInfo.ID()
-		fmt.Printf("RoomID: %d Player Count: %d\n", gameRoomArray[index].RoomInfo.ID(), len(gameRoomArray[index].RoomInfo.Players()))
+		resoult["roomState"] = gameRoomArray[index].BaseInfo.Status()
+		resoult["roomid"] = gameRoomArray[index].BaseInfo.ID()
 		break
 	}
 
+	if !player.IsInGameRoom() {
+		foundation.HTTPResponse(w, resoult, err)
+	}
+
+	foundation.SavePlayerInfo(player)
 	foundation.HTTPResponse(w, resoult, err)
 }
 func leave(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	// mu.Lock()
-	// defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 	POSTData := foundation.PostData(r)
 	playerID := foundation.InterfaceToInt(POSTData["playerid"])
-	playerid := code.PlayerID(playerID)
+	playerid := playerID
 	player := foundation.GetPlayerInfo(playerid)
 
 	resoult := make(map[string]interface{})
-	// var roomStat int8
-	var err errorlog.ErrorMsg
-
-	fmt.Println(gameRoomArray)
-	_, err = gameRoomArray[player.InRoom].RoomInfo.Leave(&player)
-	if err.MsgNum != game.OK {
-		panic("Room leave error " + string(player.ID))
+	roomInfo, err := getRoomInfo(player.InRoom)
+	if roomInfo == nil {
+		foundation.HTTPResponse(w, resoult, err)
+		return
 	}
 
-	resoult["roomState"] = gameRoomArray[player.InRoom].RoomInfo.Status()
-	resoult["roomid"] = gameRoomArray[player.InRoom].RoomInfo.ID()
-	fmt.Printf("RoomID: %d Player Count: %d\n", gameRoomArray[player.InRoom].RoomInfo.ID(), len(gameRoomArray[player.InRoom].RoomInfo.Players()))
+	_, err = roomInfo.BaseInfo.Leave(player)
 
+	if err.MsgNum != game.OK {
+		foundation.HTTPResponse(w, resoult, err)
+		return
+	}
+
+	resoult["roomState"] = roomInfo.BaseInfo.Status()
+	resoult["roomid"] = roomInfo.BaseInfo.ID()
+
+	foundation.SavePlayerInfo(player)
 	foundation.HTTPResponse(w, resoult, err)
 }
 
-func bet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-}
 func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	err := errorlog.ErrorMsg{}
+	// cleint request data
+	// betmoney int
+	// gameid string
+	// playerid int
+
+	err := errorlog.New()
 	// postData := foundation.PostData(r)
 	// token := postData["playerid"].(string)
 	// gametoken := postData["token"].(string)
 	// gameid := postData["gameid"].(string)
 	// bet := foundation.InterfaceToInt(postData["bet"])
 
-	reault := gamelogic.GameOutput([]int{0, 1, 2, 3}, []int{3, 3, 3, 3, 3})
+	reault := gamelogic.GetGameResult("slot", 200)
 
 	foundation.HTTPResponse(w, reault, err)
 
+}
+
+func getRoomInfo(roomID int) (*SlotRoomInfo, errorlog.ErrorMsg) {
+	err := errorlog.New()
+
+	if roomInfo, ok := gameRoomArray[roomID-1]; ok {
+		return &roomInfo, err
+	}
+
+	err.ErrorCode = code.RoomNotExistence
+	err.Msg = "RoomNotExistence"
+	return nil, err
 }

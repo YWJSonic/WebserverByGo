@@ -29,10 +29,10 @@ type ErrorMsg struct {
 }
 
 // New default Error Message
-func (ErrMsg *ErrorMsg) New() ErrorMsg {
+func New() ErrorMsg {
 	return ErrorMsg{
 		ErrorCode: code.OK,
-		MsgNum:    0,
-		Msg:       "",
+		// MsgNum:    0,
+		Msg: "",
 	}
 }

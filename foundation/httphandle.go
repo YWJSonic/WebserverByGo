@@ -7,7 +7,11 @@ import (
 	"log"
 	"net/http"
 
+	"../frame/code"
+	"../frame/transmission"
 	"../messagehandle/errorlog"
+	ErrorLog "../messagehandle/errorlog"
+	"github.com/julienschmidt/httprouter"
 )
 
 // HTTPGet ...
@@ -64,4 +68,46 @@ func PostData(r *http.Request) map[string]interface{} {
 		panic(err)
 	}
 	return date
+}
+
+// HTTPLisentRun ...
+func HTTPLisentRun(ListenIP string, HandleURL ...[]transmission.RESTfulURL) (err error) {
+	router := httprouter.New()
+
+	for _, RESTfulURLArray := range HandleURL {
+		for _, RESTfulURLvalue := range RESTfulURLArray {
+			fmt.Printf("HTTPListen %v %s\n", RESTfulURLvalue.RequestType, RESTfulURLvalue.URL)
+
+			ProxyData[RESTfulURLvalue.URL] = RESTfulURLvalue
+			if RESTfulURLvalue.RequestType == "GET" {
+				router.GET("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
+			} else if RESTfulURLvalue.RequestType == "POST" {
+				// router.POST("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
+				router.POST("/"+RESTfulURLvalue.URL, ListenProxy)
+			}
+		}
+	}
+
+	fmt.Println("Server run on", ListenIP)
+	err = http.ListenAndServe(ListenIP, router)
+	if err != nil {
+		ErrorLog.ErrorLogPrintln("ListenAndServe", err)
+		return err
+	}
+	return err
+}
+
+// ListenProxy client -> Porxy -> processFun
+func ListenProxy(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	if ServerSetting.Maintain {
+		maintain(w, r, ps)
+	} else {
+		ProxyData[r.URL.Path[1:]].Fun(w, r, ps)
+	}
+}
+
+func maintain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	err := ErrorLog.New()
+	err.ErrorCode = code.Maintain
+	HTTPResponse(w, "", err)
 }

@@ -1,6 +1,8 @@
 package game
 
 import (
+	"sync"
+
 	"../../messagehandle/errorlog"
 	"../code"
 	"../player"
@@ -23,6 +25,19 @@ const (
 	RoomLock
 )
 
+// IRoom RoomInfo interface
+type IRoom interface {
+	ID() int
+	GameName() string
+	GameRound() int32
+	IsRoomLock() bool
+	RoomLocker() int64
+	Players() []int64
+	Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg)
+	Leave(player *player.PlayerInfo) (int8, errorlog.ErrorMsg)
+	Lock(player *player.PlayerInfo)
+}
+
 // RoomInfo base room info
 type RoomInfo struct {
 	MaxPlayer int32
@@ -30,11 +45,11 @@ type RoomInfo struct {
 	id        int
 	gametype  string
 	gamename  string
-	locker    code.PlayerID
+	locker    int64
 	status    int8 // status 0:empty, 1:haspeople ,2:full, 3:lock
 	gameround int32
-	isLock    bool
-	players   []code.PlayerID
+	players   []int64
+	mu        *sync.RWMutex
 }
 
 // CreatedGameRoom  create room at init
@@ -46,6 +61,7 @@ func CreatedGameRoom(roomid int, maxPlayer int32, gameName, gametype string) Roo
 		gamename:  gameName,
 		status:    0,
 		gameround: 0,
+		mu:        new(sync.RWMutex),
 	}
 }
 
@@ -71,35 +87,34 @@ func (g RoomInfo) GameRound() int32 {
 
 // IsRoomLock ...
 func (g RoomInfo) IsRoomLock() bool {
-	return g.isLock
+	return g.locker != -1
 }
 
 // RoomLocker ...
-func (g RoomInfo) RoomLocker() code.PlayerID {
+func (g RoomInfo) RoomLocker() int64 {
 	return g.locker
 }
 
 // Players ...
-func (g *RoomInfo) Players() []code.PlayerID {
+func (g *RoomInfo) Players() []int64 {
 	return g.players
 }
 
 // Join ...
 func (g *RoomInfo) Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
-	// err = errormsg.New()
-	var err errorlog.ErrorMsg
+	err := errorlog.New()
 
 	// maybe meet self
 	if g.IsRoomLock() && g.locker != player.ID {
-		err.MsgNum = RoomLockError
+		err.ErrorCode = code.RoomLockError
 		err.Msg = "RoomLockError"
 		return g.status, err
 	} else if g.isPlayerInRoom(player) {
-		err.MsgNum = SelfInRoom
+		err.ErrorCode = code.SelfInRoom
 		err.Msg = "SelfInRoom"
 		return g.status, err
 	} else if g.status == RoomFull {
-		err.MsgNum = RoomFullError
+		err.ErrorCode = code.RoomFull
 		err.Msg = "RoomFullError"
 		return g.status, err
 	}
@@ -117,10 +132,10 @@ func (g *RoomInfo) Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
 
 // Leave ...
 func (g *RoomInfo) Leave(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
-	var err errorlog.ErrorMsg
+	err := errorlog.New()
 
 	if !g.isPlayerInRoom(player) {
-		err.MsgNum = SelfNotInRoom
+		err.ErrorCode = code.SelfNotInRoom
 		err.Msg = "SelfNotInRoom"
 
 	} else {
@@ -152,7 +167,9 @@ func (g *RoomInfo) releace(player *player.PlayerInfo) {
 }
 func (g *RoomInfo) isPlayerInRoom(player *player.PlayerInfo) bool {
 	playerID := player.ID
-	for _, comparetTarget := range g.players {
+	// fmt.Println("RoomID:", g.ID(), "roomInfo:", g)
+	players := g.players
+	for _, comparetTarget := range players {
 		if comparetTarget == playerID {
 			return true
 		}

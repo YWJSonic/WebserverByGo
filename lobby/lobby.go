@@ -43,15 +43,26 @@ func getplayer(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	err := errorlog.ErrorMsg{}
+	err := errorlog.New()
 	postData := foundation.PostData(r)
+	playerID := foundation.InterfaceToInt(postData["playerid"])
 	token := postData["token"].(string)
 	gametoken := postData["gametoken"].(string)
 	gameid := postData["gameid"].(string)
 	cointype := foundation.InterfaceToInt(postData["cointype"])
 	coinamount := foundation.InterfaceToInt(postData["coinamount"])
 
-	exchangeInfo := ulg.Exchange(gametoken, gameid, token, cointype, coinamount)
+	ulgResult := ulg.Exchange(gametoken, gameid, token, cointype, coinamount)
 
-	foundation.HTTPResponse(w, exchangeInfo, err)
+	// if !exchangeInfo["result"].(bool) {
+	// 	err.ErrorCode = code.FailedPrecondition
+	// 	err.Msg = exchangeInfo["errorMsg"].(string)
+	// 	foundation.HTTPResponse(w, exchangeInfo, err)
+	// }
+
+	player := foundation.GetPlayerInfo(playerID)
+	player.Money += ulgResult.GameCoin
+	foundation.SavePlayerInfo(player)
+
+	foundation.HTTPResponse(w, ulgResult, err)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // GameOutput all game result output func
-func GameOutput(items []int, wheelsSize []int) interface{} {
+func gameOutput(items []int, wheelsSize []int) interface{} {
 
 	result := newResult(items, wheelsSize)
 
