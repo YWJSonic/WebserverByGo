@@ -2,19 +2,11 @@ package game
 
 import (
 	"sync"
+	"time"
 
-	"../../messagehandle/errorlog"
 	"../code"
+	"../messagehandle/errorlog"
 	"../player"
-)
-
-// error status
-const (
-	OK int8 = iota
-	RoomFullError
-	RoomLockError
-	SelfInRoom
-	SelfNotInRoom
 )
 
 // room status
@@ -49,6 +41,7 @@ type RoomInfo struct {
 	status    int8 // status 0:empty, 1:haspeople ,2:full, 3:lock
 	gameround int32
 	players   []int64
+	jointime  []int64
 	mu        *sync.RWMutex
 }
 
@@ -87,12 +80,16 @@ func (g RoomInfo) GameRound() int32 {
 
 // IsRoomLock ...
 func (g RoomInfo) IsRoomLock() bool {
-	return g.locker != -1
+	return g.locker != 0
 }
 
 // RoomLocker ...
 func (g RoomInfo) RoomLocker() int64 {
 	return g.locker
+}
+
+func (g RoomInfo) JoinTime() []int64 {
+	return g.jointime
 }
 
 // Players ...
@@ -106,10 +103,10 @@ func (g *RoomInfo) Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
 
 	// maybe meet self
 	if g.IsRoomLock() && g.locker != player.ID {
-		err.ErrorCode = code.RoomLockError
+		err.ErrorCode = code.RoomLock
 		err.Msg = "RoomLockError"
 		return g.status, err
-	} else if g.isPlayerInRoom(player) {
+	} else if g.isPlayerInRoom(player.ID) {
 		err.ErrorCode = code.SelfInRoom
 		err.Msg = "SelfInRoom"
 		return g.status, err
@@ -120,6 +117,7 @@ func (g *RoomInfo) Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
 	}
 
 	g.players = append(g.players, player.ID)
+	g.jointime = append(g.jointime, time.Now().Unix())
 	g.status = Someone
 	player.InGame = g.gametype
 	player.InRoom = g.id
@@ -131,7 +129,7 @@ func (g *RoomInfo) Join(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
 }
 
 // Leave ...
-func (g *RoomInfo) Leave(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
+func (g *RoomInfo) Leave(player int64) (int8, errorlog.ErrorMsg) {
 	err := errorlog.New()
 
 	if !g.isPlayerInRoom(player) {
@@ -141,8 +139,9 @@ func (g *RoomInfo) Leave(player *player.PlayerInfo) (int8, errorlog.ErrorMsg) {
 	} else {
 		count := len(g.players)
 		for index := 0; index < count; index++ {
-			if g.players[index] == player.ID {
+			if g.players[index] == player {
 				g.players = append(g.players[:index], g.players[index+1:]...)
+				g.jointime = append(g.jointime[:index], g.jointime[index+1:]...)
 				break
 			}
 		}
@@ -165,9 +164,7 @@ func (g *RoomInfo) Lock(player *player.PlayerInfo) {
 func (g *RoomInfo) releace(player *player.PlayerInfo) {
 	g.locker = -1
 }
-func (g *RoomInfo) isPlayerInRoom(player *player.PlayerInfo) bool {
-	playerID := player.ID
-	// fmt.Println("RoomID:", g.ID(), "roomInfo:", g)
+func (g *RoomInfo) isPlayerInRoom(playerID int64) bool {
 	players := g.players
 	for _, comparetTarget := range players {
 		if comparetTarget == playerID {
@@ -175,4 +172,24 @@ func (g *RoomInfo) isPlayerInRoom(player *player.PlayerInfo) bool {
 		}
 	}
 	return false
+}
+
+// ClearRoom remove dead player
+func (g *RoomInfo) ClearRoom() {
+	if len(g.jointime) <= 0 {
+		return
+	}
+
+	for _, playerID := range g.players {
+		player, err := player.GetPlayerInfoByPlayerID(playerID)
+		if err.ErrorCode != code.OK {
+			g.Leave(playerID)
+		}
+
+		if player.IsPlayerConnect() {
+			continue
+		}
+
+		g.Leave(playerID)
+	}
 }

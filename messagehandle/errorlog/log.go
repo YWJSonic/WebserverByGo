@@ -3,7 +3,7 @@ package errorlog
 import (
 	"fmt"
 
-	"../../frame/code"
+	"../../code"
 )
 
 // ErrorLogPrint ...
@@ -24,8 +24,8 @@ func ErrorLogPrintln(msg string, a ...interface{}) {
 // ErrorMsg ...
 type ErrorMsg struct {
 	ErrorCode code.Code
-	MsgNum    int8
-	Msg       string
+	// MsgNum    int8
+	Msg string
 }
 
 // New default Error Message

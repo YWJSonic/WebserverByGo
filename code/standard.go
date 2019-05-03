@@ -21,11 +21,16 @@ const (
 	Unavailable        = Code(codes.Unavailable)        // 不可用
 	DataLoss           = Code(codes.DataLoss)           // 資料遺失
 	Unauthenticated    = Code(codes.Unauthenticated)    // 未認證
-	Maintain           = Code(18)                       //維護中
+	Maintain           = 18                             //維護中
+	AuthorizedError    = 19
+	ExchangeError      = 20
 
-	RoomLockError    = Code(1001)
-	SelfInRoom       = Code(1002)
-	SelfNotInRoom    = Code(1003)
-	RoomFull         = Code(1004)
-	RoomNotExistence = Code(1005)
+	NoThisPlayer = 30
+
+	RoomLock         = 1001
+	SelfInRoom       = 1002
+	SelfNotInRoom    = 1003
+	RoomFull         = 1004
+	RoomNotExistence = 1005
+	AlreadyInGame    = 1006
 )

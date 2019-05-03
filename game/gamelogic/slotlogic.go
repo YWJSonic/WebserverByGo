@@ -55,7 +55,7 @@ func newResult(items []int, wheelsSize []int) [][]int {
 	// 	{2, 0, 0}}
 	return resultRow
 }
-func rateResult(items []int, reault map[int][][]int) {
+func rateResult(items []int, result map[int][][]int) {
 	// rateInfo := map[int][]slotRate{
 	// 	0: []slotRate{slotRate{0, 2, 200, 0, 0}, slotRate{0, 3, 300, 0, 0}, slotRate{0, 4, 400, 0, 0}},
 	// 	1: []slotRate{slotRate{1, 3, 30, 0, 0}, slotRate{1, 4, 40, 0, 0}, slotRate{1, 5, 50, 0, 0}},

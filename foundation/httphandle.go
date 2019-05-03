@@ -7,12 +7,18 @@ import (
 	"log"
 	"net/http"
 
-	"../frame/code"
-	"../frame/transmission"
+	"../code"
+	"../data"
 	"../messagehandle/errorlog"
 	ErrorLog "../messagehandle/errorlog"
 	"github.com/julienschmidt/httprouter"
 )
+
+var ProxyData map[string]RESTfulURL
+
+func init() {
+	ProxyData = make(map[string]RESTfulURL)
+}
 
 // HTTPGet ...
 func HTTPGet(ip string, values map[string][]string) []byte {
@@ -48,30 +54,41 @@ func HTTPPostRequest(ip string, values map[string][]string) []byte {
 
 // HTTPResponse Respond to cliente
 func HTTPResponse(httpconn http.ResponseWriter, data interface{}, err errorlog.ErrorMsg) {
-	resoult := make(map[string]interface{})
-	resoult["data"] = data
-	resoult["error"] = err
-	fmt.Fprint(httpconn, JSONToString(resoult))
+	result := make(map[string]interface{})
+	result["data"] = data
+	result["error"] = err
+	fmt.Fprint(httpconn, JSONToString(result))
 }
 
 // PostData get http post data
 func PostData(r *http.Request) map[string]interface{} {
-	err := r.ParseForm()
-	if err != nil {
-		panic(err)
-	}
-	v := r.Form
+	data := map[string]interface{}{}
+	contentType := r.Header.Get("Content-type")
 
-	postdata := v.Get("POST")
-	date := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(postdata), &date); err != nil {
-		panic(err)
+	if contentType == "application/x-www-form-urlencoded" {
+		err := r.ParseForm()
+		if err != nil {
+			panic(err)
+		}
+		v := r.Form
+		postdata := v.Get("POST")
+		if err := json.Unmarshal([]byte(postdata), &data); err != nil {
+			panic(err)
+		}
+
+	} else {
+		d := json.NewDecoder(r.Body)
+		err := d.Decode(&data)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return date
+
+	return data
 }
 
 // HTTPLisentRun ...
-func HTTPLisentRun(ListenIP string, HandleURL ...[]transmission.RESTfulURL) (err error) {
+func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 	router := httprouter.New()
 
 	for _, RESTfulURLArray := range HandleURL {
@@ -85,10 +102,16 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]transmission.RESTfulURL) (err
 				// router.POST("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
 				router.POST("/"+RESTfulURLvalue.URL, ListenProxy)
 			}
+			router.OPTIONS("/"+RESTfulURLvalue.URL, option)
+
 		}
 	}
 
 	fmt.Println("Server run on", ListenIP)
+
+	// HTTPS Server
+	// ListenAndServeTLS
+
 	err = http.ListenAndServe(ListenIP, router)
 	if err != nil {
 		ErrorLog.ErrorLogPrintln("ListenAndServe", err)
@@ -96,14 +119,35 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]transmission.RESTfulURL) (err
 	}
 	return err
 }
+func option(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	headers := w.Header()
+	headers.Add("Access-Control-Allow-Origin", "*")
+	headers.Add("Vary", "Origin")
+	headers.Add("Vary", "Access-Control-Request-Method")
+	headers.Add("Vary", "Access-Control-Request-Headers")
+	headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
+	headers.Add("Access-Control-Allow-Methods", "GET, POST,OPTIONS")
+	w.WriteHeader(http.StatusOK)
+}
 
 // ListenProxy client -> Porxy -> processFun
 func ListenProxy(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	if ServerSetting.Maintain {
+
+	addHeader(&w)
+
+	if data.Maintain {
 		maintain(w, r, ps)
 	} else {
 		ProxyData[r.URL.Path[1:]].Fun(w, r, ps)
 	}
+}
+
+func addHeader(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	// (*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	(*w).Header().Set("Content-Type", "application/json")
+	// (*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	// (*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
 func maintain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

@@ -1,44 +1,24 @@
 package foundation
 
 import (
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
+	"math/rand"
+	"time"
 
-	"../frame/code"
-	"../frame/player"
+	"../code"
 )
 
 // DeleteArrayElement ...
 func DeleteArrayElement(ElementIndex interface{}, array []interface{}) []interface{} {
 	count := len(array)
 	for index := 0; index < count; index++ {
-		return append(array[:index], array[index+1:]...)
+		if ElementIndex == array[index] {
+			return append(array[:index], array[index+1:]...)
+		}
 	}
 	return array
-}
-
-// NewPlayerInfo Create a new PlayerInfo
-func NewPlayerInfo(id int64) player.PlayerInfo {
-	return player.PlayerInfo{
-		ID:     id,
-		Money:  10000,
-		Token:  "1234567890",
-		InRoom: -1,
-	}
-}
-
-// GetPlayerInfo getplayerinfo
-func GetPlayerInfo(id int64) *player.PlayerInfo {
-	if player, ok := CachePlayer[id]; ok {
-		return player
-	}
-	player := NewPlayerInfo(id)
-	SavePlayerInfo(&player)
-	return &player
-}
-
-// SavePlayerInfo ...
-func SavePlayerInfo(playerInfo *player.PlayerInfo) {
-	CachePlayer[playerInfo.ID] = playerInfo
 }
 
 // JSONToString conver JsonStruct to JsonString
@@ -53,13 +33,27 @@ func JSONToString(v interface{}) (out string) {
 }
 
 // InterfaceTofloat64 ...
-func InterfaceTofloat64(v interface{}) int {
-	return int(v.(float64))
+func InterfaceTofloat64(v interface{}) float64 {
+	return v.(float64)
 }
 
 // InterfaceToInt ...
 func InterfaceToInt(v interface{}) int {
 	return int(InterfaceTofloat64(v))
+}
+
+// InterfaceToInt64 ...
+func InterfaceToInt64(v interface{}) int64 {
+	switch v.(type) {
+	case float64:
+		return int64(v.(float64))
+	case int:
+		return int64(v.(int))
+	case int64:
+		return v.(int64)
+	default:
+		panic("Conver Error")
+	}
 }
 
 // InterfaceToDynamicInt ...
@@ -70,4 +64,35 @@ func InterfaceToDynamicInt(v interface{}) code.Code {
 // InterfaceToString ...
 func InterfaceToString(v interface{}) string {
 	return v.(string)
+}
+
+// NewToken ...
+func NewToken(GameAccount string) string {
+	return MD5Code(fmt.Sprintf("%s%d", GameAccount, time.Now().Unix()))
+}
+
+func MD5Code(Data string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(Data)))
+}
+
+// RangeRandom array random index
+func RangeRandom(Range []int) int {
+	Sum := 0
+	rand.Seed(time.Now().UnixNano())
+
+	for _, value := range Range {
+		Sum += value
+	}
+
+	random := rand.Intn(Sum)
+
+	Sum = 0
+	for i, value := range Range {
+		Sum += value
+		if Sum > random {
+			return i
+		}
+	}
+	return -1
+
 }
