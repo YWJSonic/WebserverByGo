@@ -18,13 +18,16 @@ type PlayerInfo struct {
 	GameAccount string `json:"GameAccount"`
 
 	///////// for Server value
+	// Account       string `json:"Account"`       // Thirdparty Account
 	InRoom        int    `json:"InRoom"`        // room index
-	Account       string `json:"Account"`       // Thirdparty Account
 	LastCheckTime int64  `json:"LastCheckTime"` // connect check time
 	InGame        string `json:"InGame"`        // gametype
+	TotalWin      int64  `json:"TotalWin"`
+	TotalLost     int64  `json:"TotalLost"`
+	TotalExchange int64  `json:"TotalExchange"`
 }
 
-func (p PlayerInfo) ToJsonStr() string {
+func (p PlayerInfo) ToJSONStr() string {
 	data, _ := json.MarshalIndent(p, "", " ")
 	STR := string(data)
 	STR = strings.ReplaceAll(STR, string(10), ``)

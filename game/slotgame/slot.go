@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"../../code"
+	"../../db"
 	"../../foundation"
 	"../../game"
 	"../../log"
@@ -79,7 +80,6 @@ func addGameRoomInArray(RoomLimit int) map[int]SlotRoomInfo {
 		RoomCount++
 		tmp := game.CreatedGameRoom(RoomCount, 1, gametypeID, gametypeID)
 		tmpRoom[RoomCount] = SlotRoomInfo{&tmp}
-		fmt.Println("Create", gametypeID, "game room", tmp.ID())
 	}
 	return tmpRoom
 }
@@ -88,28 +88,26 @@ func join(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	loginfo := log.New(log.JoinGame)
 	result := make(map[string]interface{})
 	POSTData := foundation.PostData(r)
 	// token := foundation.InterfaceToString(POSTData["token"])
 	playerID := foundation.InterfaceToInt64(POSTData["playerid"])
-	playerid := playerID
-	playerInfo, err := player.GetPlayerInfoByPlayerID(playerid)
-	loginfo.PlayerID = playerInfo.ID
-	// var roomStat int8
+	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
 	if playerInfo.IsInGameRoom() {
 		err.ErrorCode = code.AlreadyInGame
 		err.Msg = "AlreadyInGame"
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
+	loginfo := log.New(log.JoinGame)
+	loginfo.PlayerID = playerInfo.ID
 	RoomCount := len(gameRoomArray)
 	for index := 1; index <= RoomCount; index++ {
 		_, err = gameRoomArray[index].BaseInfo.Join(playerInfo)
@@ -124,7 +122,9 @@ func join(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	if !playerInfo.IsInGameRoom() {
-		foundation.HTTPResponse(w, result, err)
+		err.ErrorCode = code.RoomFull
+		err.Msg = "RoomFull"
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -135,23 +135,24 @@ func join(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func leave(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
-	loginfo := log.New(log.LeaveGame)
 	POSTData := foundation.PostData(r)
 	// token := foundation.InterfaceToString(POSTData["token"])
 	playerID := foundation.InterfaceToInt64(POSTData["playerid"])
 	playerid := playerID
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerid)
+	loginfo := log.New(log.LeaveGame)
+	loginfo.PlayerID = playerid
 
 	result := make(map[string]interface{})
 	roomInfo, err := getRoomInfo(playerInfo.InRoom)
 	if roomInfo == nil {
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
 	_, err = roomInfo.BaseInfo.Leave(playerInfo.ID)
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -167,22 +168,22 @@ func leave(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
-	loginfo := log.New(log.LeaveGame)
+
 	var result = make(map[string]interface{})
 
-	// err := errorlog.New()
 	postData := foundation.PostData(r)
 	playerid := foundation.InterfaceToInt64(postData["playerid"])
-	playerInfo, err := player.GetPlayerInfoByPlayerID(playerid)
+	playerinfo, err := player.GetPlayerInfoByPlayerID(playerid)
 	// gametoken := postData["token"].(string)
 	// gametypeid := postData["gametypeid"].(string)
 	bet := foundation.InterfaceToInt(postData["bet"])
 
 	if err.ErrorCode != code.OK {
-
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
+	loginfo := log.New(log.GameResult)
+	loginfo.PlayerID = playerid
 
 	WinBet := 0
 	ScatterIndex := -1
@@ -210,16 +211,21 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 	}
 	// GameResult = append(GameResult, newplate)
-
+	WinMoney := int64(WinBet * bet)
+	LostMoney := int64(bet)
+	playerinfo.TotalWin += WinMoney
+	playerinfo.TotalLost += LostMoney
+	playerinfo.Money = playerinfo.Money + WinMoney - LostMoney
 	result["ScatterGame"] = ScatterIndex
 	result["NormalGameIndex"] = newIndex
 	result["NormalGame"] = newplate
-	result["WinMoney"] = WinBet * bet
-	result["Player"] = playerInfo.ToJson()
+	result["WinMoney"] = WinMoney
+	// result["Player"] = playerInfo.ToJson()
 	loginfo.IValue1 = int64(WinBet * bet)
 	loginfo.SValue1 = fmt.Sprint(newplate)
 	loginfo.SValue2 = fmt.Sprint(ScatterIndex)
 
+	db.UpdatePlayerInfo(playerinfo.ID, playerinfo.Money, playerinfo.TotalWin, playerinfo.TotalLost)
 	log.SaveLog(loginfo)
 	foundation.HTTPResponse(w, result, err)
 }

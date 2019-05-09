@@ -1,9 +1,10 @@
 package gamelogic
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
+
+	"../../messagehandle/errorlog"
 )
 
 type LogicResult struct {
@@ -18,7 +19,7 @@ func GetGameResult(gameid string, bet int, payrate []int, plate []int, scroll []
 
 	normalGame := makeGamePlate(plate, scroll)
 
-	fmt.Println(normalGame)
+	errorlog.LogPrintln("GameResult", normalGame)
 	return result
 
 }

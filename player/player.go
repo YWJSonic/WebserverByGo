@@ -13,29 +13,41 @@ import (
 	"../mycache"
 )
 
+// GetAccountInfoByGameAccount Get accountinfo struct
+func GetAccountInfoByGameAccount(GameAccount string) (*AccountInfo, errorlog.ErrorMsg) {
+	info, err := mycache.GetAccountInfo(GameAccount)
+	if info == nil {
+		err.ErrorCode = code.NoThisPlayer
+		err.Msg = "NoThisGameAccount"
+		return nil, err
+	}
+
+	var account AccountInfo
+	if errMsg := json.Unmarshal(info.([]byte), &account); errMsg != nil {
+		errorlog.ErrorLogPrintln("", errMsg)
+		err.ErrorCode = code.NoThisPlayer
+		err.Msg = "AccountFormatError"
+		return nil, err
+	}
+	return &account, err
+
+}
+
 // GetPlayerInfoByPlayerID ...
 func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
-
-	var player PlayerInfo
-	// err := errorlog.New()
-	info, err := mycache.GetPlayerInfo(playerid) // get playerinfo form cache
-	// info, errMsg := (*data.CacheRef).Get(fmt.Sprintf("ID%dJS", playerid))
-
-	// if errMsg != nil {
-	// 	fmt.Println(errMsg)
-	// 	panic(errMsg)
-	// }
-	// if err.ErrorCode != code.OK {
-	// 	fmt.Println("GetPlayerInfoByPlayerID ERROR:", err.Msg, "info", info)
-	// }
+	info, err := mycache.GetPlayerInfo(playerid)
 	if info == nil {
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "NoThisPlayer"
 		return nil, err
 	}
 
+	var player PlayerInfo
 	if errMsg := json.Unmarshal(info.([]byte), &player); errMsg != nil {
-		panic(errMsg)
+		errorlog.ErrorLogPrintln("", errMsg)
+		err.ErrorCode = code.NoThisPlayer
+		err.Msg = "PlayerFormatError"
+		return nil, err
 	}
 
 	return &player, err
@@ -45,18 +57,17 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 func SavePlayerInfo(playerInfo *PlayerInfo) {
 	playerInfo.LastCheckTime = time.Now().Unix()
 
-	(*data.CacheRef).Set(fmt.Sprintf("ID%dJS", playerInfo.ID), playerInfo.ToJsonStr(), time.Hour)
-	mycache.SetPlayerInfo(playerInfo.ID, playerInfo.ToJsonStr())
-	mycache.SetPlayerID(playerInfo.GameAccount, playerInfo.ID)
+	(*data.CacheRef).Set(fmt.Sprintf("ID%dJS", playerInfo.ID), playerInfo.ToJSONStr(), time.Hour)
+	mycache.SetPlayerInfo(playerInfo.ID, playerInfo.ToJSONStr())
 
 }
 
 // New Create a new PlayerInfo
-func New(GameAccount string) *PlayerInfo {
+func New(GameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
 	playerID, err := db.NewGameAccount(GameAccount, 0)
 
 	if err.ErrorCode != code.OK {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	info := PlayerInfo{
@@ -65,7 +76,7 @@ func New(GameAccount string) *PlayerInfo {
 		Money:       0,
 	}
 
-	return &info
+	return &info, err
 }
 
 // MakePlayer Get player form db
@@ -75,13 +86,4 @@ func MakePlayer(row map[string]interface{}) *PlayerInfo {
 		Money:       foundation.InterfaceToInt64(row["GameMoney"]),
 		GameAccount: foundation.InterfaceToString(row["GameAccount"]),
 	}
-}
-
-// JSONMakePlayer create playerinfo
-func JSONMakePlayer(jsbyte []byte) PlayerInfo {
-	var info PlayerInfo
-	if err := json.Unmarshal(jsbyte, &info); err != nil {
-		panic(err)
-	}
-	return info
 }

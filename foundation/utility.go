@@ -66,11 +66,17 @@ func InterfaceToString(v interface{}) string {
 	return v.(string)
 }
 
-// NewToken ...
-func NewToken(GameAccount string) string {
-	return MD5Code(fmt.Sprintf("%s%d", GameAccount, time.Now().Unix()))
+// NewAccount convert all plant account to server account
+func NewAccount(plant, account string) string {
+	return fmt.Sprintf("%s:%s", plant, account)
 }
 
+// NewToken ...
+func NewToken(GameAccount string) string {
+	return MD5Code(fmt.Sprintf("%s%d", GameAccount, ServerNowTime))
+}
+
+// MD5Code encode MD5
 func MD5Code(Data string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(Data)))
 }
@@ -95,4 +101,14 @@ func RangeRandom(Range []int) int {
 	}
 	return -1
 
+}
+
+// ServerNowTime Get now Unix time
+func ServerNowTime() int64 {
+	return time.Now().Unix()
+}
+
+// ServerNow Get now time
+func ServerNow() time.Time {
+	return time.Now()
 }

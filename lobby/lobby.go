@@ -10,6 +10,7 @@ import (
 	"../foundation"
 	"../log"
 	"../messagehandle/errorlog"
+	"../mycache"
 	"../player"
 	"../thirdparty/ulg"
 
@@ -32,95 +33,175 @@ func ServiceStart() []foundation.RESTfulURL {
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/getplayer", Fun: getplayer})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/exchange", Fun: exchange})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/checkout", Fun: checkout})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/cachetest", Fun: cachetest})
 	return HandleURL
 }
 
 func getplayer(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	result := make(map[string]interface{})
+	mu.Lock()
+	defer mu.Unlock()
 	loginfo := log.New(log.GetPlayer)
 	err := errorlog.New()
 	postData := foundation.PostData(r)
+	token := foundation.InterfaceToString(postData["token"])
+
 	GameAccount := foundation.InterfaceToString(postData["gameaccount"])
-	// token := foundation.InterfaceToString(postData["token"])
-	// ServerToken := data.GetToken(GameAccount)
-
-	// if ServerToken != token {
-	// 	err.ErrorCode = code.Unauthenticated
-	// 	foundation.HTTPResponse(w, playerInfo, err)
-	// 	return
-	// }
-
 	if GameAccount == "" {
 		err.ErrorCode = code.Unauthenticated
 		err.Msg = "GameAccountError"
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
-	dbresult, err := db.GetPlayerInfoByGameAccount(GameAccount)
+	ServerToken := mycache.GetToken(GameAccount)
+	if ServerToken != token {
+		err.ErrorCode = code.Unauthenticated
+		err.Msg = "TokenError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	var dbresult []map[string]interface{}
+	dbresult, err = db.GetPlayerInfoByGameAccount(GameAccount)
 	if err.ErrorCode != code.OK {
-		fmt.Print(err.Msg)
+		errorlog.ErrorLogPrintln("Lobby", err.Msg)
+		foundation.HTTPResponse(w, "", err)
+		return
 	}
 
 	var playerInfo *player.PlayerInfo
 	if len(dbresult) <= 0 {
-		playerInfo = player.New(GameAccount)
+		playerInfo, err = player.New(GameAccount)
 	} else {
 		playerInfo = player.MakePlayer(dbresult[0])
 	}
 
+	if playerInfo == nil {
+		errorlog.ErrorLogPrintln("Lobby", err.Msg)
+		foundation.HTTPResponse(w, "", err)
+	}
+
 	loginfo.PlayerID = playerInfo.ID
 	player.SavePlayerInfo(playerInfo)
 	log.SaveLog(loginfo)
 	foundation.HTTPResponse(w, playerInfo, err)
 }
 
-func cachetest(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	postData := foundation.PostData(r)
-	playerid := foundation.InterfaceToInt64(postData["playerid"])
-
-	// fmt.Println("playerInfo", playerid)
-	playerInfo, err := player.GetPlayerInfoByPlayerID(playerid)
-	foundation.HTTPResponse(w, playerInfo, err)
-
-}
-
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	mu.Lock()
+	defer mu.Unlock()
 	loginfo := log.New(log.Exchange)
-	var result = make(map[string]interface{})
 	postData := foundation.PostData(r)
-	// token := foundation.InterfaceToString(postData["token"])
+	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	accounttoken := postData["accounttoken"].(string)
-	gametoken := postData["gametoken"].(string)
 	gametypeid := postData["gametypeid"].(string)
 	cointype := foundation.InterfaceToInt(postData["cointype"])
 	coinamount := foundation.InterfaceToInt(postData["coinamount"])
 
-	ulgResult, err := ulg.Exchange(gametoken, gametypeid, accounttoken, cointype, coinamount)
-
-	// if !exchangeInfo["result"].(bool) {
-	// 	err.ErrorCode = code.FailedPrecondition
-	// 	err.Msg = exchangeInfo["errorMsg"].(string)
-	// 	foundation.HTTPResponse(w, exchangeInfo, err)
-	// }
-
+	// get player
+	var err errorlog.ErrorMsg
 	var playerInfo *player.PlayerInfo
 	playerInfo, err = player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
-	playerInfo.Money += ulgResult.GameCoin
+	// check token
+	ServerToken := mycache.GetToken(playerInfo.GameAccount)
+	if ServerToken != token {
+		err.ErrorCode = code.Unauthenticated
+		err.Msg = "TokenError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	// get account
+	var AccountInfo *player.AccountInfo
+	AccountInfo, err = player.GetAccountInfoByGameAccount(playerInfo.GameAccount)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+	if AccountInfo.GameToken != "" {
+		err.ErrorCode = code.NoCheckoutError
+		err.Msg = "NoCheckoutError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	// new thirdparty token
+	AccountUserInfo, err := ulg.Authorized(accounttoken, gametypeid)
+	if err.ErrorCode != code.OK {
+		err.ErrorCode = code.FailedPrecondition
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	// exchange
+	errorlog.LogPrintln("AccountUserInfo.GameToken", AccountUserInfo.GameToken)
+	AccountInfo.GameToken = AccountUserInfo.GameToken
+	ulgResult, err := ulg.Exchange(AccountInfo.GameToken, gametypeid, accounttoken, cointype, coinamount)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	OldMoney := playerInfo.Money
+	NewMoney := playerInfo.Money + ulgResult.GameCoin
+	playerInfo.Money += NewMoney
+	playerInfo.TotalExchange = ulgResult.GameCoin
 	player.SavePlayerInfo(playerInfo)
 	loginfo.PlayerID = playerInfo.ID
 	loginfo.IValue1 = int64(cointype)
 	loginfo.IValue2 = int64(coinamount)
-	loginfo.IValue3 = playerInfo.Money
+	loginfo.IValue3 = ulgResult.GameCoin
 	log.SaveLog(loginfo)
+	db.SetExchange(playerInfo.GameAccount, cointype, coinamount, NewMoney, OldMoney, foundation.ServerNowTime())
+	mycache.SetAccountInfo(AccountInfo.GameAccount, AccountInfo.ToJSONStr())
 	foundation.HTTPResponse(w, ulgResult, err)
 }
+
 func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	mu.Lock()
+	defer mu.Unlock()
+	// loginfo := log.New(log.Exchange)
+	postData := foundation.PostData(r)
+	token := foundation.InterfaceToString(postData["token"])
+	playerID := foundation.InterfaceToInt64(postData["playerid"])
+	gametypeID := foundation.InterfaceToString(postData["gametypeid"])
+	accountToken := foundation.InterfaceToString(postData["accounttoken"])
+
+	var err errorlog.ErrorMsg
+	var playerInfo *player.PlayerInfo
+	playerInfo, err = player.GetPlayerInfoByPlayerID(playerID)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	var AccountInfo *player.AccountInfo
+	AccountInfo, err = player.GetAccountInfoByGameAccount(playerInfo.GameAccount)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	ServerToken := AccountInfo.Token
+	if ServerToken != token {
+		err.ErrorCode = code.Unauthenticated
+		err.Msg = "TokenError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	ulgResult, err := ulg.Checkout(accountToken, AccountInfo.GameToken, gametypeID, fmt.Sprint(playerInfo.TotalExchange), playerInfo.TotalWin, playerInfo.TotalLost)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+	AccountInfo.GameToken = ""
+
+	mycache.SetAccountInfo(AccountInfo.GameAccount, AccountInfo.ToJSONStr())
+	foundation.HTTPResponse(w, ulgResult, err)
 }

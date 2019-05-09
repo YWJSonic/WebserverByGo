@@ -15,8 +15,6 @@ const DBPORT string = "3306"
 const DBUser string = "root"
 const DBPassword string = "123456"
 
-const DBDataSourceName string = "root:123456@/gamedb"
-const DBLogSourceName string = "root:123456@/logdb"
 const AccountEncodeStr string = "yrgb$"
 const RedisURL string = "192.168.1.15:6379"
 const CacheDeleteTime time.Duration = time.Hour
@@ -31,9 +29,12 @@ var CacheRef *cache.Cache
 
 var Setting map[string]interface{}
 
+var PlayerToken map[string]string // [GameAccount]token
+
 func init() {
 	Maintain = false
 	Setting = make(map[string]interface{})
+	PlayerToken = make(map[string]string)
 	NewCache()
 }
 

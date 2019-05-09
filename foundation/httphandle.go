@@ -10,7 +10,6 @@ import (
 	"../code"
 	"../data"
 	"../messagehandle/errorlog"
-	ErrorLog "../messagehandle/errorlog"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -31,7 +30,7 @@ func HTTPGet(ip string, values map[string][]string) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s", result)
+	errorlog.LogPrintf("%s", result)
 	return result
 }
 
@@ -47,7 +46,6 @@ func HTTPPostRequest(ip string, values map[string][]string) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s", result)
 	return result
 
 }
@@ -93,7 +91,7 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 
 	for _, RESTfulURLArray := range HandleURL {
 		for _, RESTfulURLvalue := range RESTfulURLArray {
-			fmt.Printf("HTTPListen %v %s\n", RESTfulURLvalue.RequestType, RESTfulURLvalue.URL)
+			errorlog.LogPrintf("HTTPListen %v %s\n", RESTfulURLvalue.RequestType, RESTfulURLvalue.URL)
 
 			ProxyData[RESTfulURLvalue.URL] = RESTfulURLvalue
 			if RESTfulURLvalue.RequestType == "GET" {
@@ -107,14 +105,14 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 		}
 	}
 
-	fmt.Println("Server run on", ListenIP)
+	errorlog.LogPrintln("Server run on", ListenIP)
 
 	// HTTPS Server
 	// ListenAndServeTLS
 
 	err = http.ListenAndServe(ListenIP, router)
 	if err != nil {
-		ErrorLog.ErrorLogPrintln("ListenAndServe", err)
+		errorlog.ErrorLogPrintln("ListenAndServe", err)
 		return err
 	}
 	return err
@@ -151,7 +149,7 @@ func addHeader(w *http.ResponseWriter) {
 }
 
 func maintain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	err := ErrorLog.New()
+	err := errorlog.New()
 	err.ErrorCode = code.Maintain
 	HTTPResponse(w, "", err)
 }

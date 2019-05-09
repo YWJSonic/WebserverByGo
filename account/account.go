@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -13,21 +12,10 @@ import (
 	"../db"
 	"../foundation"
 	"../log"
+	"../mycache"
+	"../player"
 	"../thirdparty/ulg"
 )
-
-type AccountInfo struct {
-	Account     string
-	GameAccount string
-	LoginTime   int64
-
-	AccountToken   string // platform AccountToken
-	GameToken      string // platform GameToken
-	Token          string // Server Token
-	ThirdPartyInfo PartyInfo
-}
-
-type PartyInfo interface{}
 
 var isInit = false
 var mu *sync.RWMutex
@@ -51,61 +39,50 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var result = make(map[string]interface{})
 
 	postData := foundation.PostData(r)
-	token := foundation.InterfaceToString(postData["token"])
+	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
-	AccountUserInfo, err := ulg.Authorized(token, gametypeid)
+	UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 
 	if err.ErrorCode != code.OK {
 		err.ErrorCode = code.FailedPrecondition
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
-
-	Info, err := db.GetAccountInfo(strconv.FormatInt(AccountUserInfo.AccountID, 10))
+	AccountStr := foundation.NewAccount("ulg", strconv.FormatInt(UserInfo.AccountID, 10))
+	Info, err := db.GetAccountInfo(AccountStr)
 
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, result, err)
+		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
-	var accountInfo AccountInfo
+	var accountInfo player.AccountInfo
 	if len(Info) < 1 {
-		// gameid := db.GetGameID()
-		accountInfo = newAccount(strconv.FormatInt(AccountUserInfo.AccountID, 10), foundation.MD5Code(data.AccountEncodeStr+string(AccountUserInfo.AccountID)))
-		accountInfo.GameToken = AccountUserInfo.GameToken
+		accountInfo = player.NewAccount(AccountStr, foundation.MD5Code(data.AccountEncodeStr+string(UserInfo.AccountID)))
 		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.LoginTime)
 	} else {
 
 		result := Info[0]
-		accountInfo = AccountInfo{
-			Account:        result["Account"].(string),
-			GameAccount:    result["GameAccount"].(string),
-			AccountToken:   AccountUserInfo.AccountToken,
-			GameToken:      AccountUserInfo.GameToken,
-			Token:          foundation.NewToken(Info[0]["Account"].(string)),
-			LoginTime:      time.Now().Unix(),
-			ThirdPartyInfo: AccountUserInfo,
+		accountInfo = player.AccountInfo{
+			Account:      result["Account"].(string),
+			GameAccount:  result["GameAccount"].(string),
+			AccountToken: UserInfo.AccountToken,
+			Token:        foundation.NewToken(Info[0]["Account"].(string)),
+			LoginTime:    foundation.ServerNowTime(),
+			// ThirdPartyInfo: AccountUserInfo,
 		}
 		db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
 	}
 
+	mycache.SetAccountInfo(accountInfo.GameAccount, accountInfo.ToJSONStr())
+	mycache.SetToken(accountInfo.GameAccount, accountInfo.Token)
+	result["usercoinquota"] = UserInfo.UserCoinQuota
+	result["gameaccount"] = accountInfo.GameAccount
+	result["token"] = accountInfo.Token
+
 	loginfo := log.New(log.Login)
 	loginfo.Account = accountInfo.GameAccount
-	result["usercoinquota"] = AccountUserInfo.UserCoinQuota
-	result["gameaccount"] = accountInfo.GameAccount
-	result["gametoken"] = accountInfo.GameToken
-	result["token"] = accountInfo.Token
 	log.SaveLog(loginfo)
 	foundation.HTTPResponse(w, result, err)
-}
-
-// NewAccount ...
-func newAccount(account, gameAccount string) AccountInfo {
-	return AccountInfo{
-		Account:     account,
-		GameAccount: gameAccount,
-		Token:       foundation.NewToken(gameAccount),
-		LoginTime:   time.Now().Unix(),
-	}
 }

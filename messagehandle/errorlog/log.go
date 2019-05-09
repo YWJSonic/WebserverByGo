@@ -6,6 +6,25 @@ import (
 	"../../code"
 )
 
+// LogPrint ...
+func LogPrint(msg string) {
+	fmt.Print("Log " + msg)
+}
+
+// LogPrintf ...
+func LogPrintf(msg string, a ...interface{}) {
+	fmt.Printf("Log "+msg, a...)
+}
+
+// LogPrintln ...
+func LogPrintln(msg string, a ...interface{}) {
+	var tmp []interface{}
+	tmp = append(tmp, "Log")
+	tmp = append(tmp, msg)
+	tmp = append(tmp, a...)
+	fmt.Println(tmp...)
+}
+
 // ErrorLogPrint ...
 func ErrorLogPrint(msg string) {
 	fmt.Print("Error " + msg)
@@ -13,12 +32,16 @@ func ErrorLogPrint(msg string) {
 
 // ErrorLogPrintf ...
 func ErrorLogPrintf(msg string, a ...interface{}) {
-	fmt.Printf("Error "+msg, a)
+	fmt.Printf("Error "+msg, a...)
 }
 
 // ErrorLogPrintln ...
 func ErrorLogPrintln(msg string, a ...interface{}) {
-	fmt.Println("Error "+msg, a)
+	var tmp []interface{}
+	tmp = append(tmp, "Error")
+	tmp = append(tmp, msg)
+	tmp = append(tmp, a...)
+	fmt.Println(tmp...)
 }
 
 // ErrorMsg ...

@@ -11,19 +11,11 @@ func gameOutput(items []int, wheelsSize []int) interface{} {
 
 	result := newResult(items, wheelsSize)
 
-	for _, value := range result {
-		fmt.Println(value)
-	}
-
 	logicdata := Slot243Logic(items, result, GameLogicOption{
 		While: 0,
 		Sttel: -1,
 	})
 
-	for key, value := range logicdata {
-		fmt.Println(key, value)
-	}
-	fmt.Println("---------------")
 	return converTosingleLine(result)
 }
 
@@ -54,15 +46,6 @@ func newResult(items []int, wheelsSize []int) [][]int {
 	// 	{1, 2, 0},
 	// 	{2, 0, 0}}
 	return resultRow
-}
-func rateResult(items []int, result map[int][][]int) {
-	// rateInfo := map[int][]slotRate{
-	// 	0: []slotRate{slotRate{0, 2, 200, 0, 0}, slotRate{0, 3, 300, 0, 0}, slotRate{0, 4, 400, 0, 0}},
-	// 	1: []slotRate{slotRate{1, 3, 30, 0, 0}, slotRate{1, 4, 40, 0, 0}, slotRate{1, 5, 50, 0, 0}},
-	// 	2: []slotRate{slotRate{2, 3, 3, 0, 0}, slotRate{2, 4, 4, 0, 0}, slotRate{2, 5, 5, 0, 0}},
-	// 	3: []slotRate{slotRate{3, 2, 1, 0, 0}},
-	// }
-
 }
 
 // Slot243Logic ...

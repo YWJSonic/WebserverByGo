@@ -9,41 +9,73 @@ import (
 
 	"../code"
 	"../data"
+	"../foundation"
 	"../messagehandle/errorlog"
 )
 
 type sqlCLi struct {
 	DB *sql.DB
 }
+type sqlQuary struct {
+	Quary string
+	Args  []interface{}
+}
 
 var gameBDSQL *sqlCLi
 var logDBSQL *sqlCLi
+var payDBSQL *sqlCLi
 
+// QueryLogChan channel for write log
+var QueryLogChan chan string
+
+// WriteGameChan channel for write game db
+var WriteGameChan chan sqlQuary
+
+// WritePayChan channel for write pay db
+var WritePayChan chan sqlQuary
+
+// SetDBCOnn init value
 func SetDBCOnn() {
+	QueryLogChan = make(chan string)
+	WriteGameChan = make(chan sqlQuary)
+	WritePayChan = make(chan sqlQuary)
 	connectGameDB()
 	connectLogDB()
+	connectPayDB()
+	NewLogTable(foundation.ServerNow().Format("20060102"))
+}
+
+// SQLSelect channel loop
+func SQLSelect() {
+	select {
+	case dbLogQuery := <-QueryLogChan:
+		CallWrite(logDBSQL.DB, dbLogQuery)
+	case dbgameQuery := <-WriteGameChan:
+		CallWrite(gameBDSQL.DB, dbgameQuery.Quary, dbgameQuery.Args...)
+	case dbpayQuary := <-WritePayChan:
+		CallWrite(payDBSQL.DB, dbpayQuary.Quary, dbpayQuary.Args...)
+	}
 }
 
 // Connect New connect
 func connectGameDB() (db *sql.DB, err error) {
 	if gameBDSQL == nil {
 		gameBDSQL = new(sqlCLi)
-		//root:123456@/gamedb
 		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "gamedb")
-		fmt.Println(sqlstr, data.DBDataSourceName)
-		db, err := sql.Open("mysql", sqlstr) // data.DBDataSourceName)
+		errorlog.LogPrintln("DB Connect:", sqlstr)
+		db, err := sql.Open("mysql", sqlstr)
 
-		connMaxLifetime := 4
-		maxIdleConns := 3
-		maxOpenConns := 6
+		connMaxLifetime := 59 * time.Second
+		maxIdleConns := 5
+		maxOpenConns := 15
 
-		fmt.Printf("connMaxLifetime:%d\n", connMaxLifetime)
-		db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Hour)
+		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
 
-		fmt.Printf("maxIdleConns:%d\n", maxIdleConns)
+		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
 		db.SetMaxIdleConns(maxIdleConns)
 
-		fmt.Printf("maxOpenConns:%d\n", maxOpenConns)
+		errorlog.LogPrintf("maxOpenConns:%d\n", maxOpenConns)
 		db.SetMaxOpenConns(maxOpenConns)
 		if err != nil {
 			return nil, err
@@ -54,39 +86,27 @@ func connectGameDB() (db *sql.DB, err error) {
 
 	return gameBDSQL.DB, nil
 
-	// if gameBDSQL == nil {
-	// 	gameBDSQL = new(MySQLCli)
-	// 	var err error
-	// 	gameBDSQL.DB, err = sql.Open("mysql", data.DBDataSourceName)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// gameBDSQL.DB.SetMaxIdleConns(3)
-	// }
-
-	// return gameBDSQL.DB, nil
 }
 
 // Connect New connect
 func connectLogDB() (db *sql.DB, err error) {
 	if logDBSQL == nil {
 		logDBSQL = new(sqlCLi)
-		//root:123456@/gamedb
 		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "logdb")
-		fmt.Println(sqlstr, data.DBDataSourceName)
-		db, err := sql.Open("mysql", sqlstr) // data.DBDataSourceName)
+		errorlog.LogPrintln("DB Connect:", sqlstr)
+		db, err := sql.Open("mysql", sqlstr)
 
-		connMaxLifetime := 4
-		maxIdleConns := 3
-		maxOpenConns := 6
+		connMaxLifetime := 59 * time.Second
+		maxIdleConns := 5
+		maxOpenConns := 15
 
-		fmt.Printf("connMaxLifetime:%d\n", connMaxLifetime)
-		db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Hour)
+		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
 
-		fmt.Printf("maxIdleConns:%d\n", maxIdleConns)
+		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
 		db.SetMaxIdleConns(maxIdleConns)
 
-		fmt.Printf("maxOpenConns:%d\n", maxOpenConns)
+		errorlog.LogPrintf("maxOpenConns:%d\n", maxOpenConns)
 		db.SetMaxOpenConns(maxOpenConns)
 		if err != nil {
 			return nil, err
@@ -95,12 +115,42 @@ func connectLogDB() (db *sql.DB, err error) {
 		logDBSQL.DB = db
 	}
 
-	return gameBDSQL.DB, nil
+	return logDBSQL.DB, nil
+}
+
+// Connect New connect
+func connectPayDB() (db *sql.DB, err error) {
+	if payDBSQL == nil {
+		payDBSQL = new(sqlCLi)
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "paydb")
+		errorlog.LogPrintln("DB Connect:", sqlstr)
+		db, err := sql.Open("mysql", sqlstr)
+
+		connMaxLifetime := 59 * time.Second
+		maxIdleConns := 3
+		maxOpenConns := 6
+
+		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
+
+		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
+		db.SetMaxIdleConns(maxIdleConns)
+
+		errorlog.LogPrintf("maxOpenConns:%d\n", maxOpenConns)
+		db.SetMaxOpenConns(maxOpenConns)
+		if err != nil {
+			return nil, err
+		}
+
+		payDBSQL.DB = db
+	}
+
+	return payDBSQL.DB, nil
 }
 
 // CallRead call stored procedure
 func CallRead(name string, args ...interface{}) ([]interface{}, errorlog.ErrorMsg) {
-	QueryStr := makeQueryStr(name, len(args))
+	QueryStr := makeProcedureQueryStr(name, len(args))
 	request, err := query(QueryStr, args...)
 	return request, err
 
@@ -108,16 +158,15 @@ func CallRead(name string, args ...interface{}) ([]interface{}, errorlog.ErrorMs
 
 // CallReadOutMap call stored procedure
 func CallReadOutMap(name string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
-	QueryStr := makeQueryStr(name, len(args))
+	QueryStr := makeProcedureQueryStr(name, len(args))
 	request, err := queryOutMap(QueryStr, args...)
 	return request, err
 
 }
 
 // CallWrite ...
-func CallWrite(name string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
-	QueryStr := makeQueryStr(name, len(args))
-	request, err := exec(QueryStr, args...)
+func CallWrite(DB *sql.DB, name string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
+	request, err := exec(DB, name, args...)
 	return request, err
 }
 
@@ -129,6 +178,7 @@ func query(query string, args ...interface{}) ([]interface{}, errorlog.ErrorMsg)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
+		errorlog.ErrorLogPrintln("DB", errMsg, query)
 		return nil, err
 	}
 
@@ -146,6 +196,7 @@ func queryOutMap(query string, args ...interface{}) ([]map[string]interface{}, e
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
+		errorlog.ErrorLogPrintln("DB", errMsg, query)
 		return nil, err
 	}
 
@@ -156,21 +207,20 @@ func queryOutMap(query string, args ...interface{}) ([]map[string]interface{}, e
 }
 
 // Exec Use to INSTER, UPDATE, DELETE
-func exec(query string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
+func exec(DB *sql.DB, query string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
 	err := errorlog.New()
 
-	res, errMsg := gameBDSQL.DB.Exec(query, args...)
+	res, errMsg := DB.Exec(query, args...)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
+		errorlog.ErrorLogPrintln("DB", errMsg, query)
 		return nil, err
 	}
-	res.LastInsertId()
 	return res, err
-
 }
 
-func makeQueryStr(name string, args int) string {
+func makeProcedureQueryStr(name string, args int) string {
 	query := "CALL " + name + "("
 
 	if args > 0 {
@@ -253,7 +303,6 @@ func makeScanMap(rows *sql.Rows) []map[string]interface{} {
 		}
 
 		Result = append(Result, tomap)
-		fmt.Println(Result)
 	}
 
 	return Result

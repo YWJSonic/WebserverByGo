@@ -24,8 +24,11 @@ const (
 	Maintain           = 18                             //維護中
 	AuthorizedError    = 19
 	ExchangeError      = 20
+	GetUserError       = 21
+	NoCheckoutError    = 22
 
-	NoThisPlayer = 30
+	NoThisGameAccount = 30
+	NoThisPlayer      = 31
 
 	RoomLock         = 1001
 	SelfInRoom       = 1002
