@@ -15,10 +15,7 @@ type AccountInfo struct {
 	LoginTime   int64  `json:"LoginTime"`
 
 	AccountToken string `json:"AccountToken"` // platform AccountToken
-	GameToken    string `json:"GameToken"`    // platform GameToken
 	Token        string `json:"Token"`        // Server Token
-
-	IsGameTokenCheckout bool `json:"IsGameTokenCheckout"` // 
 }
 
 // PartyInfo ThirdPartyInfo

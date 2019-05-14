@@ -30,6 +30,8 @@ const (
 	NoThisGameAccount = 30
 	NoThisPlayer      = 31
 
+	NoThisPartyInfo = 40
+
 	RoomLock         = 1001
 	SelfInRoom       = 1002
 	SelfNotInRoom    = 1003

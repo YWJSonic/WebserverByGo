@@ -35,7 +35,7 @@ func GetAccountInfo(GameAccount string) (interface{}, errorlog.ErrorMsg) {
 	info, errMsg := get(fmt.Sprintf("ACC%s", GameAccount))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache", errMsg)
+		errorlog.ErrorLogPrintln("Cache", GameAccount, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -55,7 +55,7 @@ func GetPlayerInfo(playerid int64) (interface{}, errorlog.ErrorMsg) {
 	info, errMsg := get(fmt.Sprintf("ID%dJS", playerid))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache", errMsg)
+		errorlog.ErrorLogPrintln("Cache", playerid, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -69,17 +69,7 @@ func SetPlayerInfo(playerid int64, Value interface{}) {
 	runSet(fmt.Sprintf("ID%dJS", playerid), Value, data.CacheDeleteTime)
 }
 
-// func GetPlayerID(GameAccount string) int64 {
-// 	id, err := getInt64(GameAccount)
-// 	if err != nil {
-// 		panic("GetPlayerID Error")
-// 	}
-// 	return id
-// }
-// func SetPlayerID(GameAccount string, playerID int64) {
-// 	runSet(GameAccount, playerID, data.CacheDeleteTime)
-// }
-
+// ClearAllCache ...
 func ClearAllCache() {
 	runFlush()
 }

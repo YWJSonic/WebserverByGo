@@ -1,9 +1,11 @@
 package gamelogic
 
 import (
-	"math/rand"
-	"time"
+	"encoding/json"
+	"fmt"
 
+	"../../code"
+	"../../foundation"
 	"../../messagehandle/errorlog"
 )
 
@@ -13,26 +15,20 @@ type LogicResult struct {
 	PerTypeWinMoney [][]int
 }
 
-// GetGameResult All game result interface
-func GetGameResult(gameid string, bet int, payrate []int, plate []int, scroll [][]int) interface{} {
-	var result map[string]LogicResult
+// GetGameResult ...
+func GetGameResult(thirdparty string, gametypeID, betmoney int64) (map[string]interface{}, errorlog.ErrorMsg) {
+	err := errorlog.New()
+	POSTvalues := map[string][]string{"POST": []string{fmt.Sprintf(`{"betmoney": %d, "gametypeID":%d,"thirdparty":%s}`, betmoney, gametypeID, thirdparty)}}
+	reuslt := foundation.HTTPPostRequest("http://192.168.1.15:8100/slot2/gameresult", POSTvalues)
 
-	normalGame := makeGamePlate(plate, scroll)
-
-	errorlog.LogPrintln("GameResult", normalGame)
-	return result
-
-}
-
-func makeGamePlate(plate []int, scroll [][]int) [][]int {
-	var result [][]int
-	var RmIndex int
-	rand.Seed(time.Now().UnixNano())
-
-	for i, value := range plate {
-		RmIndex = rand.Intn(len(scroll[i]) - value)
-		result = append(result, scroll[i][RmIndex:RmIndex+value])
+	var gamereuslt map[string]interface{}
+	if errMsg := json.Unmarshal(reuslt, &gamereuslt); errMsg != nil {
+		errorlog.ErrorLogPrintln("GameResult", errMsg, "[", reuslt, "]")
+		err.ErrorCode = code.NoThisPlayer
+		err.Msg = "PlayerFormatError"
+		return nil, err
 	}
 
-	return result
+	return gamereuslt, err
+
 }

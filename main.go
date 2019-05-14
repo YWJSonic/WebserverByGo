@@ -6,6 +6,7 @@ import (
 	"./db"
 	"./event"
 	"./foundation"
+	"./game/slot2"
 	"./game/slotgame"
 	"./lobby"
 	_ "github.com/go-sql-driver/mysql"
@@ -16,6 +17,7 @@ func main() {
 	var initArray [][]foundation.RESTfulURL
 	initArray = append(initArray, account.ServiceStart())
 	initArray = append(initArray, slotgame.ServiceStart())
+	initArray = append(initArray, slot2.ServiceStart())
 	initArray = append(initArray, lobby.ServiceStart())
 	// foundation.NewToken()
 	db.SetDBCOnn()

@@ -1,7 +1,6 @@
 package gamelogic
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -11,7 +10,7 @@ func gameOutput(items []int, wheelsSize []int) interface{} {
 
 	result := newResult(items, wheelsSize)
 
-	logicdata := Slot243Logic(items, result, GameLogicOption{
+	Slot243Logic(items, result, GameLogicOption{
 		While: 0,
 		Sttel: -1,
 	})

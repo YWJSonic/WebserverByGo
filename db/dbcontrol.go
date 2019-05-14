@@ -153,13 +153,12 @@ func CallRead(name string, args ...interface{}) ([]interface{}, errorlog.ErrorMs
 	QueryStr := makeProcedureQueryStr(name, len(args))
 	request, err := query(QueryStr, args...)
 	return request, err
-
 }
 
 // CallReadOutMap call stored procedure
-func CallReadOutMap(name string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
+func CallReadOutMap(DB *sql.DB, name string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
 	QueryStr := makeProcedureQueryStr(name, len(args))
-	request, err := queryOutMap(QueryStr, args...)
+	request, err := queryOutMap(DB, QueryStr, args...)
 	return request, err
 
 }
@@ -189,10 +188,10 @@ func query(query string, args ...interface{}) ([]interface{}, errorlog.ErrorMsg)
 }
 
 // QueryOutMap Use to SELECT return array map
-func queryOutMap(query string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
+func queryOutMap(DB *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
 	err := errorlog.New()
 
-	res, errMsg := gameBDSQL.DB.Query(query, args...)
+	res, errMsg := DB.Query(query, args...)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"

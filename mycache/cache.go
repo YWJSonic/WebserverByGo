@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"../data"
+	"../messagehandle/errorlog"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -102,6 +103,7 @@ func runSet(key string, v interface{}, d time.Duration) error {
 	args := []interface{}{key, v}
 
 	_, err := set(args, d)
+	errorlog.ErrorLogPrintln("Cache Set", err)
 	return err
 }
 

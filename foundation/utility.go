@@ -56,6 +56,18 @@ func InterfaceToInt64(v interface{}) int64 {
 	}
 }
 
+// InterfaceToBool ...
+func InterfaceToBool(v interface{}) bool {
+	switch v.(type) {
+	case int:
+		return v.(bool)
+	case bool:
+		return v.(bool)
+	default:
+		panic("Conver Error")
+	}
+}
+
 // InterfaceToDynamicInt ...
 func InterfaceToDynamicInt(v interface{}) code.Code {
 	return code.Code(InterfaceTofloat64(v))

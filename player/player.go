@@ -2,11 +2,9 @@ package player
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"../code"
-	"../data"
 	"../db"
 	"../foundation"
 	"../messagehandle/errorlog"
@@ -24,7 +22,7 @@ func GetAccountInfoByGameAccount(GameAccount string) (*AccountInfo, errorlog.Err
 
 	var account AccountInfo
 	if errMsg := json.Unmarshal(info.([]byte), &account); errMsg != nil {
-		errorlog.ErrorLogPrintln("", errMsg)
+		errorlog.ErrorLogPrintln("Player", errMsg)
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "AccountFormatError"
 		return nil, err
@@ -44,7 +42,7 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 
 	var player PlayerInfo
 	if errMsg := json.Unmarshal(info.([]byte), &player); errMsg != nil {
-		errorlog.ErrorLogPrintln("", errMsg)
+		errorlog.ErrorLogPrintln("Player", errMsg)
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "PlayerFormatError"
 		return nil, err
@@ -57,8 +55,9 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 func SavePlayerInfo(playerInfo *PlayerInfo) {
 	playerInfo.LastCheckTime = time.Now().Unix()
 
-	(*data.CacheRef).Set(fmt.Sprintf("ID%dJS", playerInfo.ID), playerInfo.ToJSONStr(), time.Hour)
+	// (*data.CacheRef).Set(fmt.Sprintf("ID%dJS", playerInfo.ID), playerInfo.ToJSONStr(), time.Hour)
 	mycache.SetPlayerInfo(playerInfo.ID, playerInfo.ToJSONStr())
+	db.UpdatePlayerInfo(playerInfo.ID, playerInfo.Money, playerInfo.GameToken)
 
 }
 

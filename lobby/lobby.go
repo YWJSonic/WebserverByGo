@@ -30,9 +30,9 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/getplayer", Fun: getplayer})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/exchange", Fun: exchange})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/checkout", Fun: checkout})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/getplayer", Fun: getplayer, ConnType: foundation.Client})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/exchange", Fun: exchange, ConnType: foundation.Client})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/checkout", Fun: checkout, ConnType: foundation.Client})
 	return HandleURL
 }
 
@@ -89,7 +89,6 @@ func getplayer(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
-	loginfo := log.New(log.Exchange)
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
@@ -123,7 +122,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
-	if AccountInfo.GameToken != "" {
+	if playerInfo.GameToken != "" {
 		err.ErrorCode = code.NoCheckoutError
 		err.Msg = "NoCheckoutError"
 		foundation.HTTPResponse(w, "", err)
@@ -131,7 +130,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// new thirdparty token
-	AccountUserInfo, err := ulg.Authorized(accounttoken, gametypeid)
+	ulguser, err := ulg.Authorized(accounttoken, gametypeid)
 	if err.ErrorCode != code.OK {
 		err.ErrorCode = code.FailedPrecondition
 		foundation.HTTPResponse(w, "", err)
@@ -139,26 +138,29 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// exchange
-	errorlog.LogPrintln("AccountUserInfo.GameToken", AccountUserInfo.GameToken)
-	AccountInfo.GameToken = AccountUserInfo.GameToken
-	ulgResult, err := ulg.Exchange(AccountInfo.GameToken, gametypeid, accounttoken, cointype, coinamount)
+	errorlog.LogPrintln("AccountUserInfo.GameToken", ulguser.GameToken)
+	ulgResult, err := ulg.Exchange(ulguser.GameToken, gametypeid, accounttoken, cointype, coinamount)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
+	ulg.NewULGInfo(playerInfo.ID, ulgResult.GameCoin, ulgResult.GameToken)
+
 	OldMoney := playerInfo.Money
-	NewMoney := playerInfo.Money + ulgResult.GameCoin
-	playerInfo.Money += NewMoney
-	playerInfo.TotalExchange = ulgResult.GameCoin
+	playerInfo.Money = playerInfo.Money + ulgResult.GameCoin
+	playerInfo.GameToken = ulguser.GameToken
 	player.SavePlayerInfo(playerInfo)
+	db.SetExchange(playerInfo.GameAccount, playerInfo.GameToken, cointype, coinamount, playerInfo.Money, OldMoney, foundation.ServerNowTime())
+	mycache.SetAccountInfo(AccountInfo.GameAccount, AccountInfo.ToJSONStr())
+
+	loginfo := log.New(log.Exchange)
 	loginfo.PlayerID = playerInfo.ID
 	loginfo.IValue1 = int64(cointype)
 	loginfo.IValue2 = int64(coinamount)
 	loginfo.IValue3 = ulgResult.GameCoin
 	log.SaveLog(loginfo)
-	db.SetExchange(playerInfo.GameAccount, cointype, coinamount, NewMoney, OldMoney, foundation.ServerNowTime())
-	mycache.SetAccountInfo(AccountInfo.GameAccount, AccountInfo.ToJSONStr())
+
 	foundation.HTTPResponse(w, ulgResult, err)
 }
 
@@ -195,12 +197,19 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	ulgResult, err := ulg.Checkout(accountToken, AccountInfo.GameToken, gametypeID, fmt.Sprint(playerInfo.TotalExchange), playerInfo.TotalWin, playerInfo.TotalLost)
+	ulginfo, err := ulg.GetULGInfo(playerInfo.GameToken)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+
+	}
+
+	ulgResult, err := ulg.Checkout(accountToken, playerInfo.GameToken, gametypeID, fmt.Sprint(ulginfo.TotalBet), ulginfo.TotalWin, ulginfo.TotalLost)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
-	AccountInfo.GameToken = ""
+	playerInfo.GameToken = ""
 
 	mycache.SetAccountInfo(AccountInfo.GameAccount, AccountInfo.ToJSONStr())
 	foundation.HTTPResponse(w, ulgResult, err)

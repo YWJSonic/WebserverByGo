@@ -18,15 +18,13 @@ type PlayerInfo struct {
 	GameAccount string `json:"GameAccount"`
 
 	///////// for Server value
-	// Account       string `json:"Account"`       // Thirdparty Account
+	GameToken     string `json:"GameToken"`
 	InRoom        int    `json:"InRoom"`        // room index
 	LastCheckTime int64  `json:"LastCheckTime"` // connect check time
 	InGame        string `json:"InGame"`        // gametype
-	TotalWin      int64  `json:"TotalWin"`
-	TotalLost     int64  `json:"TotalLost"`
-	TotalExchange int64  `json:"TotalExchange"`
 }
 
+// ToJSONStr ...
 func (p PlayerInfo) ToJSONStr() string {
 	data, _ := json.MarshalIndent(p, "", " ")
 	STR := string(data)
@@ -57,4 +55,8 @@ func (p PlayerInfo) IsPlayerConnect() bool {
 // IsInGameRoom is player in game room
 func (p PlayerInfo) IsInGameRoom() bool {
 	return p.InRoom != 0
+}
+
+func (p PlayerInfo) IsCheckOut() {
+
 }

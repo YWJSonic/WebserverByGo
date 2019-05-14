@@ -19,7 +19,7 @@ func GetSetting() {
 
 // GetAccountInfo Check Account existence and get
 func GetAccountInfo(Account string) ([]map[string]interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap("AccountGet_Read", Account)
+	result, err := CallReadOutMap(gameBDSQL.DB, "AccountGet_Read", Account)
 	return result, err
 }
 
@@ -68,13 +68,13 @@ func NewGameAccount(args ...interface{}) (int64, errorlog.ErrorMsg) {
 
 // GetPlayerInfoByGameAccount ...
 func GetPlayerInfoByGameAccount(GameAccount string) ([]map[string]interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap("GameAccountGet_Read", GameAccount)
+	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", GameAccount)
 	return result, err
 }
 
 // GetPlayerInfoByPlayerID ...
 func GetPlayerInfoByPlayerID(PlayerID int64) (interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap("GameAccountGet_Read", PlayerID)
+	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", PlayerID)
 
 	return result, err
 }

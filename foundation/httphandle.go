@@ -97,7 +97,6 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 			if RESTfulURLvalue.RequestType == "GET" {
 				router.GET("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
 			} else if RESTfulURLvalue.RequestType == "POST" {
-				// router.POST("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
 				router.POST("/"+RESTfulURLvalue.URL, ListenProxy)
 			}
 			router.OPTIONS("/"+RESTfulURLvalue.URL, option)
@@ -110,12 +109,13 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 	// HTTPS Server
 	// ListenAndServeTLS
 
-	err = http.ListenAndServe(ListenIP, router)
-	if err != nil {
-		errorlog.ErrorLogPrintln("ListenAndServe", err)
-		return err
-	}
-	return err
+	log.Fatal(http.ListenAndServe(ListenIP, router))
+	// if err != nil {
+	// 	errorlog.ErrorLogPrintln("ListenAndServe", err)
+	// 	return err
+	// }
+	// return err
+	return nil
 }
 func option(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	headers := w.Header()
@@ -131,12 +131,18 @@ func option(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 // ListenProxy client -> Porxy -> processFun
 func ListenProxy(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
+	RESTfulInfo := ProxyData[r.RequestURI[1:]]
 	addHeader(&w)
 
-	if data.Maintain {
-		maintain(w, r, ps)
-	} else {
-		ProxyData[r.URL.Path[1:]].Fun(w, r, ps)
+	switch RESTfulInfo.ConnType {
+	case Client:
+		if data.Maintain {
+			maintain(w, r, ps)
+		} else {
+			RESTfulInfo.Fun(w, r, ps)
+		}
+	case Backend:
+		RESTfulInfo.Fun(w, r, ps)
 	}
 }
 

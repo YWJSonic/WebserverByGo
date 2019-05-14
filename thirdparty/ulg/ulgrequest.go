@@ -3,69 +3,12 @@ package ulg
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"../../code"
+	"../../db"
 	"../../foundation"
 	"../../messagehandle/errorlog"
-)
-
-// UlgResult ...
-type UlgResult struct {
-	Result        int           `json:"result"`
-	AccountID     int64         `json:"userID"`
-	Status        int           `json:"status"` // 0: empty 1:exchange 2:checkout
-	AccountName   string        `json:"accountName"`
-	ErrorMsg      string        `json:"errorMsg"`
-	UserName      string        `json:"userName"`   // not use, give default value
-	AccountToken  string        `json:"token"`      // for plant token
-	GameToken     string        `json:"game_token"` // for game token
-	UserPhone     string        `json:"userPhone"`
-	GameCoin      int64         `json:"gameCoin"`
-	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota"`
-	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting"`
-	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo"`
-}
-
-// CoinInfo Coin rate info
-type CoinInfo struct {
-	CoinType string  `json:"type"`
-	Status   int     `json:"status"`
-	Rate     float32 `json:"rate"`
-	Sort     int     `json:"sort"`
-}
-
-// CoinQuota ulg user CoinQuota
-type CoinQuota struct {
-	CoinType string `json:"type"`
-	Amount   int64  `json:"amount"`
-
-	Coin1Out     int64  `json:"coin1_out"`
-	Coin2Out     int64  `json:"coin2_out"`
-	Coin3Out     int64  `json:"coin3_out"`
-	Coin4Out     int64  `json:"coin4_out"`
-	Betting      string `json:"betting"`
-	Win          string `json:"win"`
-	Lost         string `json:"lost"`
-	OutboundTime int64  `json:"outbound_time"`
-}
-
-// CoinSetting ulg CoinSetting
-type CoinSetting struct {
-	Cointype string  `json:"cointype"` // money type
-	Status   int     `json:"status"`   // enable status
-	Rate     float32 `json:"rate"`     // exchange rate
-	Sort     int     `json:"sort"`     // sort index
-
-}
-
-// platform api url
-const (
-	loginURL      string = "http://54.65.188.126/api/v1/game/login"
-	getuserURL    string = "http://54.65.188.126/api/v1/game/get_user"
-	authorizedURL string = "http://54.65.188.126/api/v1/game/authorized"
-	exchangeURL   string = "http://54.65.188.126/api/v1/game/exchange"
-	checkoutURL   string = "http://54.65.188.126/api/v1/game/checkout"
+	"../../mycache"
 )
 
 // LoginURL ...
@@ -109,6 +52,81 @@ func CheckoutURL() string {
 // 	return info
 // }
 
+// NewULGInfo New ULGInfo
+func NewULGInfo(playerid, coinamount int64, gametoken string) ULGInfo {
+	info := ULGInfo{
+		PlayerID:  playerid,
+		GameToken: gametoken,
+	}
+	db.NewULGInfoRow(playerid, gametoken)
+	mycache.SetULGInfo(fmt.Sprintf("ULG%d", playerid), info.ToJSONStr())
+	return info
+}
+
+// GetULGInfo ...
+func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
+	ULGJsStr, err := mycache.GetULGInfoCache(gametoken)
+	var ulginfo *ULGInfo
+
+	// cache no data
+	if err.ErrorCode != code.OK {
+		ulginfomap, err := db.GetULGInfoRow(gametoken)
+
+		// db no data
+		if err.ErrorCode != code.OK {
+			errorlog.ErrorLogPrintln("Cache", err)
+			return nil, err
+		}
+		if len(ulginfomap) < 1 {
+			errorlog.ErrorLogPrintln("DB", err)
+			err.ErrorCode = code.NoThisPartyInfo
+			err.Msg = "NoThisPartyInfo"
+			return nil, err
+		}
+		ulginfo = MakeULGInfo(ulginfomap[0])
+
+	} else {
+		if errMsg := json.Unmarshal([]byte(ULGJsStr), ulginfo); errMsg != nil {
+			errorlog.ErrorLogPrintln("Cache", errMsg)
+			err.ErrorCode = code.NoThisPartyInfo
+			err.Msg = "ULGInfoFormatError"
+			return nil, err
+		}
+	}
+
+	return ulginfo, err
+}
+
+// UpdateULGInfo ...
+func UpdateULGInfo(ulginfo *ULGInfo, BetMoney, WinBet int64) {
+	WinMoney := WinBet * BetMoney
+
+	ulginfo.TotalBet += BetMoney
+	ulginfo.TotalWin += (BetMoney * WinBet)
+	if BetMoney > WinMoney {
+
+		ulginfo.TotalLost += (WinMoney - BetMoney)
+	}
+	SaveULGInfo(ulginfo)
+}
+
+// SaveULGInfo ...
+func SaveULGInfo(Info *ULGInfo) {
+	mycache.SetULGInfo(fmt.Sprintf("ULG%d", Info.PlayerID), Info.ToJSONStr())
+	db.UpdateULGInfoRow(Info.GameToken, Info.TotalWin, Info.ToJSONStr, Info.IsCheckOut)
+}
+
+// MakeULGInfo get ulg info form db
+func MakeULGInfo(row map[string]interface{}) *ULGInfo {
+	return &ULGInfo{
+		PlayerID:   foundation.InterfaceToInt64(row["PlayerID"]),
+		GameToken:  foundation.InterfaceToString(row["GameToken"]),
+		TotalWin:   foundation.InterfaceToInt64(row["TotalWin"]),
+		TotalLost:  foundation.InterfaceToInt64(row["TotalLost"]),
+		IsCheckOut: foundation.InterfaceToBool(row["CheckOut"]),
+	}
+}
+
 // GetUser client request getplayer info
 func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 	var info UlgResult
@@ -132,18 +150,8 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 	return info, err
 }
 
-var count int
-var mu *sync.RWMutex
-
-func init() {
-
-	mu = new(sync.RWMutex)
-}
-
 // Authorized ...
 func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
-	mu.Lock()
-	defer mu.Unlock()
 	var info UlgResult
 	err := errorlog.New()
 	postData := map[string][]string{

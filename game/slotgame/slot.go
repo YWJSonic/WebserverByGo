@@ -6,11 +6,11 @@ import (
 	"sync"
 
 	"../../code"
-	"../../db"
 	"../../foundation"
 	"../../game"
 	"../../log"
 	"../../player"
+	"../../thirdparty/ulg"
 
 	"../../messagehandle/errorlog"
 	"github.com/julienschmidt/httprouter"
@@ -210,23 +210,28 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			break
 		}
 	}
-	// GameResult = append(GameResult, newplate)
 	WinMoney := int64(WinBet * bet)
 	LostMoney := int64(bet)
-	playerinfo.TotalWin += WinMoney
-	playerinfo.TotalLost += LostMoney
+
+	ulginfo, err := ulg.GetULGInfo(playerinfo.GameToken)
+	ulginfo.TotalWin += WinMoney
+	ulginfo.TotalLost += LostMoney
+	ulg.SaveULGInfo(ulginfo)
+
+	// playerinfo.TotalWin += WinMoney
+	// playerinfo.TotalLost += LostMoney
 	playerinfo.Money = playerinfo.Money + WinMoney - LostMoney
+	player.SavePlayerInfo(playerinfo)
+
+	loginfo.IValue1 = int64(WinBet * bet)
+	loginfo.SValue1 = fmt.Sprint(newplate)
+	loginfo.SValue2 = fmt.Sprint(ScatterIndex)
+	log.SaveLog(loginfo)
+
 	result["ScatterGame"] = ScatterIndex
 	result["NormalGameIndex"] = newIndex
 	result["NormalGame"] = newplate
 	result["WinMoney"] = WinMoney
-	// result["Player"] = playerInfo.ToJson()
-	loginfo.IValue1 = int64(WinBet * bet)
-	loginfo.SValue1 = fmt.Sprint(newplate)
-	loginfo.SValue2 = fmt.Sprint(ScatterIndex)
-
-	db.UpdatePlayerInfo(playerinfo.ID, playerinfo.Money, playerinfo.TotalWin, playerinfo.TotalLost)
-	log.SaveLog(loginfo)
 	foundation.HTTPResponse(w, result, err)
 }
 func addroom(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

@@ -31,10 +31,9 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "account/login", Fun: login})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "account/login", Fun: login, ConnType: foundation.Client})
 	return HandleURL
 }
-
 func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var result = make(map[string]interface{})
 
@@ -70,14 +69,13 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			AccountToken: UserInfo.AccountToken,
 			Token:        foundation.NewToken(Info[0]["Account"].(string)),
 			LoginTime:    foundation.ServerNowTime(),
-			// ThirdPartyInfo: AccountUserInfo,
 		}
 		db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
 	}
 
 	mycache.SetAccountInfo(accountInfo.GameAccount, accountInfo.ToJSONStr())
 	mycache.SetToken(accountInfo.GameAccount, accountInfo.Token)
-	result["usercoinquota"] = UserInfo.UserCoinQuota
+	result["partyinfo"] = UserInfo.UserCoinQuota
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
 
