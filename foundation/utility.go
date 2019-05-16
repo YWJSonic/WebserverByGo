@@ -124,3 +124,8 @@ func ServerNowTime() int64 {
 func ServerNow() time.Time {
 	return time.Now()
 }
+
+// ConevrToTimeInt64 Get time point
+func ConevrToTimeInt64(year int, month time.Month, day, hour, min, sec, nsec int) int64 {
+	return time.Date(year, month, day, hour, min, sec, nsec, time.Local).Unix()
+}

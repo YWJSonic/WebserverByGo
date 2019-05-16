@@ -30,7 +30,8 @@ const (
 	NoThisGameAccount = 30
 	NoThisPlayer      = 31
 
-	NoThisPartyInfo = 40
+	NoExchange         = 40
+	ULGInfoFormatError = 41
 
 	RoomLock         = 1001
 	SelfInRoom       = 1002

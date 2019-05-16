@@ -40,7 +40,7 @@ func UpdateAccount(args ...interface{}) errorlog.ErrorMsg {
 	return err
 }
 
-// NewGameAccount ...
+// NewGameAccount gameaccount, money, gametoken
 func NewGameAccount(args ...interface{}) (int64, errorlog.ErrorMsg) {
 	QuertStr := "INSERT INTO gameaccount VALUE (NULL,"
 	if len(args) > 0 {
@@ -120,15 +120,6 @@ func SetLog(Account string, PlayerID, Time int64, ActivityEvent int, IValue1, IV
 	go func() { QueryLogChan <- query }()
 }
 
-// ExecLog Exec Use to INSTER, UPDATE, DELETE
-// func ExecLog(query string, args ...interface{}) {
-
-// 	_, err := logDBSQL.DB.Exec(query, args...)
-// 	if err != nil {
-// 		errorlog.ErrorLogPrintln("DB", err, query)
-// 	}
-// }
-
 /////////////////		Pay DB		////////////////
 
 // SetExchange new goruting set exchange log
@@ -140,11 +131,28 @@ func SetExchange(args ...interface{}) {
 	go func() { WritePayChan <- qu }()
 }
 
-// ExecPay ...
-// func ExecPay(query string, args ...interface{}) {
+// third party request
 
-// 	_, err := payDBSQL.DB.Exec(query, args...)
-// 	if err != nil {
-// 		errorlog.ErrorLogPrintln("DB", err, query)
-// 	}
-// }
+// NewULGInfoRow gametoken, playerid
+func NewULGInfoRow(args ...interface{}) errorlog.ErrorMsg {
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("ULGNew_Write", len(args)), args...)
+	return err
+}
+
+// UpdateULGInfoRow gametoken ,totalwin, totallost ,checkout
+func UpdateULGInfoRow(args ...interface{}) errorlog.ErrorMsg {
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("ULGSet_Update", len(args)), args...)
+	return err
+}
+
+// GetULGInfoRow ...
+func GetULGInfoRow(gametoken string) ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "ULGGet_Read", gametoken)
+	return result, err
+}
+
+// UpdateCheckUlgRow ...
+func UpdateCheckUlgRow(gametoken string) errorlog.ErrorMsg {
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("ULGCheckout_Update", 2), gametoken, true)
+	return err
+}

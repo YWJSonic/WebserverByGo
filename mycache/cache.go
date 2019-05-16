@@ -103,7 +103,9 @@ func runSet(key string, v interface{}, d time.Duration) error {
 	args := []interface{}{key, v}
 
 	_, err := set(args, d)
-	errorlog.ErrorLogPrintln("Cache Set", err)
+	if err != nil {
+		errorlog.ErrorLogPrintln("Cache Set", key, err)
+	}
 	return err
 }
 

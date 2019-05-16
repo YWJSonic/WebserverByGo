@@ -35,7 +35,7 @@ func GetAccountInfo(GameAccount string) (interface{}, errorlog.ErrorMsg) {
 	info, errMsg := get(fmt.Sprintf("ACC%s", GameAccount))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache", GameAccount, errMsg)
+		errorlog.ErrorLogPrintln("Cache GetAccountInfo", GameAccount, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -55,7 +55,7 @@ func GetPlayerInfo(playerid int64) (interface{}, errorlog.ErrorMsg) {
 	info, errMsg := get(fmt.Sprintf("ID%dJS", playerid))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache", playerid, errMsg)
+		errorlog.ErrorLogPrintln("Cache GetPlayerInfo", playerid, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -72,4 +72,17 @@ func SetPlayerInfo(playerid int64, Value interface{}) {
 // ClearAllCache ...
 func ClearAllCache() {
 	runFlush()
+}
+
+// third party request
+
+// SetULGInfo Set ULG info
+func SetULGInfo(key, value string) {
+	runSet(key, value, data.CacheDeleteTime)
+}
+
+// GetULGInfoCache Get ULG info
+func GetULGInfoCache(key string) string {
+	info, _ := getString(key)
+	return info
 }

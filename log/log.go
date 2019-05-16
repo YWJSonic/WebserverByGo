@@ -13,6 +13,7 @@ const (
 	JoinGame   = 13
 	LeaveGame  = 14
 	GameResult = 15
+	CheckOut   = 16
 )
 
 type Log struct {

@@ -53,42 +53,47 @@ func CheckoutURL() string {
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid, coinamount int64, gametoken string) ULGInfo {
+func NewULGInfo(playerid, coinamount int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
 		PlayerID:  playerid,
 		GameToken: gametoken,
 	}
-	db.NewULGInfoRow(playerid, gametoken)
+	err := db.NewULGInfoRow(playerid, gametoken)
+	if err.ErrorCode != code.OK {
+		return nil, err
+	}
 	mycache.SetULGInfo(fmt.Sprintf("ULG%d", playerid), info.ToJSONStr())
-	return info
+	return &info, err
 }
 
 // GetULGInfo ...
 func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
-	ULGJsStr, err := mycache.GetULGInfoCache(gametoken)
 	var ulginfo *ULGInfo
+	var err errorlog.ErrorMsg
 
+	ULGJsStr := mycache.GetULGInfoCache(gametoken)
 	// cache no data
 	if err.ErrorCode != code.OK {
-		ulginfomap, err := db.GetULGInfoRow(gametoken)
+		var ulginfomap []map[string]interface{}
+		ulginfomap, err = db.GetULGInfoRow(gametoken)
 
 		// db no data
 		if err.ErrorCode != code.OK {
-			errorlog.ErrorLogPrintln("Cache", err)
+			errorlog.ErrorLogPrintln("Cache GetULGInfo", err)
 			return nil, err
 		}
 		if len(ulginfomap) < 1 {
 			errorlog.ErrorLogPrintln("DB", err)
-			err.ErrorCode = code.NoThisPartyInfo
-			err.Msg = "NoThisPartyInfo"
+			err.ErrorCode = code.NoExchange
+			err.Msg = "NoExchange"
 			return nil, err
 		}
 		ulginfo = MakeULGInfo(ulginfomap[0])
 
 	} else {
 		if errMsg := json.Unmarshal([]byte(ULGJsStr), ulginfo); errMsg != nil {
-			errorlog.ErrorLogPrintln("Cache", errMsg)
-			err.ErrorCode = code.NoThisPartyInfo
+			errorlog.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
+			err.ErrorCode = code.ULGInfoFormatError
 			err.Msg = "ULGInfoFormatError"
 			return nil, err
 		}
@@ -110,10 +115,21 @@ func UpdateULGInfo(ulginfo *ULGInfo, BetMoney, WinBet int64) {
 	SaveULGInfo(ulginfo)
 }
 
+// UpdateUlgInfoCheckOut ...
+func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
+	err := db.UpdateCheckUlgRow(gametoken)
+	return err
+}
+
 // SaveULGInfo ...
 func SaveULGInfo(Info *ULGInfo) {
 	mycache.SetULGInfo(fmt.Sprintf("ULG%d", Info.PlayerID), Info.ToJSONStr())
-	db.UpdateULGInfoRow(Info.GameToken, Info.TotalWin, Info.ToJSONStr, Info.IsCheckOut)
+	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, Info.IsCheckOut)
+	// if Info.IsCheckOut {
+	// 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, 1)
+	// } else {
+	// 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, 0)
+	// }
 }
 
 // MakeULGInfo get ulg info form db
@@ -216,7 +232,9 @@ func Checkout(accounttoken, gametoken, gameid, amount string, totalwin, totalost
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeError"
 	}
-	//{"data":{"result":0,"userID":0,"status":0,"accountName":"","errorMsg":"\u0008checkout - 無遊戲紀錄","userName":"","token":"","game_token":"","gameCoin":0,"userCoinQuota":null,"coinsetting":null,"gameInfo":null},"error":{"ErrorCode":20,"Msg":"ExchangeError"}}
+
+	UpdateUlgInfoCheckOut(gametoken)
+
 	if info.Result == 1 {
 		err.ErrorCode = code.OK
 	} else {

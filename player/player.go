@@ -63,7 +63,7 @@ func SavePlayerInfo(playerInfo *PlayerInfo) {
 
 // New Create a new PlayerInfo
 func New(GameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
-	playerID, err := db.NewGameAccount(GameAccount, 0)
+	playerID, err := db.NewGameAccount(GameAccount, 0,"")
 
 	if err.ErrorCode != code.OK {
 		return nil, err

@@ -2,12 +2,21 @@ package event
 
 import "time"
 
-// Event UpdateEvent struct
-// 0: clock TimeSince >= DoTime Run
-// 1: CrontabTime Run
-type Event struct {
-	Stat        int
-	CrontabTime [5]int // month: -1~12 , dayOfmonth:-1~31, hour:-1~23, minute:-1~59, second:0~59. default -1 is everytime
-	DoTime      time.Duration
-	Do          func(interface{}) interface{}
+// event type enum
+const (
+	LoopEvent = iota + 1
+	AtTimeEvent
+)
+
+// EventInfo UpdateEvent struct
+// DoTime: run at server  time on time
+// LoopTime: run at server every pass time.Duration time
+// *LoopTime limit Mini time.Duration is 1 Second
+type EventInfo struct {
+	EventType int
+	CountTime int64
+	DoTime    int64
+	LoopTime  time.Duration
+	Do        func(interface{}) interface{}
+	IsLaunch  bool
 }
