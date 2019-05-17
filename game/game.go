@@ -6,8 +6,10 @@ import (
 	"sync"
 
 	"../code"
+	"../data"
 	"../foundation"
 	"../log"
+	"../messagehandle/errorlog"
 	"../player"
 	"../thirdparty/ulg"
 
@@ -46,12 +48,21 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// return
 
 	var result = make(map[string]interface{})
-
 	postData := foundation.PostData(r)
 	// gametoken := foundation.InterfaceToString(postData["token"])
-	// gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	BetMoney := foundation.InterfaceToInt64(postData["bet"])
 
+	// gametype check
+	err := errorlog.New()
+	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
+	if gametypeid != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	// get player
 	playerid := foundation.InterfaceToInt64(postData["playerid"])
 	playerinfo, err := player.GetPlayerInfoByPlayerID(playerid)
 	if err.ErrorCode != code.OK {
@@ -59,6 +70,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	// get thirdparty info data
 	var ulginfo *ulg.ULGInfo
 	ulginfo, err = ulg.GetULGInfo(playerinfo.GameToken)
 	if err.ErrorCode != code.OK {
@@ -66,6 +78,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	// get game result
 	var gameresult map[string]interface{}
 	gameresult = make(map[string]interface{})
 	gameresult["WinBet"] = 200

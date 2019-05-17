@@ -57,6 +57,7 @@ func (p PlayerInfo) IsInGameRoom() bool {
 	return p.InRoom != 0
 }
 
-func (p PlayerInfo) IsCheckOut() {
-
+// IsCheckOut is ulg checkout
+func (p PlayerInfo) IsCheckOut() bool {
+	return p.GameToken == ""
 }

@@ -12,6 +12,7 @@ import (
 	"../db"
 	"../foundation"
 	"../log"
+	"../messagehandle/errorlog"
 	"../mycache"
 	"../player"
 	"../thirdparty/ulg"
@@ -41,6 +42,14 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
+	err := errorlog.New()
+	if gametypeid != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
 	UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 
 	if err.ErrorCode != code.OK {
@@ -58,7 +67,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var accountInfo player.AccountInfo
 	if len(Info) < 1 {
-		accountInfo = player.NewAccount(AccountStr, foundation.MD5Code(data.AccountEncodeStr+string(UserInfo.AccountID)))
+		accountInfo = player.NewAccountInfo(AccountStr, foundation.NewGameAccount(string(UserInfo.AccountID)))
 		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.LoginTime)
 	} else {
 

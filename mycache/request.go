@@ -69,6 +69,13 @@ func SetPlayerInfo(playerid int64, Value interface{}) {
 	runSet(fmt.Sprintf("ID%dJS", playerid), Value, data.CacheDeleteTime)
 }
 
+// ClearPlayerCache ...
+func ClearPlayerCache(playerid int64, GameAccount string) {
+	del(fmt.Sprintf("ID%dJS", playerid))
+	del(fmt.Sprintf("ACC%s", GameAccount))
+	del(fmt.Sprintf("TOK%s", GameAccount))
+}
+
 // ClearAllCache ...
 func ClearAllCache() {
 	runFlush()

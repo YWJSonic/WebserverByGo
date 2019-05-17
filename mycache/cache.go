@@ -66,6 +66,14 @@ func set(args []interface{}, d time.Duration) (interface{}, error) {
 	return Conn.Do("SET", args...)
 }
 
+func del(key string) error {
+	Conn := CachePool.Get()
+	defer Conn.Close()
+
+	_, err := Conn.Do("DEL", key)
+	return err
+}
+
 func runExist(key string) (bool, error) {
 	Conn := CachePool.Get()
 	defer Conn.Close()

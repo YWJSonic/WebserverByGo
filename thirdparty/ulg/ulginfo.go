@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// ULGInfo plant ULG game play data
 type ULGInfo struct {
 	PlayerID   int64  `json:"PlayerID"`
 	GameToken  string `json:"GameToken"` // platform GameToken
@@ -12,6 +13,8 @@ type ULGInfo struct {
 	TotalWin   int64  `json:"TotalWin"`
 	TotalLost  int64  `json:"TotalLost"`
 	IsCheckOut bool   `json:"CheckOut"`
+
+	AccountToken string `json:"AccountToken"` // Maintan checkout use
 }
 
 // ToJSONStr ...
@@ -22,7 +25,7 @@ func (ulg ULGInfo) ToJSONStr() string {
 	return STR
 }
 
-// UlgResult ...
+// UlgResult plant ULG API Result
 type UlgResult struct {
 	Result        int           `json:"result"`
 	AccountID     int64         `json:"userID"`

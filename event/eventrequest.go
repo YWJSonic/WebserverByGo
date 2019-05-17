@@ -8,8 +8,6 @@ import (
 
 var eventList []EventInfo
 
-var count int
-
 // Update event check loop
 func Update() {
 	tick1 := time.Tick(1e9) //  1 second
@@ -21,12 +19,6 @@ func Update() {
 				if event.IsLaunch {
 					continue
 				}
-
-				// switch event.EventType {
-				// case LoopEvent:
-
-				// case AtTimeEvent:
-				// }
 			}
 		}
 		db.SQLSelect()
@@ -51,4 +43,9 @@ func init() {
 			// slotgame.Update()
 			return nil
 		}})
+}
+
+// AddNewEvent add new event
+func AddNewEvent(event EventInfo) {
+	eventList = append(eventList, event)
 }

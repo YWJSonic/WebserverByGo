@@ -90,47 +90,6 @@ func UpdatePlayerInfo(args ...interface{}) {
 	}()
 }
 
-/////////////////		Log DB		/////////////////
-
-// NewLogTable Create new LogTable if table alerady exists return FailedPrecondition Error
-func NewLogTable(TableName string) errorlog.ErrorMsg {
-	query := fmt.Sprintf("CREATE TABLE `%s` (`index` BIGINT NOT NULL AUTO_INCREMENT,`Account` VARCHAR(128) NOT NULL,`PlayerID` BIGINT NOT NULL,`Time` BIGINT NOT NULL,`ActivityEvent` INT NOT NULL,`IValue1` BIGINT NOT NULL DEFAULT 0,`IValue2` BIGINT NOT NULL DEFAULT 0,`IValue3` BIGINT NOT NULL DEFAULT 0,`SValue1` VARCHAR(128) NOT NULL DEFAULT '',`SValue2` VARCHAR(128) NOT NULL DEFAULT '',`SValue3` VARCHAR(128) NOT NULL DEFAULT '',`Msg` TEXT NOT NULL,PRIMARY KEY (`index`));", TableName)
-	_, errMsg := logDBSQL.DB.Exec(query)
-	err := errorlog.New()
-
-	if errMsg != nil {
-		mysqlerr := errMsg.(*mysql.MySQLError)
-		if mysqlerr.Number == 1050 { // Table alerady exists
-			return err
-		}
-		err.ErrorCode = code.FailedPrecondition
-		err.Msg = "NewLogTableError"
-		errorlog.ErrorLogPrintln("DB", err, query)
-		return err
-	}
-
-	return err
-}
-
-// SetLog new goruting set log
-func SetLog(Account string, PlayerID, Time int64, ActivityEvent int, IValue1, IValue2, IValue3 int64, SValue1, SValue2, SValue3, Msg string) {
-	TableName := foundation.ServerNow().Format("20060102")
-	query := fmt.Sprintf("INSERT INTO `%s` VALUE(NULL,\"%s\",%d,%d, %d, %d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\");", TableName, Account, PlayerID, Time, ActivityEvent, IValue1, IValue2, IValue3, SValue1, SValue2, SValue3, Msg)
-
-	go func() { QueryLogChan <- query }()
-}
-
-/////////////////		Pay DB		////////////////
-
-// SetExchange new goruting set exchange log
-func SetExchange(args ...interface{}) {
-	qu := sqlQuary{
-		Quary: makeProcedureQueryStr("ExchangeNew_Write", len(args)),
-		Args:  args,
-	}
-	go func() { WritePayChan <- qu }()
-}
-
 // third party request
 
 // NewULGInfoRow gametoken, playerid
@@ -155,4 +114,49 @@ func GetULGInfoRow(gametoken string) ([]map[string]interface{}, errorlog.ErrorMs
 func UpdateCheckUlgRow(gametoken string) errorlog.ErrorMsg {
 	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("ULGCheckout_Update", 2), gametoken, true)
 	return err
+}
+
+// ULGMaintainCheckoutRow ...
+func ULGMaintainCheckoutRow() ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "ULGMaintainCheckoutGet_Read")
+	return result, err
+}
+
+/////////////////		Log DB		/////////////////
+
+// NewLogTable Create new LogTable if table alerady exists return FailedPrecondition Error
+func NewLogTable(TableName string) {
+	query := fmt.Sprintf("CREATE TABLE `%s` (`index` BIGINT NOT NULL AUTO_INCREMENT,`Account` VARCHAR(128) NOT NULL,`PlayerID` BIGINT NOT NULL,`Time` BIGINT NOT NULL,`ActivityEvent` INT NOT NULL,`IValue1` BIGINT NOT NULL DEFAULT 0,`IValue2` BIGINT NOT NULL DEFAULT 0,`IValue3` BIGINT NOT NULL DEFAULT 0,`SValue1` VARCHAR(128) NOT NULL DEFAULT '',`SValue2` VARCHAR(128) NOT NULL DEFAULT '',`SValue3` VARCHAR(128) NOT NULL DEFAULT '',`Msg` TEXT NOT NULL,PRIMARY KEY (`index`));", TableName)
+	_, errMsg := logDBSQL.DB.Exec(query)
+	err := errorlog.New()
+
+	if errMsg != nil {
+		mysqlerr := errMsg.(*mysql.MySQLError)
+		if mysqlerr.Number == 1050 { // Table alerady exists
+			errorlog.LogPrintln("DB NewLogTable", TableName)
+			return
+		}
+		err.ErrorCode = code.FailedPrecondition
+		err.Msg = "NewLogTableError"
+		errorlog.ErrorLogPrintln("DB", err, query)
+	}
+}
+
+// SetLog new goruting set log
+func SetLog(Account string, PlayerID, Time int64, ActivityEvent int, IValue1, IValue2, IValue3 int64, SValue1, SValue2, SValue3, Msg string) {
+	TableName := foundation.ServerNow().Format("20060102")
+	query := fmt.Sprintf("INSERT INTO `%s` VALUE(NULL,\"%s\",%d,%d, %d, %d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\");", TableName, Account, PlayerID, Time, ActivityEvent, IValue1, IValue2, IValue3, SValue1, SValue2, SValue3, Msg)
+
+	go func() { QueryLogChan <- query }()
+}
+
+/////////////////		Pay DB		////////////////
+
+// SetExchange new goruting set exchange log
+func SetExchange(args ...interface{}) {
+	qu := sqlQuary{
+		Quary: makeProcedureQueryStr("ExchangeNew_Write", len(args)),
+		Args:  args,
+	}
+	go func() { WritePayChan <- qu }()
 }

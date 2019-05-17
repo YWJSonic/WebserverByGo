@@ -22,7 +22,7 @@ type AccountInfo struct {
 type PartyInfo interface{}
 
 // NewAccount ...
-func NewAccount(account, gameAccount string) AccountInfo {
+func NewAccountInfo(account, gameAccount string) AccountInfo {
 	return AccountInfo{
 		Account:     account,
 		GameAccount: gameAccount,

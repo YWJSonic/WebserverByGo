@@ -53,12 +53,12 @@ func CheckoutURL() string {
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid, coinamount int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
+func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
 		PlayerID:  playerid,
 		GameToken: gametoken,
 	}
-	err := db.NewULGInfoRow(playerid, gametoken)
+	err := db.NewULGInfoRow(playerid, gametoken, accounttoken)
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
@@ -73,17 +73,17 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 
 	ULGJsStr := mycache.GetULGInfoCache(gametoken)
 	// cache no data
-	if err.ErrorCode != code.OK {
+	if ULGJsStr == "" {
 		var ulginfomap []map[string]interface{}
 		ulginfomap, err = db.GetULGInfoRow(gametoken)
 
 		// db no data
 		if err.ErrorCode != code.OK {
-			errorlog.ErrorLogPrintln("Cache GetULGInfo", err)
+			errorlog.ErrorLogPrintln("DB GetULGInfo", err)
 			return nil, err
 		}
 		if len(ulginfomap) < 1 {
-			errorlog.ErrorLogPrintln("DB", err)
+			errorlog.ErrorLogPrintln("DB GetULGInfo", err)
 			err.ErrorCode = code.NoExchange
 			err.Msg = "NoExchange"
 			return nil, err
@@ -100,6 +100,26 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 	}
 
 	return ulginfo, err
+}
+
+// MaintainULGInfos ...
+func MaintainULGInfos() (*[]ULGInfo, errorlog.ErrorMsg) {
+	var Infos []ULGInfo
+	result, err := db.ULGMaintainCheckoutRow()
+
+	// db no data
+	if err.ErrorCode != code.OK {
+		errorlog.ErrorLogPrintln("Cache GetULGInfo", err)
+		return nil, err
+	}
+
+	Infos = make([]ULGInfo, len(result))
+	for i, row := range result {
+
+		Infos[i] = *MakeULGInfo(row)
+	}
+
+	return &Infos, err
 }
 
 // UpdateULGInfo ...
@@ -134,13 +154,19 @@ func SaveULGInfo(Info *ULGInfo) {
 
 // MakeULGInfo get ulg info form db
 func MakeULGInfo(row map[string]interface{}) *ULGInfo {
-	return &ULGInfo{
+	info := &ULGInfo{
 		PlayerID:   foundation.InterfaceToInt64(row["PlayerID"]),
 		GameToken:  foundation.InterfaceToString(row["GameToken"]),
 		TotalWin:   foundation.InterfaceToInt64(row["TotalWin"]),
 		TotalLost:  foundation.InterfaceToInt64(row["TotalLost"]),
 		IsCheckOut: foundation.InterfaceToBool(row["CheckOut"]),
 	}
+
+	if _, ok := row["AccountToken"]; ok {
+		info.AccountToken = foundation.InterfaceToString(row["AccountToken"])
+	}
+
+	return info
 }
 
 // GetUser client request getplayer info
@@ -224,8 +250,8 @@ func Checkout(accounttoken, gametoken, gameid, amount string, totalwin, totalost
 		"game_id":    {gameid},
 		"token":      {accounttoken},
 		"amount":     {amount},
-		"win":        {fmt.Sprint(int(600))},
-		"lost":       {fmt.Sprint(int(300))},
+		"win":        {fmt.Sprint(totalwin)},
+		"lost":       {fmt.Sprint(totalost)},
 	}
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {

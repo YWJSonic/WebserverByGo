@@ -2,13 +2,14 @@ package main
 
 import (
 	"./account"
+	_ "./crontab"
 	"./data"
 	"./db"
 	"./event"
 	"./foundation"
-	"./game/slot2"
-	"./game/slotgame"
+	"./game"
 	"./lobby"
+	"./service/api"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -16,11 +17,11 @@ func main() {
 
 	var initArray [][]foundation.RESTfulURL
 	initArray = append(initArray, account.ServiceStart())
-	initArray = append(initArray, slotgame.ServiceStart())
-	initArray = append(initArray, slot2.ServiceStart())
+	initArray = append(initArray, game.ServiceStart())
 	initArray = append(initArray, lobby.ServiceStart())
+	initArray = append(initArray, api.ServiceStart())
 	// foundation.NewToken()
-	db.SetDBCOnn()
+	db.SetDBConn()
 
 	// mycache.ClearAllCache()
 

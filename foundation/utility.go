@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"../code"
+	"../data"
 )
 
 // DeleteArrayElement ...
@@ -83,9 +84,14 @@ func NewAccount(plant, account string) string {
 	return fmt.Sprintf("%s:%s", plant, account)
 }
 
+// NewGameAccount new game account
+func NewGameAccount(account string) string {
+	return MD5Code(data.AccountEncodeStr + account)
+}
+
 // NewToken ...
 func NewToken(GameAccount string) string {
-	return MD5Code(fmt.Sprintf("%s%d", GameAccount, ServerNowTime))
+	return MD5Code(fmt.Sprintf("%s%d", GameAccount, ServerNowTime()))
 }
 
 // MD5Code encode MD5

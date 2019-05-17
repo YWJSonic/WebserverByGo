@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"../code"
+	"../data"
 	"../db"
 	"../foundation"
 	"../log"
@@ -33,7 +34,6 @@ func ServiceStart() []foundation.RESTfulURL {
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/getplayer", Fun: getplayer, ConnType: foundation.Client})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/exchange", Fun: exchange, ConnType: foundation.Client})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/checkout", Fun: checkout, ConnType: foundation.Client})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/clearcache", Fun: clearAllCache, ConnType: foundation.Backend})
 	return HandleURL
 }
 
@@ -101,6 +101,13 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// get player
 	var err errorlog.ErrorMsg
+	if gametypeid != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
 	var playerInfo *player.PlayerInfo
 	playerInfo, err = player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
@@ -147,7 +154,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	_, err = ulg.NewULGInfo(playerInfo.ID, ulgResult.GameCoin, ulguser.GameToken)
+	_, err = ulg.NewULGInfo(playerInfo.ID, ulguser.GameToken, accounttoken)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
@@ -176,8 +183,16 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
-	gametypeID := foundation.InterfaceToString(postData["gametypeid"])
+	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	accountToken := foundation.InterfaceToString(postData["accounttoken"])
+
+	err := errorlog.New()
+	if gametypeid != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
 
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
@@ -216,7 +231,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	var ulgResult ulg.UlgResult
-	ulgResult, err = ulg.Checkout(accountToken, playerInfo.GameToken, gametypeID, fmt.Sprint(ulginfo.TotalBet), ulginfo.TotalWin, ulginfo.TotalLost)
+	ulgResult, err = ulg.Checkout(accountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), ulginfo.TotalWin, ulginfo.TotalLost)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
@@ -238,8 +253,4 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SavePlayerInfo(playerInfo)
 
 	foundation.HTTPResponse(w, ulgResult, err)
-}
-
-func clearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mycache.ClearAllCache()
 }

@@ -106,15 +106,11 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]RESTfulURL) (err error) {
 
 	errorlog.LogPrintln("Server run on", ListenIP)
 
-	// HTTPS Server
-	// ListenAndServeTLS
-
-	log.Fatal(http.ListenAndServe(ListenIP, router))
-	// if err != nil {
-	// 	errorlog.ErrorLogPrintln("ListenAndServe", err)
-	// 	return err
-	// }
-	// return err
+	err = http.ListenAndServe(ListenIP, router)
+	if err != nil {
+		errorlog.ErrorLogPrintln("ListenAndServe", err)
+		return err
+	}
 	return nil
 }
 func option(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

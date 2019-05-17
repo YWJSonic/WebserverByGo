@@ -1,11 +1,6 @@
 package log
 
-import (
-	"time"
-
-	"../db"
-)
-
+// Login event
 const (
 	Login      = 10
 	GetPlayer  = 11
@@ -16,7 +11,8 @@ const (
 	CheckOut   = 16
 )
 
-type Log struct {
+// LogInfo struect
+type LogInfo struct {
 	Account       string
 	PlayerID      int64
 	Time          int64
@@ -28,28 +24,4 @@ type Log struct {
 	SValue2       string // varchar(128)
 	SValue3       string // varchar(128)
 	Msg           string // text
-}
-
-// New Default log
-func New(ActivityEvent int) Log {
-	return Log{
-		Time:          time.Now().Unix(),
-		ActivityEvent: ActivityEvent,
-	}
-}
-
-// SaveLog Save to db
-func SaveLog(log Log) {
-	db.SetLog(
-		log.Account,
-		log.PlayerID,
-		log.Time,
-		log.ActivityEvent,
-		log.IValue1,
-		log.IValue2,
-		log.IValue3,
-		log.SValue1,
-		log.SValue2,
-		log.SValue3,
-		log.Msg)
 }

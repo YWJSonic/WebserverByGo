@@ -1,11 +1,16 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
+	"../../crontab"
+	"../../data"
 	"../../foundation"
 	"../../messagehandle/errorlog"
+	"../../mycache"
+	"../../thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -24,27 +29,63 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/changeRTP", Fun: changeRTP})
-	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/addroom", Fun: addroom})
-	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/getRoom", Fun: getRoom})
+	crontab.NewCron("0 20 15 * * *", MaintainCheckout)
+	// crontab.NewCron("*/10 * * * * *", MaintainCheckout)
+
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
+
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintaincheckout", Fun: maintaincheckout, ConnType: foundation.Backend})
+
 	return HandleURL
 }
 
-func changeRTP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	err := errorlog.New()
-	// postData := foundation.PostData(r)
-	// newRTP := postData["RTP"]
-
-	foundation.HTTPResponse(w, "", err)
+// CronStart cron API
+func CronStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	crontab.CronStart()
+	fmt.Println("CronStart")
 }
 
-// GetRTP dynamic RTP
-func GetRTP() int {
-	mu.RLock()
-	defer mu.RUnlock()
+// CronStop cron API
+func CronStop(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	crontab.CronStop()
+	fmt.Println("CronStop")
+}
 
-	return 97
+// CronAdd cron API
+func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Println("AddCron")
+}
+
+// MaintainStart Maintain API
+func MaintainStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	data.Maintain = true
+}
+
+// MaintainEnd Maintain API
+func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	data.Maintain = false
+}
+
+// MaintainCheckout auto checkout ulg
+func MaintainCheckout() {
+	if !data.Maintain {
+		errorlog.LogPrintln("API Warning: MaintainCheckout not in maintain")
+		return
+	}
+
+	infos, err := ulg.MaintainULGInfos()
+	fmt.Println(infos, err)
+}
+func maintaincheckout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	MaintainCheckout()
+}
+
+// ClearAllCache clear all cache data
+func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	mycache.ClearAllCache()
 }

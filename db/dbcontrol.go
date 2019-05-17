@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"../code"
+	"../crontab"
 	"../data"
 	"../foundation"
 	"../messagehandle/errorlog"
@@ -34,15 +35,23 @@ var WriteGameChan chan sqlQuary
 // WritePayChan channel for write pay db
 var WritePayChan chan sqlQuary
 
-// SetDBCOnn init value
-func SetDBCOnn() {
+// SetDBConn init value
+func SetDBConn() {
 	QueryLogChan = make(chan string)
 	WriteGameChan = make(chan sqlQuary)
 	WritePayChan = make(chan sqlQuary)
 	connectGameDB()
 	connectLogDB()
 	connectPayDB()
+
+	// server start check today log table.
 	NewLogTable(foundation.ServerNow().Format("20060102"))
+
+	// set Schedule check next day log table.
+	crontab.NewCronBaseJob("0 35 15 * * *", &crontab.LogCrontab{
+		Params: func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
+		FUN:    NewLogTable,
+	})
 }
 
 // SQLSelect channel loop
@@ -69,7 +78,7 @@ func connectGameDB() (db *sql.DB, err error) {
 		maxIdleConns := 5
 		maxOpenConns := 15
 
-		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
 
 		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
@@ -100,7 +109,7 @@ func connectLogDB() (db *sql.DB, err error) {
 		maxIdleConns := 5
 		maxOpenConns := 15
 
-		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		errorlog.LogPrintf("connMaxLifetime:%d second\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
 
 		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
@@ -130,7 +139,7 @@ func connectPayDB() (db *sql.DB, err error) {
 		maxIdleConns := 3
 		maxOpenConns := 6
 
-		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime)
+		errorlog.LogPrintf("connMaxLifetime:%d second\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
 
 		errorlog.LogPrintf("maxIdleConns:%d\n", maxIdleConns)
