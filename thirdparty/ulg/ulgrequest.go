@@ -11,31 +11,6 @@ import (
 	"../../mycache"
 )
 
-// LoginURL ...
-func LoginURL() string {
-	return loginURL
-}
-
-// GetUserURL ...
-func GetUserURL() string {
-	return getuserURL
-}
-
-// AuthorizedURL ...
-func AuthorizedURL() string {
-	return authorizedURL
-}
-
-// ExchangeURL ...
-func ExchangeURL() string {
-	return exchangeURL
-}
-
-// CheckoutURL ...
-func CheckoutURL() string {
-	return checkoutURL
-}
-
 /////// API interface process
 
 // Login ...
@@ -255,8 +230,8 @@ func Checkout(accounttoken, gametoken, gameid, amount string, totalwin, totalost
 	}
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
-		err.ErrorCode = code.ExchangeError
-		err.Msg = "ExchangeError"
+		err.ErrorCode = code.CheckoutError
+		err.Msg = "CheckoutError"
 	}
 
 	UpdateUlgInfoCheckOut(gametoken)

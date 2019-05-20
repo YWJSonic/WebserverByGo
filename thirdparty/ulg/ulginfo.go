@@ -2,7 +2,10 @@ package ulg
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
+
+	"../../foundation"
 )
 
 // ULGInfo plant ULG game play data
@@ -40,6 +43,21 @@ type UlgResult struct {
 	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota"`
 	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting"`
 	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo"`
+}
+
+// PartyAccount ...
+func (ulg *UlgResult) PartyAccount() string {
+	return foundation.NewAccount("ulg", strconv.FormatInt(ulg.AccountID, 10))
+}
+
+// GameAccount ...
+func (ulg *UlgResult) GameAccount() string {
+	return foundation.NewGameAccount(string(ulg.AccountID))
+}
+
+// PartyToken ...
+func (ulg *UlgResult) PartyToken() string {
+	return ulg.AccountToken
 }
 
 // CoinInfo Coin rate info

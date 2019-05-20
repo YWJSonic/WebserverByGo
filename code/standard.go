@@ -27,6 +27,7 @@ const (
 	GetUserError       = 21
 	NoCheckoutError    = 22
 	GameTypeError      = 23
+	CheckoutError      = 24
 
 	NoThisGameAccount = 30
 	NoThisPlayer      = 31

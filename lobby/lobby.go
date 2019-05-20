@@ -249,6 +249,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.SValue1 = playerInfo.GameToken
 	log.SaveLog(loginfo)
 
+	playerInfo.Money = 0
 	playerInfo.GameToken = ""
 	player.SavePlayerInfo(playerInfo)
 

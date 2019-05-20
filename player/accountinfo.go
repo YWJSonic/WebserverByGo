@@ -10,9 +10,10 @@ import (
 
 // AccountInfo ...
 type AccountInfo struct {
-	Account     string `json:"Account"`
-	GameAccount string `json:"GameAccount"`
-	LoginTime   int64  `json:"LoginTime"`
+	Account      string `json:"Account"`
+	GameAccount  string `json:"GameAccount"`
+	ThirdPartyID int    `json:"ThirdPartyID"`
+	LoginTime    int64  `json:"LoginTime"`
 
 	AccountToken string `json:"AccountToken"` // platform AccountToken
 	Token        string `json:"Token"`        // Server Token
@@ -21,12 +22,12 @@ type AccountInfo struct {
 // PartyInfo ThirdPartyInfo
 type PartyInfo interface{}
 
-// NewAccount ...
+// NewAccountInfo ...
 func NewAccountInfo(account, gameAccount string) AccountInfo {
 	return AccountInfo{
 		Account:     account,
 		GameAccount: gameAccount,
-		Token:       foundation.NewToken(gameAccount),
+		Token:       foundation.NewToken(account),
 		LoginTime:   time.Now().Unix(),
 	}
 }
