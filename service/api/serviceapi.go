@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	"../../code"
 	"../../crontab"
 	"../../data"
 	"../../foundation"
@@ -38,8 +39,6 @@ func ServiceStart() []foundation.RESTfulURL {
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
-
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintaincheckout", Fun: maintaincheckout, ConnType: foundation.Backend})
 
 	return HandleURL
 }
@@ -80,9 +79,15 @@ func MaintainCheckout() {
 
 	infos, err := ulg.MaintainULGInfos()
 	fmt.Println(infos, err)
-}
-func maintaincheckout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	MaintainCheckout()
+
+	for _, ulginfo := range infos {
+		_, err = ulg.Checkout(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+		if err.ErrorCode != code.OK {
+			errorlog.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
+		}
+
+		mycache.ClearAllCache()
+	}
 }
 
 // ClearAllCache clear all cache data

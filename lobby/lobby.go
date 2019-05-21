@@ -227,27 +227,29 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
-
 	}
-
-	var ulgResult ulg.UlgResult
-	ulgResult, err = ulg.Checkout(accountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), ulginfo.TotalWin, ulginfo.TotalLost)
-	if err.ErrorCode != code.OK {
+	if ulginfo.IsCheckOut {
+		playerInfo.Money = 0
+		playerInfo.GameToken = ""
+		player.SavePlayerInfo(playerInfo)
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
-	// err =
-	// if err.ErrorCode != code.OK {
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	return
-	// }
+	var ulgResult ulg.UlgResult
+	ulgResult, err = ulg.Checkout(accountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
 
 	loginfo := log.New(log.CheckOut)
 	loginfo.PlayerID = playerInfo.ID
 	loginfo.IValue1 = playerInfo.Money
 	loginfo.SValue1 = playerInfo.GameToken
 	log.SaveLog(loginfo)
+
+	ulg.UpdateUlgInfoCheckOut(playerInfo.GameToken)
 
 	playerInfo.Money = 0
 	playerInfo.GameToken = ""

@@ -40,9 +40,10 @@ type UlgResult struct {
 	GameToken     string        `json:"game_token"` // for game token
 	UserPhone     string        `json:"userPhone"`
 	GameCoin      int64         `json:"gameCoin"`
-	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota"`
+	UserCoinQuota CoinQuota     `json:"userCoinQuota,CoinQuota"`
 	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting"`
 	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo"`
+	CheckOutCoin  AmountCoin    `json:"amountCoin,AmountCoin"`
 }
 
 // PartyAccount ...
@@ -81,6 +82,7 @@ type CoinQuota struct {
 	Win          string `json:"win"`
 	Lost         string `json:"lost"`
 	OutboundTime int64  `json:"outbound_time"`
+	Status       int    `json:"status"`
 }
 
 // CoinSetting ulg CoinSetting
@@ -90,6 +92,14 @@ type CoinSetting struct {
 	Rate     float32 `json:"rate"`     // exchange rate
 	Sort     int     `json:"sort"`     // sort index
 
+}
+
+// AmountCoin coin check out
+type AmountCoin struct {
+	Coin1 int64 `json:"coin1"`
+	Coin2 int64 `json:"coin2"`
+	Coin3 int64 `json:"coin3"`
+	Coin4 int64 `json:"coin4"`
 }
 
 // platform api url

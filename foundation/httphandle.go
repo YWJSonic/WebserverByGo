@@ -1,6 +1,7 @@
 package foundation
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -48,6 +49,22 @@ func HTTPPostRequest(ip string, values map[string][]string) []byte {
 	}
 	return result
 
+}
+
+// HTTPPostRawRequest Http Raw Request
+func HTTPPostRawRequest(url string, value []byte) []byte {
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(value))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	return body
 }
 
 // HTTPResponse Respond to cliente

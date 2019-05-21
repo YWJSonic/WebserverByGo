@@ -130,10 +130,10 @@ func NewLogTable(TableName string) {
 	_, errMsg := logDBSQL.DB.Exec(query)
 	err := errorlog.New()
 
+	errorlog.LogPrintln("DB NewLogTable", TableName)
 	if errMsg != nil {
 		mysqlerr := errMsg.(*mysql.MySQLError)
 		if mysqlerr.Number == 1050 { // Table alerady exists
-			errorlog.LogPrintln("DB NewLogTable", TableName)
 			return
 		}
 		err.ErrorCode = code.FailedPrecondition

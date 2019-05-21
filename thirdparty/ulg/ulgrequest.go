@@ -37,7 +37,7 @@ func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, error
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
-	mycache.SetULGInfo(fmt.Sprintf("ULG%d", playerid), info.ToJSONStr())
+	mycache.SetULGInfo(gametoken, info.ToJSONStr())
 	return &info, err
 }
 
@@ -78,7 +78,7 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 }
 
 // MaintainULGInfos ...
-func MaintainULGInfos() (*[]ULGInfo, errorlog.ErrorMsg) {
+func MaintainULGInfos() ([]ULGInfo, errorlog.ErrorMsg) {
 	var Infos []ULGInfo
 	result, err := db.ULGMaintainCheckoutRow()
 
@@ -94,7 +94,7 @@ func MaintainULGInfos() (*[]ULGInfo, errorlog.ErrorMsg) {
 		Infos[i] = *MakeULGInfo(row)
 	}
 
-	return &Infos, err
+	return Infos, err
 }
 
 // UpdateULGInfo ...
@@ -104,7 +104,6 @@ func UpdateULGInfo(ulginfo *ULGInfo, BetMoney, WinBet int64) {
 	ulginfo.TotalBet += BetMoney
 	ulginfo.TotalWin += (BetMoney * WinBet)
 	if BetMoney > WinMoney {
-
 		ulginfo.TotalLost += (WinMoney - BetMoney)
 	}
 	SaveULGInfo(ulginfo)
@@ -132,6 +131,7 @@ func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 	info := &ULGInfo{
 		PlayerID:   foundation.InterfaceToInt64(row["PlayerID"]),
 		GameToken:  foundation.InterfaceToString(row["GameToken"]),
+		TotalBet:   foundation.InterfaceToInt64(row["TotalBet"]),
 		TotalWin:   foundation.InterfaceToInt64(row["TotalWin"]),
 		TotalLost:  foundation.InterfaceToInt64(row["TotalLost"]),
 		IsCheckOut: foundation.InterfaceToBool(row["CheckOut"]),
@@ -217,7 +217,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 }
 
 // Checkout ...
-func Checkout(accounttoken, gametoken, gameid, amount string, totalwin, totalost int64) (UlgResult, errorlog.ErrorMsg) {
+func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgResult, errorlog.ErrorMsg) {
 	var info UlgResult
 	err := errorlog.New()
 	postData := map[string][]string{
@@ -225,16 +225,14 @@ func Checkout(accounttoken, gametoken, gameid, amount string, totalwin, totalost
 		"game_id":    {gameid},
 		"token":      {accounttoken},
 		"amount":     {amount},
-		"win":        {fmt.Sprint(totalwin)},
-		"lost":       {fmt.Sprint(totalost)},
+		"win":        {totalwin},
+		"lost":       {totalost},
 	}
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"
 	}
-
-	UpdateUlgInfoCheckOut(gametoken)
 
 	if info.Result == 1 {
 		err.ErrorCode = code.OK
