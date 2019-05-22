@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./account"
 	_ "./crontab"
 	"./data"
 	"./db"
@@ -9,6 +8,7 @@ import (
 	"./foundation"
 	"./game"
 	"./lobby"
+	"./login"
 	"./service/api"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,9 +16,9 @@ import (
 func main() {
 
 	var initArray [][]foundation.RESTfulURL
-	initArray = append(initArray, account.ServiceStart())
-	initArray = append(initArray, game.ServiceStart())
+	initArray = append(initArray, login.ServiceStart())
 	initArray = append(initArray, lobby.ServiceStart())
+	initArray = append(initArray, game.ServiceStart())
 	initArray = append(initArray, api.ServiceStart())
 	// foundation.NewToken()
 	db.SetDBConn()

@@ -48,7 +48,7 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 
 	ULGJsStr := mycache.GetULGInfoCache(gametoken)
 	// cache no data
-	if ULGJsStr == "" {
+	if ULGJsStr == nil {
 		var ulginfomap []map[string]interface{}
 		ulginfomap, err = db.GetULGInfoRow(gametoken)
 
@@ -66,7 +66,8 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 		ulginfo = MakeULGInfo(ulginfomap[0])
 
 	} else {
-		if errMsg := json.Unmarshal([]byte(ULGJsStr), ulginfo); errMsg != nil {
+		fmt.Println("ULGJsStr:", string(ULGJsStr.([]byte)))
+		if errMsg := json.Unmarshal(ULGJsStr.([]byte), &ulginfo); errMsg != nil {
 			errorlog.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
 			err.ErrorCode = code.ULGInfoFormatError
 			err.Msg = "ULGInfoFormatError"
@@ -119,11 +120,6 @@ func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
 func SaveULGInfo(Info *ULGInfo) {
 	mycache.SetULGInfo(fmt.Sprintf("ULG%d", Info.PlayerID), Info.ToJSONStr())
 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, Info.IsCheckOut)
-	// if Info.IsCheckOut {
-	// 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, 1)
-	// } else {
-	// 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, 0)
-	// }
 }
 
 // MakeULGInfo get ulg info form db
@@ -154,6 +150,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 	}
 	jsbyte := foundation.HTTPPostRequest(getuserURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
+		fmt.Println(string(jsbyte))
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
 	}
@@ -217,8 +214,8 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 }
 
 // Checkout ...
-func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgResult, errorlog.ErrorMsg) {
-	var info UlgResult
+func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
+	var info UlgCheckOutResult
 	err := errorlog.New()
 	postData := map[string][]string{
 		"game_token": {gametoken},
@@ -229,6 +226,7 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 		"lost":       {totalost},
 	}
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
+	fmt.Println("jsbyte:", string(jsbyte))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"

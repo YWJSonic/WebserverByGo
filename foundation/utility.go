@@ -9,6 +9,8 @@ import (
 
 	"../code"
 	"../data"
+	"../messagehandle/errorlog"
+	"../mycache"
 )
 
 // DeleteArrayElement ...
@@ -92,6 +94,27 @@ func NewGameAccount(account string) string {
 // NewToken ...
 func NewToken(GameAccount string) string {
 	return MD5Code(fmt.Sprintf("%s%d", GameAccount, ServerNowTime()))
+}
+
+// CheckToken Check Token func
+func CheckToken(GameAccount, token string) errorlog.ErrorMsg {
+	err := errorlog.New()
+	ServerToken := mycache.GetToken(GameAccount)
+	if ServerToken != token {
+		err.ErrorCode = code.Unauthenticated
+		err.Msg = "TokenError"
+	}
+	return err
+}
+
+// CheckGameType Check Game Type
+func CheckGameType(GameTypeID string) errorlog.ErrorMsg {
+	err := errorlog.New()
+	if GameTypeID != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+	}
+	return err
 }
 
 // MD5Code encode MD5

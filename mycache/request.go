@@ -84,12 +84,21 @@ func ClearAllCache() {
 // third party request
 
 // SetULGInfo Set ULG info
-func SetULGInfo(key, value string) {
+func SetULGInfo(key string, value interface{}) {
 	runSet(key, value, data.CacheDeleteTime)
 }
 
 // GetULGInfoCache Get ULG info
-func GetULGInfoCache(key string) string {
-	info, _ := getString(key)
+func GetULGInfoCache(key string) interface{} {
+	err := errorlog.New()
+	info, errMsg := get(key)
+
+	if errMsg != nil {
+		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", key)
+		err.ErrorCode = code.FailedPrecondition
+		err.Msg = fmt.Sprintln(errMsg)
+		return nil
+	}
+
 	return info
 }

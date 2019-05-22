@@ -8,12 +8,27 @@ import (
 	"../foundation"
 )
 
+// Account Type
+const (
+	None = iota
+	Guest
+	Self
+	Ulg
+)
+
+// IPratyAccount thirdparty api interface
+type IPratyAccount interface {
+	PartyAccount() string
+	GameAccount() string
+	AccountType() int64
+}
+
 // AccountInfo ...
 type AccountInfo struct {
-	Account      string `json:"Account"`
-	GameAccount  string `json:"GameAccount"`
-	ThirdPartyID int    `json:"ThirdPartyID"`
-	LoginTime    int64  `json:"LoginTime"`
+	Account     string `json:"Account"`
+	GameAccount string `json:"GameAccount"`
+	AccountType int64  `json:"AccountType"`
+	LoginTime   int64  `json:"LoginTime"`
 
 	AccountToken string `json:"AccountToken"` // platform AccountToken
 	Token        string `json:"Token"`        // Server Token
@@ -23,12 +38,13 @@ type AccountInfo struct {
 type PartyInfo interface{}
 
 // NewAccountInfo ...
-func NewAccountInfo(account, gameAccount string) AccountInfo {
+func NewAccountInfo(account, gameAccount string, AccountType int64) AccountInfo {
 	return AccountInfo{
 		Account:     account,
 		GameAccount: gameAccount,
 		Token:       foundation.NewToken(account),
 		LoginTime:   time.Now().Unix(),
+		AccountType: AccountType,
 	}
 }
 

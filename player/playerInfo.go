@@ -24,6 +24,19 @@ type PlayerInfo struct {
 	InGame        string `json:"InGame"`        // gametype
 }
 
+// ToJSONClient ...
+func (p PlayerInfo) ToJSONClient() string {
+	clientdata := make(map[string]interface{})
+	clientdata["ID"] = p.ID
+	clientdata["Money"] = p.Money
+	clientdata["GameAccount"] = p.GameAccount
+
+	data, _ := json.MarshalIndent(clientdata, "", " ")
+	STR := string(data)
+	STR = strings.ReplaceAll(STR, string(10), ``)
+	return STR
+}
+
 // ToJSONStr ...
 func (p PlayerInfo) ToJSONStr() string {
 	data, _ := json.MarshalIndent(p, "", " ")

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"../../foundation"
+	"../../player"
 )
 
 // ULGInfo plant ULG game play data
@@ -40,10 +41,17 @@ type UlgResult struct {
 	GameToken     string        `json:"game_token"` // for game token
 	UserPhone     string        `json:"userPhone"`
 	GameCoin      int64         `json:"gameCoin"`
-	UserCoinQuota CoinQuota     `json:"userCoinQuota,CoinQuota"`
+	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota"`
 	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting"`
 	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo"`
 	CheckOutCoin  AmountCoin    `json:"amountCoin,AmountCoin"`
+}
+
+// UlgCheckOutResult Ulg check result
+type UlgCheckOutResult struct {
+	Result        int       `json:"result"`
+	ErrorMsg      string    `json:"errorMsg"`
+	UserCoinQuota CoinQuota `json:"userCoinQuota,CoinQuota"`
 }
 
 // PartyAccount ...
@@ -59,6 +67,11 @@ func (ulg *UlgResult) GameAccount() string {
 // PartyToken ...
 func (ulg *UlgResult) PartyToken() string {
 	return ulg.AccountToken
+}
+
+// AccountType ...
+func (ulg *UlgResult) AccountType() int64 {
+	return player.Ulg
 }
 
 // CoinInfo Coin rate info

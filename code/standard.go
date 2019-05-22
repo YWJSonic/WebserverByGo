@@ -21,19 +21,22 @@ const (
 	Unavailable        = Code(codes.Unavailable)        // 不可用
 	DataLoss           = Code(codes.DataLoss)           // 資料遺失
 	Unauthenticated    = Code(codes.Unauthenticated)    // 未認證
-	Maintain           = 18                             //維護中
-	AuthorizedError    = 19
-	ExchangeError      = 20
-	GetUserError       = 21
-	NoCheckoutError    = 22
-	GameTypeError      = 23
-	CheckoutError      = 24
 
-	NoThisGameAccount = 30
-	NoThisPlayer      = 31
+	// system error
+	Maintain          = 18 //維護中
+	GameTypeError     = 19
+	AccountTypeError  = 20
+	NoThisGameAccount = 21
+	NoThisPlayer      = 22
 
-	NoExchange         = 40
-	ULGInfoFormatError = 41
+	// ulg error
+	AuthorizedError    = 50
+	ExchangeError      = 51
+	GetUserError       = 52
+	NoExchange         = 53
+	ULGInfoFormatError = 54
+	NoCheckoutError    = 55
+	CheckoutError      = 56
 
 	RoomLock         = 1001
 	SelfInRoom       = 1002

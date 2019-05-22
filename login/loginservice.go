@@ -1,4 +1,4 @@
-package account
+package login
 
 import (
 	"net/http"
@@ -7,14 +7,12 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"../code"
-	"../data"
 	"../db"
 	"../foundation"
 	"../log"
 	"../messagehandle/errorlog"
-	"../mycache"
 	"../player"
-	"../thirdparty"
+	"../thirdparty/guest"
 	"../thirdparty/ulg"
 )
 
@@ -39,24 +37,28 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var result = make(map[string]interface{})
 
 	postData := foundation.PostData(r)
-	thirdpartyid := foundation.InterfaceToInt(postData["thirdpartyid"])
-	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
+	logintype := foundation.InterfaceToInt(postData["logintype"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
 	err := errorlog.New()
-	if gametypeid != data.GameTypeID {
-		err.ErrorCode = code.GameTypeError
-		err.Msg = "GameTypeError"
+	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
 
 	// mutility party switch
-	var iPratyAccount thirdparty.IPratyAccount
-	switch thirdpartyid {
-	case thirdparty.Self:
-	case thirdparty.Ulg:
-	default:
+	var iPratyAccount player.IPratyAccount
+	switch logintype {
+	case player.Guest:
+		account := foundation.InterfaceToString(postData["account"])
+		guestinfo := guest.GuestInfo{
+			Account: account,
+		}
+
+		iPratyAccount = &guestinfo
+	case player.Self:
+	case player.Ulg:
+		accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
 			err.ErrorCode = code.FailedPrecondition
@@ -66,27 +68,28 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		iPratyAccount = &UserInfo
 		result["partyinfo"] = UserInfo.UserCoinQuota
+	default:
+		errorlog.ErrorLogPrintln("logintype Error", logintype, gametypeid, postData)
 	}
 
 	Info, err := db.GetAccountInfo(iPratyAccount.PartyAccount())
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "", err)
+		foundation.HTTPResponse(w, "LoginType", err)
 		return
 	}
 
 	var accountInfo player.AccountInfo
 	if len(Info) < 1 {
-		accountInfo = player.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount())
-		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.LoginTime)
+		accountInfo = player.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(), iPratyAccount.AccountType())
+		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.AccountType)
 
 	} else {
 		result := Info[0]
-		accountInfo = player.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string))
-		db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
+		accountInfo = player.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), result["AccountType"].(int64))
+		// db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
 	}
 
-	mycache.SetAccountInfo(accountInfo.GameAccount, accountInfo.ToJSONStr())
-	mycache.SetToken(accountInfo.GameAccount, accountInfo.Token)
+	player.SaveAccountInfo(&accountInfo)
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
 
