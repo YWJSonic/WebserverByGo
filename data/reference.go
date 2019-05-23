@@ -17,28 +17,31 @@ const MaintainFinishTime string = "0 0 16 * * *"
 const GameTypeID string = "A173D52E01A6EB65A5D6EDFB71A8C39C"
 
 // IP Server Listen address
-const IP string = "192.168.1.15"
+const IP string = "192.168.1.32"
 
 // PORT ServerListen PORT
 const PORT string = "8000"
 
 // DBIP server connect DB address
-const DBIP string = "127.0.0.1"
+const DBIP string = "192.168.1.14"
 
 // DBPORT server connect DB port
 const DBPORT string = "3306"
 
 // DBUser Connect name
-const DBUser string = "root"
+const DBUser string = "serverConnect"
 
 // DBPassword connect Password
-const DBPassword string = "123456"
+const DBPassword string = "123qweasdzxc"
 
 // AccountEncodeStr account encode noise
 const AccountEncodeStr string = "yrgb$"
 
 // RedisURL cache server address
-const RedisURL string = "192.168.1.15:6379"
+const RedisURL string = "192.168.1.14:6379"
+
+// GameResultURL gamelogic server API URL
+const GameResultURL = "http://192.168.1.146:9781/api/entry"
 
 // CacheDeleteTime cache keep time
 const CacheDeleteTime time.Duration = time.Hour
@@ -59,19 +62,6 @@ func init() {
 	Setting = make(map[string]interface{})
 	// NewCache()
 }
-
-// func NewCache() {
-
-// 	cache, err := cache.New(cache.Config{
-// 		RedisURL:  "redis://127.0.0.1:6379",
-// 		MustRedis: true,
-// 	})
-
-// 	CacheRef = &cache
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
 
 // ServerURL ...
 func ServerURL() string {
