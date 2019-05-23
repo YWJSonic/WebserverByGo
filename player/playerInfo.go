@@ -27,9 +27,9 @@ type PlayerInfo struct {
 // ToJSONClient ...
 func (p PlayerInfo) ToJSONClient() map[string]interface{} {
 	clientdata := make(map[string]interface{})
-	clientdata["ID"] = p.ID
-	clientdata["Money"] = p.Money
-	clientdata["GameAccount"] = p.GameAccount
+	clientdata["id"] = p.ID
+	clientdata["money"] = p.Money
+	clientdata["gameaccount"] = p.GameAccount
 	return clientdata
 }
 
