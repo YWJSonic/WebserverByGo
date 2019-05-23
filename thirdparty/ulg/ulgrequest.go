@@ -30,8 +30,9 @@ import (
 // NewULGInfo New ULGInfo
 func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
-		PlayerID:  playerid,
-		GameToken: gametoken,
+		PlayerID:     playerid,
+		GameToken:    gametoken,
+		AccountToken: accounttoken,
 	}
 	err := db.NewULGInfoRow(playerid, gametoken, accounttoken)
 	if err.ErrorCode != code.OK {
@@ -66,7 +67,6 @@ func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 		ulginfo = MakeULGInfo(ulginfomap[0])
 
 	} else {
-		fmt.Println("ULGJsStr:", string(ULGJsStr.([]byte)))
 		if errMsg := json.Unmarshal(ULGJsStr.([]byte), &ulginfo); errMsg != nil {
 			errorlog.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
 			err.ErrorCode = code.ULGInfoFormatError
@@ -150,7 +150,6 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 	}
 	jsbyte := foundation.HTTPPostRequest(getuserURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
-		fmt.Println(string(jsbyte))
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
 	}
@@ -226,7 +225,6 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 		"lost":       {totalost},
 	}
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
-	fmt.Println("jsbyte:", string(jsbyte))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"

@@ -205,7 +205,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
-	accountToken := foundation.InterfaceToString(postData["accounttoken"])
+	// accountToken := foundation.InterfaceToString(postData["accounttoken"])
 
 	err := errorlog.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
@@ -247,7 +247,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	var ulgCheckOutResult ulg.UlgCheckOutResult
-	ulgCheckOutResult, err = ulg.Checkout(accountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+	ulgCheckOutResult, err = ulg.Checkout(ulginfo.AccountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
 		foundation.HTTPResponse(w, "", err)
 		return
