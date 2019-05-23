@@ -31,20 +31,20 @@ func (ulg ULGInfo) ToJSONStr() string {
 
 // UlgResult plant ULG API Result
 type UlgResult struct {
-	Result        int           `json:"result"`
-	AccountID     int64         `json:"userID"`
-	Status        int           `json:"status"` // 0: empty 1:exchange 2:checkout
-	AccountName   string        `json:"accountName"`
-	ErrorMsg      string        `json:"errorMsg"`
-	UserName      string        `json:"userName"`   // not use, give default value
-	AccountToken  string        `json:"token"`      // for plant token
-	GameToken     string        `json:"game_token"` // for game token
-	UserPhone     string        `json:"userPhone"`
-	GameCoin      int64         `json:"gameCoin"`
-	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota"`
-	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting"`
-	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo"`
-	CheckOutCoin  AmountCoin    `json:"amountCoin,AmountCoin"`
+	Result        int           `json:"result,omitempty"`
+	AccountID     int64         `json:"userID,omitempty"`
+	Status        int           `json:"status,omitempty"` // 0: empty 1:exchange 2:checkout
+	AccountName   string        `json:"accountName,omitempty"`
+	ErrorMsg      string        `json:"errorMsg,omitempty"`
+	UserName      string        `json:"userName,omitempty"`   // not use, give default value
+	AccountToken  string        `json:"token,omitempty"`      // for plant token
+	GameToken     string        `json:"game_token,omitempty"` // for game token
+	UserPhone     string        `json:"userPhone,omitempty"`
+	GameCoin      int64         `json:"gameCoin,omitempty"`
+	UserCoinQuota []CoinQuota   `json:"userCoinQuota,CoinQuota,omitempty"`
+	Coinsetting   []CoinSetting `json:"coinsetting,CoinSetting,omitempty"`
+	GameInfo      []CoinInfo    `json:"gameInfo,CoinInfo,omitempty"`
+	// CheckOutCoin  AmountCoin    `json:"amountCoin,AmountCoin,omitempty"`
 }
 
 // UlgCheckOutResult Ulg check result
@@ -84,18 +84,26 @@ type CoinInfo struct {
 
 // CoinQuota ulg user CoinQuota
 type CoinQuota struct {
-	CoinType string `json:"type"`
+	CoinType string `json:"type,omitempty"`
 	Amount   int64  `json:"amount"`
 
-	Coin1Out     int64 `json:"coin1_out"`
-	Coin2Out     int64 `json:"coin2_out"`
-	Coin3Out     int64 `json:"coin3_out"`
-	Coin4Out     int64 `json:"coin4_out"`
-	Betting      int64 `json:"betting"`
-	Win          int64 `json:"win"`
-	Lost         int64 `json:"lost"`
-	OutboundTime int64 `json:"outbound_time"`
-	Status       int   `json:"status"`
+	Coin1Out     int64 `json:"coin1_out,omitempty"`
+	Coin2Out     int64 `json:"coin2_out,omitempty"`
+	Coin3Out     int64 `json:"coin3_out,omitempty"`
+	Coin4Out     int64 `json:"coin4_out,omitempty"`
+	Betting      int64 `json:"betting,omitempty"`
+	Win          int64 `json:"win,omitempty"`
+	Lost         int64 `json:"lost,omitempty"`
+	OutboundTime int64 `json:"outbound_time,omitempty"`
+	Status       int   `json:"status,omitempty"`
+}
+
+// ToJSONClient ...
+func (c CoinQuota) ToJSONClient() map[string]interface{} {
+	result := make(map[string]interface{})
+	result["cointype"] = c.CoinType
+	result["amount"] = c.Amount
+	return result
 }
 
 // CoinSetting ulg CoinSetting

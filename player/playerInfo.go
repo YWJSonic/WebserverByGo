@@ -18,23 +18,19 @@ type PlayerInfo struct {
 	GameAccount string `json:"GameAccount"`
 
 	///////// for Server value
-	GameToken     string `json:"GameToken"`
-	InRoom        int    `json:"InRoom"`        // room index
-	LastCheckTime int64  `json:"LastCheckTime"` // connect check time
-	InGame        string `json:"InGame"`        // gametype
+	GameToken     string `json:"GameToken,omitempty"`
+	InRoom        int    `json:"InRoom,omitempty"`        // room index
+	LastCheckTime int64  `json:"LastCheckTime,omitempty"` // connect check time
+	InGame        string `json:"InGame,omitempty"`        // gametype
 }
 
 // ToJSONClient ...
-func (p PlayerInfo) ToJSONClient() string {
+func (p PlayerInfo) ToJSONClient() map[string]interface{} {
 	clientdata := make(map[string]interface{})
 	clientdata["ID"] = p.ID
 	clientdata["Money"] = p.Money
 	clientdata["GameAccount"] = p.GameAccount
-
-	data, _ := json.MarshalIndent(clientdata, "", " ")
-	STR := string(data)
-	STR = strings.ReplaceAll(STR, string(10), ``)
-	return STR
+	return clientdata
 }
 
 // ToJSONStr ...

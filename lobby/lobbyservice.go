@@ -119,7 +119,10 @@ func reflash(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	foundation.HTTPResponse(w, UserInfo.UserCoinQuota, err)
+	result := make(map[string]interface{})
+	result["usercoinquota"] = UserInfo.UserCoinQuota
+
+	foundation.HTTPResponse(w, result, err)
 }
 
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -195,6 +198,10 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.IValue3 = ulgResult.GameCoin
 	log.SaveLog(loginfo)
 
+	result := make(map[string]interface{})
+	result["result"] = 1
+	result["gameCoin"] = ulgResult.UserCoinQuota
+
 	foundation.HTTPResponse(w, ulgResult, err)
 }
 
@@ -265,5 +272,8 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerInfo.GameToken = ""
 	player.SavePlayerInfo(playerInfo)
 
-	foundation.HTTPResponse(w, ulgCheckOutResult, err)
+	result := make(map[string]interface{})
+	result["usercoinquota"] = ulgCheckOutResult
+
+	foundation.HTTPResponse(w, result, err)
 }
