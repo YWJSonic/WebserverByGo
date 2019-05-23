@@ -67,8 +67,8 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 
 		iPratyAccount = &UserInfo
-		result["partyinfo"] = UserInfo.UserCoinQuota
-		result["gameInfo"] = UserInfo.GameInfo
+		result["UserCoinQuota"] = UserInfo.UserCoinQuota
+		result["GameInfo"] = UserInfo.GameInfo
 	default:
 		errorlog.ErrorLogPrintln("logintype Error", logintype, gametypeid, postData)
 	}

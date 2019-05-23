@@ -31,7 +31,7 @@ func HTTPGet(ip string, values map[string][]string) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	errorlog.LogPrintf("%s", result)
+	errorlog.LogPrintf("%s\n", result)
 	return result
 }
 
