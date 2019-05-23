@@ -30,7 +30,7 @@ func ServiceStart() []foundation.RESTfulURL {
 	isInit = true
 
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/init", Fun: gameinit, ConnType: foundation.Client})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/reflash", Fun: reflash, ConnType: foundation.Client})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/refrash", Fun: refrash, ConnType: foundation.Client})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/exchange", Fun: exchange, ConnType: foundation.Client})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "lobby/checkout", Fun: checkout, ConnType: foundation.Client})
 	return HandleURL
@@ -92,7 +92,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	foundation.HTTPResponse(w, result, err)
 }
 
-func reflash(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func refrash(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
 	err := errorlog.New()
