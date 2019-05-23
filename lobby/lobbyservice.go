@@ -120,7 +120,7 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	result := make(map[string]interface{})
-	result["usercoinquota"] = UserInfo.UserCoinQuota
+	result["userCoinQuota"] = UserInfo.UserCoinQuota
 
 	foundation.HTTPResponse(w, result, err)
 }
