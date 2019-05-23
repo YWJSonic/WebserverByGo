@@ -273,7 +273,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SavePlayerInfo(playerInfo)
 
 	result := make(map[string]interface{})
-	result["usercoinquota"] = ulgCheckOutResult
+	result["userCoinQuota"] = ulgCheckOutResult.UserCoinQuota
 
 	foundation.HTTPResponse(w, result, err)
 }

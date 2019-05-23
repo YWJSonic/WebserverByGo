@@ -87,11 +87,11 @@ type CoinQuota struct {
 	CoinType string `json:"type,omitempty"`
 	Amount   int64  `json:"amount"`
 
-	Coin1Out     int64 `json:"coin1_out,omitempty"`
-	Coin2Out     int64 `json:"coin2_out,omitempty"`
-	Coin3Out     int64 `json:"coin3_out,omitempty"`
-	Coin4Out     int64 `json:"coin4_out,omitempty"`
-	Betting      int64 `json:"betting,omitempty"`
+	Coin1Out     int64 `json:"coin1_out"`
+	Coin2Out     int64 `json:"coin2_out"`
+	Coin3Out     int64 `json:"coin3_out"`
+	Coin4Out     int64 `json:"coin4_out"`
+	Betting      int64 `json:"betting"`
 	Win          int64 `json:"win,omitempty"`
 	Lost         int64 `json:"lost,omitempty"`
 	OutboundTime int64 `json:"outbound_time,omitempty"`
