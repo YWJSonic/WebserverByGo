@@ -170,5 +170,6 @@ func addHeader(w *http.ResponseWriter) {
 func maintain(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	err := errorlog.New()
 	err.ErrorCode = code.Maintain
+	err.Msg = "Maintain"
 	HTTPResponse(w, "", err)
 }
