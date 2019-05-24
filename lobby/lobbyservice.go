@@ -156,12 +156,12 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	if playerInfo.GameToken != "" {
-		err.ErrorCode = code.NoCheckoutError
-		err.Msg = "NoCheckoutError"
-		foundation.HTTPResponse(w, "", err)
-		return
-	}
+	// if playerInfo.GameToken != "" {
+	// 	err.ErrorCode = code.NoCheckoutError
+	// 	err.Msg = "NoCheckoutError"
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	return
+	// }
 
 	// new thirdparty token
 	ulguser, err := ulg.Authorized(accountToken, gametypeid)
@@ -186,7 +186,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	OldMoney := playerInfo.Money
-	playerInfo.Money = playerInfo.Money + ulgResult.GameCoin
+	playerInfo.Money = ulgResult.GameCoin
 	playerInfo.GameToken = ulguser.GameToken
 	player.SavePlayerInfo(playerInfo)
 	db.SetExchange(playerInfo.GameAccount, playerInfo.GameToken, cointype, coinamount, playerInfo.Money, OldMoney, foundation.ServerNowTime())
