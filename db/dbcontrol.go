@@ -35,6 +35,9 @@ var WriteGameChan chan sqlQuary
 // WritePayChan channel for write pay db
 var WritePayChan chan sqlQuary
 
+// UseChanQueue use other goruting to write/update.
+var UseChanQueue = false
+
 // SetDBConn init value
 func SetDBConn() {
 	QueryLogChan = make(chan string)

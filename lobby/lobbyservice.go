@@ -198,10 +198,6 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.IValue3 = ulgResult.GameCoin
 	log.SaveLog(loginfo)
 
-	result := make(map[string]interface{})
-	result["result"] = 1
-	result["gameCoin"] = ulgResult.UserCoinQuota
-
 	foundation.HTTPResponse(w, ulgResult, err)
 }
 

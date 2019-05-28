@@ -29,9 +29,12 @@ func NewAccount(args ...interface{}) { //errorlog.ErrorMsg {
 		Quary: makeProcedureQueryStr("AccountNew_Write", len(args)),
 		Args:  args,
 	}
-	go func() {
-		WriteGameChan <- qu
-	}()
+
+	if UseChanQueue {
+		go func() { WriteGameChan <- qu }()
+	} else {
+		CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
+	}
 }
 
 // UpdateAccount update
@@ -85,9 +88,12 @@ func UpdatePlayerInfo(args ...interface{}) {
 		Quary: makeProcedureQueryStr("GameAccountSet_Update", len(args)),
 		Args:  args,
 	}
-	go func() {
-		WriteGameChan <- qu
-	}()
+
+	if UseChanQueue {
+		go func() { WriteGameChan <- qu }()
+	} else {
+		CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
+	}
 }
 
 // third party request
@@ -147,7 +153,11 @@ func SetLog(Account string, PlayerID, Time int64, ActivityEvent int, IValue1, IV
 	TableName := foundation.ServerNow().Format("20060102")
 	query := fmt.Sprintf("INSERT INTO `%s` VALUE(NULL,\"%s\",%d,%d, %d, %d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\");", TableName, Account, PlayerID, Time, ActivityEvent, IValue1, IValue2, IValue3, SValue1, SValue2, SValue3, Msg)
 
-	go func() { QueryLogChan <- query }()
+	if UseChanQueue {
+		go func() { QueryLogChan <- query }()
+	} else {
+		CallWrite(logDBSQL.DB, query)
+	}
 }
 
 /////////////////		Pay DB		////////////////
@@ -158,5 +168,10 @@ func SetExchange(args ...interface{}) {
 		Quary: makeProcedureQueryStr("ExchangeNew_Write", len(args)),
 		Args:  args,
 	}
-	go func() { WritePayChan <- qu }()
+
+	if UseChanQueue {
+		go func() { WritePayChan <- qu }()
+	} else {
+		CallWrite(payDBSQL.DB, qu.Quary, qu.Args...)
+	}
 }
