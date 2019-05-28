@@ -8,6 +8,7 @@ import (
 	"../../code"
 	"../../crontab"
 	"../../data"
+	"../../db"
 	"../../foundation"
 	"../../messagehandle/errorlog"
 	"../../mycache"
@@ -88,6 +89,8 @@ func MaintainCheckout() {
 
 		mycache.ClearAllCache()
 	}
+
+	db.ULGMaintainCheckOutUpdate()
 }
 
 // ClearAllCache clear all cache data

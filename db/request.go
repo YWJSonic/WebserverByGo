@@ -128,6 +128,13 @@ func ULGMaintainCheckoutRow() ([]map[string]interface{}, errorlog.ErrorMsg) {
 	return result, err
 }
 
+// ULGMaintainCheckOutUpdate ...
+func ULGMaintainCheckOutUpdate() errorlog.ErrorMsg {
+	_, err := CallReadOutMap(gameBDSQL.DB, "ULGMaintainCheckOutSet_Update")
+	return err
+
+}
+
 /////////////////		Log DB		/////////////////
 
 // NewLogTable Create new LogTable if table alerady exists return FailedPrecondition Error
