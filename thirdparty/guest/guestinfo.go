@@ -1,8 +1,8 @@
 package guest
 
 import (
-	"../../foundation"
-	"../../player"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/player"
 )
 
 // GuestInfo ...

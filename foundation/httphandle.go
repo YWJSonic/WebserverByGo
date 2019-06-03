@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 
-	"../code"
-	"../data"
-	"../messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"github.com/julienschmidt/httprouter"
 )
 

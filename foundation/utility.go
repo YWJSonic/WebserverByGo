@@ -7,10 +7,10 @@ import (
 	"math/rand"
 	"time"
 
-	"../code"
-	"../data"
-	"../messagehandle/errorlog"
-	"../mycache"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/mycache"
 )
 
 // DeleteArrayElement ...

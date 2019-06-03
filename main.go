@@ -1,16 +1,16 @@
 package main
 
 import (
-	_ "./crontab"
-	"./data"
-	"./db"
-	"./event"
-	"./foundation"
-	"./game"
-	"./lobby"
-	"./login"
-	"./service/api"
 	_ "github.com/go-sql-driver/mysql"
+	_ "gitlab.com/WeberverByGo/crontab"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/event"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game"
+	"gitlab.com/WeberverByGo/lobby"
+	"gitlab.com/WeberverByGo/login"
+	"gitlab.com/WeberverByGo/service/api"
 )
 
 func main() {

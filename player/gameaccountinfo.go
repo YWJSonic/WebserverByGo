@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"../foundation"
+	"gitlab.com/WeberverByGo/foundation"
 )
 
 // Account Type

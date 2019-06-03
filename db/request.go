@@ -3,18 +3,68 @@ package db
 import (
 	"fmt"
 
-	"../code"
-	"../foundation"
-	"../messagehandle/errorlog"
 	"github.com/go-sql-driver/mysql"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 // GetSetting get db setting
-func GetSetting() {
-	_, err := CallRead("SettingGet_Read")
-	if err.ErrorCode != code.OK {
-		panic(err.Msg)
+func GetSetting() ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "SettingGet_Read")
+	return result, err
+}
+
+// GetSettingKey get db setting
+func GetSettingKey(key string) ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "SettingKeyGet_Read", key)
+	return result, err
+}
+
+// NewSetting ...
+func NewSetting(args ...interface{}) {
+	qu := sqlQuary{
+		Quary: makeProcedureQueryStr("SettingNew_Write", len(args)),
+		Args:  args,
 	}
+
+	if UseChanQueue {
+		go func() { WriteGameChan <- qu }()
+	} else {
+		CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
+	}
+}
+
+// UpdateSetting ...
+func UpdateSetting(args ...interface{}) errorlog.ErrorMsg {
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("SettomgSet_Update", len(args)), args...)
+	return err
+}
+
+// GetAttachKind get db attach kind
+func GetAttachKind(playerid int64, kind int64) ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "AttachKindGet_Read", playerid, kind)
+	return result, err
+}
+
+// NewAttach ...
+func NewAttach(args ...interface{}) {
+	qu := sqlQuary{
+		Quary: makeProcedureQueryStr("AttachNew_Write", len(args)),
+		Args:  args,
+	}
+
+	if UseChanQueue {
+		go func() { WriteGameChan <- qu }()
+	} else {
+		CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
+	}
+}
+
+// UpdateAttach ...
+func UpdateAttach(args ...interface{}) errorlog.ErrorMsg {
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("AttachSet_Update", len(args)), args...)
+	return err
 }
 
 // GetAccountInfo Check Account existence and get
@@ -78,7 +128,6 @@ func GetPlayerInfoByGameAccount(GameAccount string) ([]map[string]interface{}, e
 // GetPlayerInfoByPlayerID ...
 func GetPlayerInfoByPlayerID(PlayerID int64) (interface{}, errorlog.ErrorMsg) {
 	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", PlayerID)
-
 	return result, err
 }
 

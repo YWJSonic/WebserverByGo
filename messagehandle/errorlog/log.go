@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"../../code"
+	"gitlab.com/WeberverByGo/code"
 )
 
 // IsAddTimeFlag log title add time flag

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"../data"
+	"gitlab.com/WeberverByGo/data"
 )
 
 // CachePlayer memory cache player

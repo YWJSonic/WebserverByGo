@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"../data"
-	"../messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"github.com/gomodule/redigo/redis"
 )
 

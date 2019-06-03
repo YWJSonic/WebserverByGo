@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"../code"
-	"../data"
-	"../messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 // SetToken ...
@@ -84,13 +84,38 @@ func ClearAllCache() {
 // third party request
 
 // SetULGInfo Set ULG info
-func SetULGInfo(key string, value interface{}) {
+func SetULGInfo(playerid int64, value interface{}) {
+	key := fmt.Sprintf("ULG%d", playerid)
 	runSet(key, value, data.CacheDeleteTime)
 }
 
 // GetULGInfoCache Get ULG info
-func GetULGInfoCache(key string) interface{} {
+func GetULGInfoCache(gametoken string) interface{} {
 	err := errorlog.New()
+	info, errMsg := get(gametoken)
+
+	if errMsg != nil {
+		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", gametoken)
+		err.ErrorCode = code.FailedPrecondition
+		err.Msg = fmt.Sprintln(errMsg)
+		return nil
+	}
+
+	return info
+}
+
+// game info per each player
+
+// SetGameInfo ...
+func SetGameInfo(playerid int64, value interface{}) {
+	key := fmt.Sprintf("gameinfo%d", playerid)
+	runSet(key, value, data.CacheDeleteTime)
+}
+
+// GetGameInfo game data request
+func GetGameInfo(playerid int64) interface{} {
+	err := errorlog.New()
+	key := fmt.Sprintf("gameinfo%d", playerid)
 	info, errMsg := get(key)
 
 	if errMsg != nil {

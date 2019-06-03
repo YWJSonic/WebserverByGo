@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"../../code"
-	"../../db"
-	"../../foundation"
-	"../../messagehandle/errorlog"
-	"../../mycache"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/mycache"
 )
 
 /////// API interface process
@@ -38,7 +38,7 @@ func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, error
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
-	mycache.SetULGInfo(gametoken, info.ToJSONStr())
+	mycache.SetULGInfo(playerid, info.ToJSONStr())
 	return &info, err
 }
 
@@ -118,7 +118,7 @@ func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
 
 // SaveULGInfo ...
 func SaveULGInfo(Info *ULGInfo) {
-	mycache.SetULGInfo(fmt.Sprintf("ULG%d", Info.PlayerID), Info.ToJSONStr())
+	mycache.SetULGInfo(Info.PlayerID, Info.ToJSONStr())
 	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, Info.IsCheckOut)
 }
 

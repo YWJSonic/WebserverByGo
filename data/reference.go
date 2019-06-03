@@ -3,8 +3,6 @@ package data
 import (
 	"fmt"
 	"time"
-
-	"../cache"
 )
 
 // MaintainStartTime cron maintain schedule
@@ -53,7 +51,7 @@ const ConnectTimeOut int64 = 15e9
 var Maintain = false
 
 // CacheRef old cache not used
-var CacheRef *cache.Cache
+// var CacheRef *cache.Cache
 
 // Setting settint from db data
 var Setting map[string]interface{}

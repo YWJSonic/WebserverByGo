@@ -1,8 +1,8 @@
 package crontab
 
 import (
-	"../data"
 	"github.com/robfig/cron"
+	"gitlab.com/WeberverByGo/data"
 )
 
 func init() {

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"../../foundation"
-	"../../player"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/player"
 )
 
 // ULGInfo plant ULG game play data
