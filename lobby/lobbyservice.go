@@ -89,7 +89,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
-	result["scroll"] = game.GetInitScroll()
+	result["reel"] = game.GetInitScroll()
 	result["betrate"] = game.GetBetRate()
 
 	foundation.HTTPResponse(w, result, err)
@@ -100,7 +100,7 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 	err := errorlog.New()
 	postData := foundation.PostData(r)
-
+	//
 	// logintype := foundation.InterfaceToInt(postData["logintype"])
 	// if logintype != account.Ulg {
 	// 	err.ErrorCode = code.AccountTypeError
