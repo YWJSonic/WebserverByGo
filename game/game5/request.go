@@ -85,15 +85,15 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, map[string]in
 	if isFreeGameCount(plate) {
 		freecount++
 		if freecount >= freeGameTrigger {
-			result["isfreegame"] = 1
-			result["freecount"] = 0
+			otherdata["isfreegame"] = 1
+			otherdata["freecount"] = 0
 		} else {
-			result["freecount"] = freecount
+			otherdata["freecount"] = freecount
 		}
 	}
 
 	if isRespin(plate) {
-		result["isrespin"] = 1
+		otherdata["isrespin"] = 1
 	}
 
 	if len(gameresult) > 0 {
