@@ -40,20 +40,20 @@ func Result(BetIndex int64, FreeCount int) interface{} {
 	Bet := betRate[BetIndex]
 
 	fmt.Println("----")
-	normalresult, normaltotalwin := outputGame(Bet, FreeCount)
-
-	totalWin += normaltotalwin
+	normalresult, otherdata, normaltotalwin := outputGame(Bet, FreeCount)
+	result = otherdata
 	result["normalresult"] = normalresult
+	totalWin += normaltotalwin
 
-	if normalresult["isfreegame"].(int) == 1 {
-		fmt.Println("----")
+	if otherdata["isfreegame"].(int) == 1 {
+		result["isfreegame"] = 1
 		freeresult, freetotalwin := outputFreeSpin()
 		totalWin += freetotalwin
 		result["freegame"] = freeresult
 
 	}
-	if normalresult["isrespin"].(int) == 1 {
-		fmt.Println("----")
+	if otherdata["isrespin"].(int) == 1 {
+		result["isrespin"] = 1
 		respinresult, respintotalwin := outRespin()
 		totalWin += respintotalwin
 		result["respin"] = respinresult
@@ -64,19 +64,21 @@ func Result(BetIndex int64, FreeCount int) interface{} {
 	return result
 }
 
-func outputGame(bet int64, freecount int) (map[string]interface{}, int64) {
+func outputGame(bet int64, freecount int) (map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
+	otherdata := make(map[string]interface{})
 	result := make(map[string]interface{})
 
 	ScrollIndex, plate := newPlate(scrollSize, normalScroll)
 	gameresult := winresultArray(plate)
 	fmt.Println(ScrollIndex, plate, gameresult)
 
+	otherdata["isfreegame"] = 0
+	otherdata["freecount"] = freecount
+	otherdata["isrespin"] = 0
+
 	result["plateindex"] = ScrollIndex
 	result["plate"] = plate
-	result["isfreegame"] = 0
-	result["freecount"] = freecount
-	result["isrespin"] = 0
 	result["scores"] = 0
 	result["islink"] = 0
 
@@ -100,7 +102,7 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, int64) {
 		result["islink"] = 1
 	}
 
-	return result, foundation.InterfaceToInt64(result["scores"])
+	return result, otherdata, foundation.InterfaceToInt64(result["scores"])
 }
 
 func outputFreeSpin() ([]interface{}, int64) {

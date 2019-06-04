@@ -27,8 +27,7 @@ func gameRequest(BetIndex int64) (map[string]interface{}, int64) {
 	gameinfo := getGameInfo(1, gameRules.GameIndex())
 	result := gameRules.Result(BetIndex, gameinfo.FreeCount)
 
-	normalresult := result.(map[string]interface{})["normalresult"]
-	gameinfo.FreeCount = foundation.InterfaceToInt(normalresult.(map[string]interface{})["freecount"])
+	gameinfo.FreeCount = foundation.InterfaceToInt(result.(map[string]interface{})["freecount"])
 	saveGameInfo(1, gameRules.GameIndex(), gameinfo)
 	return result.(map[string]interface{}), foundation.InterfaceToInt64(result.(map[string]interface{})["totalwinscore"])
 }
