@@ -33,10 +33,9 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 
 	var result = make(map[string]interface{})
-	var BetMoney int64 = 20
-	// postData := foundation.PostData(r)
+	postData := foundation.PostData(r)
 	// gametoken := foundation.InterfaceToString(postData["token"])
-	// BetMoney := foundation.InterfaceToInt64(postData["bet"])
+	BetIndex := foundation.InterfaceToInt64(postData["bet"])
 
 	// gametype check
 	err := errorlog.New()
@@ -65,7 +64,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// 	return
 	// }
 
-	result = gameRequest(BetMoney)
+	result = gameRequest(BetIndex)
 
 	// loginfo := log.New(log.GameResult)
 	// loginfo.PlayerID = playerid

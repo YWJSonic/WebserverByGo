@@ -24,7 +24,6 @@ func GetBetRate() interface{} {
 
 // GameRequest ...
 func gameRequest(BetIndex int64) map[string]interface{} {
-
 	gameinfo := getGameInfo(1, gameRules.GameIndex())
 	result := gameRules.Result(BetIndex, gameinfo.FreeCount)
 
