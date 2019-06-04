@@ -32,7 +32,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	var result = make(map[string]interface{})
+	// var result = make(map[string]interface{})
 	postData := foundation.PostData(r)
 	// gametoken := foundation.InterfaceToString(postData["token"])
 	BetIndex := foundation.InterfaceToInt64(postData["bet"])
@@ -64,8 +64,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// 	return
 	// }
 
-	result = gameRequest(BetIndex)
-
+	result, totalwinscore := gameRequest(BetIndex)
+	result["playermoney"] = totalwinscore
 	// loginfo := log.New(log.GameResult)
 	// loginfo.PlayerID = playerid
 	// loginfo.IValue1 = int64(WinBet * BetMoney)
