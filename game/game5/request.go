@@ -26,9 +26,9 @@ func BetRate() interface{} {
 // Scroll ...
 func Scroll() interface{} {
 	scrollmap := map[string][][]int{
-		"normalscroll": normalScroll,
-		"freescroll":   freeScroll,
-		"respinscroll": {respuinScroll()},
+		"normalreel": normalScroll,
+		"freereel":   freeScroll,
+		"respinreel": {respuinScroll()},
 	}
 	return scrollmap
 }
