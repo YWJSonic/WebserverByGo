@@ -6,7 +6,7 @@ import (
 )
 
 type gameInfo struct {
-	FreeCount int64 `json:"freecount"`
+	FreeCount int `json:"freecount"`
 }
 
 // ToJSONStr ...

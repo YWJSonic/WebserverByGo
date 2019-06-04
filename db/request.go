@@ -63,7 +63,7 @@ func NewAttach(args ...interface{}) {
 
 // UpdateAttach ...
 func UpdateAttach(args ...interface{}) errorlog.ErrorMsg {
-	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("AttachSet_Update", len(args)), args...)
+	_, err := CallWrite(gameBDSQL.DB, makeProcedureQueryStr("AttachGame5Set_Update", len(args)), args...)
 	return err
 }
 

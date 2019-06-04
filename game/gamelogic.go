@@ -2,7 +2,8 @@ package game
 
 import (
 	"encoding/json"
-	"fmt"
+
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
@@ -11,69 +12,26 @@ import (
 	"gitlab.com/WeberverByGo/mycache"
 )
 
-func outputGame(freecount int) (map[string]interface{}, int64) {
-	var result map[string]interface{}
-	var totalScores int64
-
-	ScrollIndex, plate, otherdata := gameRules.NoprmalPlate()
-	gr := gameRules.GameResult(plate)
-	fmt.Println(ScrollIndex, plate, gr, otherdata)
-
-	result["plateindex"] = ScrollIndex
-	result["plate"] = plate
-	result["freecount"] = freecount + otherdata[1]
-	result["isrespin"] = otherdata[0] == 1
-	result["isfreegame"] = foundation.InterfaceToInt(result["freecount"]) > gameRules.FreeGameTrigger
-
-	result["scores"] = 0
-	if len(gr) > 0 {
-		result["scores"] = gr[0][2]
-		totalScores += foundation.InterfaceToInt64(result["scores"])
-	}
-
-	return result, int64(gr[0][2])
+// GetInitScroll ...
+func GetInitScroll() interface{} {
+	return gameRules.Scroll()
 }
 
-func outputFreeSpin() ([]interface{}, int64) {
-	var result []interface{}
-	var totalScores int64
-
-	for i, max := 0, 5; i < max; i++ {
-		var freeresult map[string]interface{}
-		ScrollIndex, plate, otherdata := gameRules.FreePlate()
-		gr := gameRules.GameResult(plate)
-		fmt.Println(ScrollIndex, plate, gr, otherdata)
-
-		freeresult["plateindex"] = ScrollIndex
-		freeresult["plate"] = plate
-		freeresult["scores"] = 0
-		if len(gr) > 0 {
-			freeresult["scores"] = gr[0][2]
-			totalScores += foundation.InterfaceToInt64(freeresult["scores"])
-		}
-
-		result = append(result, freeresult)
-	}
-	return result, totalScores
+// GetBetRate ...
+func GetBetRate() interface{} {
+	return gameRules.BetRate()
 }
 
-func outRespin() (map[string]interface{}, int64) {
-	var result map[string]interface{}
-	var totalscores int64
+// GameRequest ...
+func gameRequest(BetIndex int64) map[string]interface{} {
 
-	ScrollIndex, plate, otherdata := gameRules.RespinPlate()
-	gr := gameRules.RespinResult(plate)
-	fmt.Println(ScrollIndex, plate, gr, otherdata)
+	gameinfo := getGameInfo(1, gameRules.GameIndex())
+	result := gameRules.Result(BetIndex, gameinfo.FreeCount)
 
-	result["plateindex"] = ScrollIndex
-	result["plate"] = plate
-	result["scores"] = 0
-	if len(gr) > 0 {
-		result["scores"] = gr[0][1]
-		totalscores += foundation.InterfaceToInt64(result["scores"])
-	}
-
-	return result, totalscores
+	normalresult := result.(map[string]interface{})["normalresult"]
+	gameinfo.FreeCount = foundation.InterfaceToInt(normalresult.(map[string]interface{})["freecount"])
+	saveGameInfo(1, gameRules.GameIndex(), gameinfo)
+	return result.(map[string]interface{})
 }
 
 // 0:free game count
@@ -85,14 +43,18 @@ func getGameInfo(playerID int64, gameIndex int64) gameInfo {
 		row, err := db.GetAttachKind(playerID, gameIndex)
 
 		if len(row) > 0 && err.ErrorCode == code.OK {
+			// db data
 			info = toGameInfo(row)
 		} else {
 
+			// new data
 			db.NewAttach(playerID, gameIndex, 0, 0)
 			info = newGameInfo()
 		}
 	} else {
+		// cache data
 		if errMsg := json.Unmarshal(gameinfo.([]byte), &info); errMsg != nil {
+			errorlog.ErrorLogPrintln("GameLogic", playerID, gameIndex, string(gameinfo.([]byte)))
 			info = newGameInfo()
 		}
 	}
@@ -113,7 +75,7 @@ func toGameInfo(rows []map[string]interface{}) gameInfo {
 	for _, row := range rows {
 		switch foundation.InterfaceToInt64(row["Type"]) {
 		case 0:
-			info.FreeCount = foundation.InterfaceToInt64(row["IValue"])
+			info.FreeCount = foundation.InterfaceToInt(row["IValue"])
 		}
 	}
 	return info

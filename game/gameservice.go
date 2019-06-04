@@ -1,12 +1,10 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
 	"gitlab.com/WeberverByGo/foundation"
-	gameRules "gitlab.com/WeberverByGo/game/game5"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
 	"github.com/julienschmidt/httprouter"
@@ -35,6 +33,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 
 	var result = make(map[string]interface{})
+	var BetMoney int64 = 20
 	// postData := foundation.PostData(r)
 	// gametoken := foundation.InterfaceToString(postData["token"])
 	// BetMoney := foundation.InterfaceToInt64(postData["bet"])
@@ -66,17 +65,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// 	return
 	// }
 
-	gameinfo := getGameInfo(1, gameRules.GameIndex)
-
-	fmt.Println("----")
-	outputGame(int(gameinfo.FreeCount))
-	fmt.Println("----")
-	outputFreeSpin()
-	fmt.Println("----")
-	outRespin()
-	gameinfo.FreeCount++
-
-	saveGameInfo(1, gameRules.GameIndex, gameinfo)
+	result = gameRequest(BetMoney)
 
 	// loginfo := log.New(log.GameResult)
 	// loginfo.PlayerID = playerid

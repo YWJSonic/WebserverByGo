@@ -8,6 +8,7 @@ import (
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game"
 	"gitlab.com/WeberverByGo/log"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/player"
@@ -88,6 +89,8 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
+	result["scroll"] = game.GetInitScroll()
+	result["betrate"] = game.GetBetRate()
 
 	foundation.HTTPResponse(w, result, err)
 }
