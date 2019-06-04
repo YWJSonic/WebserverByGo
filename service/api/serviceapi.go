@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"sync"
 
-	"../../code"
-	"../../crontab"
-	"../../data"
-	"../../db"
-	"../../foundation"
-	"../../messagehandle/errorlog"
-	"../../mycache"
-	"../../thirdparty/ulg"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/crontab"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/mycache"
+	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )

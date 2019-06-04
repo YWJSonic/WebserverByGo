@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"../code"
-	"../crontab"
-	"../data"
-	"../foundation"
-	"../messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/crontab"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 type sqlCLi struct {
@@ -190,7 +190,7 @@ func query(query string, args ...interface{}) ([]interface{}, errorlog.ErrorMsg)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
-		errorlog.ErrorLogPrintln("DB", errMsg, query)
+		errorlog.ErrorLogPrintln("DB", errMsg, query, args)
 		return nil, err
 	}
 
@@ -208,7 +208,7 @@ func queryOutMap(DB *sql.DB, query string, args ...interface{}) ([]map[string]in
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
-		errorlog.ErrorLogPrintln("DB", errMsg, query)
+		errorlog.ErrorLogPrintln("DB", errMsg, query, args)
 		return nil, err
 	}
 
@@ -226,7 +226,7 @@ func exec(DB *sql.DB, query string, args ...interface{}) (sql.Result, errorlog.E
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
-		errorlog.ErrorLogPrintln("DB", errMsg, query)
+		errorlog.ErrorLogPrintln("DB", errMsg, query, args)
 		return nil, err
 	}
 	return res, err

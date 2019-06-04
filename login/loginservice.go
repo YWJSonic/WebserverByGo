@@ -6,14 +6,14 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"../code"
-	"../db"
-	"../foundation"
-	"../log"
-	"../messagehandle/errorlog"
-	"../player"
-	"../thirdparty/guest"
-	"../thirdparty/ulg"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/log"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/WeberverByGo/thirdparty/guest"
+	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
 
 var isInit = false

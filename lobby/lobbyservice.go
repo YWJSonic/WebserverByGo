@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"sync"
 
-	"../code"
-	"../db"
-	"../foundation"
-	"../log"
-	"../messagehandle/errorlog"
-	"../player"
-	"../thirdparty/ulg"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game"
+	"gitlab.com/WeberverByGo/log"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -88,6 +89,8 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
+	result["scroll"] = game.GetInitScroll()
+	result["betrate"] = game.GetBetRate()
 
 	foundation.HTTPResponse(w, result, err)
 }

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"../code"
-	"../db"
-	"../foundation"
-	"../messagehandle/errorlog"
-	"../mycache"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/mycache"
 )
 
 // GetAccountInfoByGameAccount Get accountinfo struct

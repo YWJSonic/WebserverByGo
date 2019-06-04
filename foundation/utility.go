@@ -7,10 +7,10 @@ import (
 	"math/rand"
 	"time"
 
-	"../code"
-	"../data"
-	"../messagehandle/errorlog"
-	"../mycache"
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/mycache"
 )
 
 // DeleteArrayElement ...
@@ -42,7 +42,16 @@ func InterfaceTofloat64(v interface{}) float64 {
 
 // InterfaceToInt ...
 func InterfaceToInt(v interface{}) int {
-	return int(InterfaceTofloat64(v))
+	switch v.(type) {
+	case float64:
+		return int(InterfaceTofloat64(v))
+	case int:
+		return v.(int)
+	case int64:
+		return int(v.(int64))
+	default:
+		panic("Conver Error")
+	}
 }
 
 // InterfaceToInt64 ...
