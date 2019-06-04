@@ -100,7 +100,7 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 	err := errorlog.New()
 	postData := foundation.PostData(r)
-
+	//
 	// logintype := foundation.InterfaceToInt(postData["logintype"])
 	// if logintype != account.Ulg {
 	// 	err.ErrorCode = code.AccountTypeError
