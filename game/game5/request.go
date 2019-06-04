@@ -116,8 +116,11 @@ func outputFreeSpin() ([]interface{}, int64) {
 		freeresult["plateindex"] = ScrollIndex
 		freeresult["plate"] = plate
 		freeresult["scores"] = 0
+		freeresult["islink"] = 0
+
 		if len(gr) > 0 {
-			freeresult["scores"] = gr[0][2]
+			freeresult["islink"] = 1
+			freeresult["scores"] = gr[0][3]
 			totalScores += foundation.InterfaceToInt64(freeresult["scores"])
 		}
 
@@ -137,7 +140,10 @@ func outRespin() (map[string]interface{}, int64) {
 	result["plateindex"] = ScrollIndex
 	result["plate"] = plate
 	result["scores"] = 0
+	result["islink"] = 0
+
 	if len(gr) > 0 {
+		result["islink"] = 1
 		result["scores"] = gr[0][1]
 		totalscores += foundation.InterfaceToInt64(result["scores"])
 	}
