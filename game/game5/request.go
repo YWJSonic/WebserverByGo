@@ -78,6 +78,7 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, int64) {
 	result["freecount"] = freecount
 	result["isrespin"] = 0
 	result["scores"] = 0
+	result["islink"] = 0
 
 	if isFreeGameCount(plate) {
 		freecount++
@@ -96,6 +97,7 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, int64) {
 	if len(gameresult) > 0 {
 		totalScores = bet * int64(gameresult[0][3])
 		result["scores"] = totalScores
+		result["islink"] = 1
 	}
 
 	return result, foundation.InterfaceToInt64(result["scores"])
