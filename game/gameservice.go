@@ -39,6 +39,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// var result = make(map[string]interface{})
 	postData := foundation.PostData(r)
+	token := foundation.InterfaceToString(postData["token"])
 	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	betMoney := GetBetMoney(betIndex)
 
@@ -60,6 +61,13 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	// check token
+	if err = foundation.CheckToken(playerinfo.GameAccount, token); err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	// money check
 	if playerinfo.Money < betMoney {
 		err.ErrorCode = code.NoMoneyToBet
 		err.Msg = "NoMoneyToBet"
