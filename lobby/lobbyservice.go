@@ -239,7 +239,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	var ulginfo *ulg.ULGInfo
-	ulginfo, err = ulg.GetULGInfo(playerInfo.GameToken)
+	ulginfo, err = ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return

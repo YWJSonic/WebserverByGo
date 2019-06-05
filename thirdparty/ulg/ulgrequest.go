@@ -43,11 +43,11 @@ func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, error
 }
 
 // GetULGInfo ...
-func GetULGInfo(gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
+func GetULGInfo(playerid int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
 	var ulginfo *ULGInfo
 	var err errorlog.ErrorMsg
 
-	ULGJsStr := mycache.GetULGInfoCache(gametoken)
+	ULGJsStr := mycache.GetULGInfoCache(playerid)
 	// cache no data
 	if ULGJsStr == nil {
 		var ulginfomap []map[string]interface{}
