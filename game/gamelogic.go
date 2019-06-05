@@ -47,6 +47,7 @@ func gameRequest(playerID, betMoney int64) (map[string]interface{}, int64) {
 	loginfo := log.New(log.GameResult)
 	loginfo.PlayerID = playerID
 	loginfo.IValue1 = foundation.InterfaceToInt64(result["totalwinscore"])
+	loginfo.IValue2 = betMoney
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 	return result, foundation.InterfaceToInt64(result["totalwinscore"])

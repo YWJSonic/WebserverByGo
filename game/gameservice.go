@@ -54,8 +54,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// get player
-	playerid := foundation.InterfaceToInt64(postData["playerid"])
-	playerinfo, err := player.GetPlayerInfoByPlayerID(playerid)
+	playerID := foundation.InterfaceToInt64(postData["playerid"])
+	playerinfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
