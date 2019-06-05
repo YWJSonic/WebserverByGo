@@ -12,8 +12,8 @@ import (
 )
 
 // GetAccountInfoByGameAccount Get accountinfo struct
-func GetAccountInfoByGameAccount(GameAccount string) (*AccountInfo, errorlog.ErrorMsg) {
-	info, err := mycache.GetAccountInfo(GameAccount)
+func GetAccountInfoByGameAccount(gameAccount string) (*AccountInfo, errorlog.ErrorMsg) {
+	info, err := mycache.GetAccountInfo(gameAccount)
 	if info == nil {
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "NoThisGameAccount"
@@ -68,15 +68,15 @@ func SavePlayerInfo(playerInfo *PlayerInfo) {
 }
 
 // New Create a new PlayerInfo
-func New(GameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
-	playerID, err := db.NewGameAccount(GameAccount, 0, "")
+func New(gameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
+	playerID, err := db.NewGameAccount(gameAccount, 0, "")
 
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
 
 	info := PlayerInfo{
-		GameAccount: GameAccount,
+		GameAccount: gameAccount,
 		ID:          playerID,
 		Money:       0,
 	}

@@ -38,13 +38,13 @@ type AccountInfo struct {
 type PartyInfo interface{}
 
 // NewAccountInfo ...
-func NewAccountInfo(account, gameAccount string, AccountType int64) AccountInfo {
+func NewAccountInfo(account, gameAccount string, accountType int64) AccountInfo {
 	return AccountInfo{
 		Account:     account,
 		GameAccount: gameAccount,
 		Token:       foundation.NewToken(account),
 		LoginTime:   time.Now().Unix(),
-		AccountType: AccountType,
+		AccountType: accountType,
 	}
 }
 

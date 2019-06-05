@@ -34,13 +34,13 @@ func Scroll() interface{} {
 }
 
 // Result ...
-func Result(BetIndex int64, FreeCount int) interface{} {
+func Result(betIndex int64, freeCount int) interface{} {
 	var result = make(map[string]interface{})
 	var totalWin int64
-	Bet := betRate[BetIndex]
+	Bet := betRate[betIndex]
 
 	fmt.Println("----")
-	normalresult, otherdata, normaltotalwin := outputGame(Bet, FreeCount)
+	normalresult, otherdata, normaltotalwin := outputGame(Bet, freeCount)
 	result = otherdata
 	result["normalresult"] = normalresult
 	totalWin += normaltotalwin
@@ -79,7 +79,7 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, map[string]in
 	fmt.Println(ScrollIndex, plate, gameresult)
 
 	otherdata["isfreegame"] = 0
-	otherdata["freecount"] = freecount % freeGameTrigger
+	otherdata["freecount"] = freecount % FreeGameTrigger
 	otherdata["isrespin"] = 0
 
 	result["plateindex"] = ScrollIndex
@@ -89,7 +89,7 @@ func outputGame(bet int64, freecount int) (map[string]interface{}, map[string]in
 
 	if isFreeGameCount(plate) {
 		freecount++
-		if freecount >= freeGameTrigger {
+		if freecount >= FreeGameTrigger {
 			otherdata["isfreegame"] = 1
 			otherdata["freecount"] = freecount
 		} else {

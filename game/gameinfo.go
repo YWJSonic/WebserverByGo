@@ -5,13 +5,14 @@ import (
 	"strings"
 )
 
-type gameInfo struct {
+// Attach game att data
+type Attach struct {
 	FreeCount int `json:"freecount"`
 }
 
 // ToJSONStr ...
-func (p gameInfo) ToJSONStr() string {
-	data, _ := json.MarshalIndent(p, "", " ")
+func (gi Attach) ToJSONStr() string {
+	data, _ := json.MarshalIndent(gi, "", " ")
 	STR := string(data)
 	STR = strings.ReplaceAll(STR, string(10), ``)
 	return STR

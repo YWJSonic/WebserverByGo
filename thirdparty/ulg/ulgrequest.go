@@ -117,9 +117,9 @@ func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
 }
 
 // SaveULGInfo ...
-func SaveULGInfo(Info *ULGInfo) {
-	mycache.SetULGInfo(Info.PlayerID, Info.ToJSONStr())
-	db.UpdateULGInfoRow(Info.GameToken, Info.TotalBet, Info.TotalWin, Info.TotalLost, Info.IsCheckOut)
+func SaveULGInfo(info *ULGInfo) {
+	mycache.SetULGInfo(info.PlayerID, info.ToJSONStr())
+	db.UpdateULGInfoRow(info.GameToken, info.TotalBet, info.TotalWin, info.TotalLost, info.IsCheckOut)
 }
 
 // MakeULGInfo get ulg info form db

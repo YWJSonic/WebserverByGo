@@ -30,16 +30,16 @@ func CronStop() {
 }
 
 // NewCron add new fun
-func NewCron(spec string, FUN func()) {
-	c.AddFunc(spec, FUN)
+func NewCron(spec string, fun func()) {
+	c.AddFunc(spec, fun)
 }
 
 // NewCronBaseJob cron job interface
-func NewCronBaseJob(spec string, Job cron.Job) {
-	c.AddJob(spec, Job)
+func NewCronBaseJob(spec string, job cron.Job) {
+	c.AddJob(spec, job)
 }
 
 // NewCronJob add new params job
-func NewCronJob(spec string, Job *ParamsJob) {
-	c.AddJob(spec, Job)
+func NewCronJob(spec string, job *ParamsJob) {
+	c.AddJob(spec, job)
 }

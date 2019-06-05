@@ -169,16 +169,16 @@ func CallRead(name string, args ...interface{}) ([]interface{}, errorlog.ErrorMs
 }
 
 // CallReadOutMap call stored procedure
-func CallReadOutMap(DB *sql.DB, name string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
+func CallReadOutMap(db *sql.DB, name string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
 	QueryStr := makeProcedureQueryStr(name, len(args))
-	request, err := queryOutMap(DB, QueryStr, args...)
+	request, err := queryOutMap(db, QueryStr, args...)
 	return request, err
 
 }
 
 // CallWrite ...
-func CallWrite(DB *sql.DB, name string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
-	request, err := exec(DB, name, args...)
+func CallWrite(db *sql.DB, name string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
+	request, err := exec(db, name, args...)
 	return request, err
 }
 
@@ -201,10 +201,10 @@ func query(query string, args ...interface{}) ([]interface{}, errorlog.ErrorMsg)
 }
 
 // QueryOutMap Use to SELECT return array map
-func queryOutMap(DB *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
+func queryOutMap(db *sql.DB, query string, args ...interface{}) ([]map[string]interface{}, errorlog.ErrorMsg) {
 	err := errorlog.New()
 
-	res, errMsg := DB.Query(query, args...)
+	res, errMsg := db.Query(query, args...)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"
@@ -219,10 +219,10 @@ func queryOutMap(DB *sql.DB, query string, args ...interface{}) ([]map[string]in
 }
 
 // Exec Use to INSTER, UPDATE, DELETE
-func exec(DB *sql.DB, query string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
+func exec(db *sql.DB, query string, args ...interface{}) (sql.Result, errorlog.ErrorMsg) {
 	err := errorlog.New()
 
-	res, errMsg := DB.Exec(query, args...)
+	res, errMsg := db.Exec(query, args...)
 	if errMsg != nil {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "DBExecFail"

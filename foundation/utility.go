@@ -14,10 +14,10 @@ import (
 )
 
 // DeleteArrayElement ...
-func DeleteArrayElement(ElementIndex interface{}, array []interface{}) []interface{} {
+func DeleteArrayElement(elementIndex interface{}, array []interface{}) []interface{} {
 	count := len(array)
 	for index := 0; index < count; index++ {
-		if ElementIndex == array[index] {
+		if elementIndex == array[index] {
 			return append(array[:index], array[index+1:]...)
 		}
 	}
@@ -101,14 +101,14 @@ func NewGameAccount(account string) string {
 }
 
 // NewToken ...
-func NewToken(GameAccount string) string {
-	return MD5Code(fmt.Sprintf("%s%d", GameAccount, ServerNowTime()))
+func NewToken(gameAccount string) string {
+	return MD5Code(fmt.Sprintf("%s%d", gameAccount, ServerNowTime()))
 }
 
 // CheckToken Check Token func
-func CheckToken(GameAccount, token string) errorlog.ErrorMsg {
+func CheckToken(gameAccount, token string) errorlog.ErrorMsg {
 	err := errorlog.New()
-	ServerToken := mycache.GetToken(GameAccount)
+	ServerToken := mycache.GetToken(gameAccount)
 	if ServerToken != token {
 		err.ErrorCode = code.Unauthenticated
 		err.Msg = "TokenError"
@@ -117,9 +117,9 @@ func CheckToken(GameAccount, token string) errorlog.ErrorMsg {
 }
 
 // CheckGameType Check Game Type
-func CheckGameType(GameTypeID string) errorlog.ErrorMsg {
+func CheckGameType(gameTypeID string) errorlog.ErrorMsg {
 	err := errorlog.New()
-	if GameTypeID != data.GameTypeID {
+	if gameTypeID != data.GameTypeID {
 		err.ErrorCode = code.GameTypeError
 		err.Msg = "GameTypeError"
 	}
@@ -127,23 +127,23 @@ func CheckGameType(GameTypeID string) errorlog.ErrorMsg {
 }
 
 // MD5Code encode MD5
-func MD5Code(Data string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(Data)))
+func MD5Code(data string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(data)))
 }
 
 // RangeRandom array random index
-func RangeRandom(Range []int) int {
+func RangeRandom(rangeInt []int) int {
 	Sum := 0
 	rand.Seed(time.Now().UnixNano())
 
-	for _, value := range Range {
+	for _, value := range rangeInt {
 		Sum += value
 	}
 
 	random := rand.Intn(Sum)
 
 	Sum = 0
-	for i, value := range Range {
+	for i, value := range rangeInt {
 		Sum += value
 		if Sum > random {
 			return i

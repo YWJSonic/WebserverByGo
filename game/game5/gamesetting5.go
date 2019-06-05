@@ -22,7 +22,7 @@ var normalScroll = [][]int{
 }
 
 // FreeGameTrigger free count equal FreeGameTrigger free game start
-const freeGameTrigger = 10
+const FreeGameTrigger = 10
 
 // FreeScroll ...
 var freeScroll = [][]int{

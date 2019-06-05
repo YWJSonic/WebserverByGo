@@ -7,10 +7,10 @@ import (
 )
 
 // New Default log
-func New(ActivityEvent int) LogInfo {
+func New(activityEvent int) LogInfo {
 	return LogInfo{
 		Time:          time.Now().Unix(),
-		ActivityEvent: ActivityEvent,
+		ActivityEvent: activityEvent,
 	}
 }
 
