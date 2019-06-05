@@ -2,7 +2,9 @@ package game
 
 import (
 	"encoding/json"
+	"strings"
 
+	"gitlab.com/WeberverByGo/log"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
 	"gitlab.com/WeberverByGo/code"
@@ -22,17 +24,32 @@ func GetBetRate() interface{} {
 	return gameRules.BetRate()
 }
 
-// GameRequest ...
-func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
-	attach := GetAttach(playerID)
-	result := gameRules.Result(betIndex, attach.FreeCount)
+// GetBetMoney ...
+func GetBetMoney(betIndex int64) int64 {
+	betrate := gameRules.BetRate()
 
-	attach.FreeCount = foundation.InterfaceToInt(result.(map[string]interface{})["freecount"])
+	return betrate[betIndex]
+}
+
+// GameRequest ...
+func gameRequest(playerID, betMoney int64) (map[string]interface{}, int64) {
+	attach := GetAttach(playerID)
+	result := gameRules.Result(betMoney, attach.FreeCount)
+
+	attach.FreeCount = foundation.InterfaceToInt(result["freecount"])
 	if attach.FreeCount >= gameRules.FreeGameTrigger {
 		attach.FreeCount %= gameRules.FreeGameTrigger
 	}
-	saveAttach(1, gameRules.GameIndex(), attach)
-	return result.(map[string]interface{}), foundation.InterfaceToInt64(result.(map[string]interface{})["totalwinscore"])
+	saveAttach(playerID, gameRules.GameIndex(), attach)
+
+	msg := foundation.JSONToString(result)
+	msg = strings.ReplaceAll(msg, "\"", "\\\"")
+	loginfo := log.New(log.GameResult)
+	loginfo.PlayerID = playerID
+	loginfo.IValue1 = foundation.InterfaceToInt64(result["totalwinscore"])
+	loginfo.Msg = msg
+	log.SaveLog(loginfo)
+	return result, foundation.InterfaceToInt64(result["totalwinscore"])
 }
 
 // GetAttach 0:free game count
