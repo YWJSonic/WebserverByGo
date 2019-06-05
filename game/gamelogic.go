@@ -23,51 +23,55 @@ func GetBetRate() interface{} {
 }
 
 // GameRequest ...
-func gameRequest(BetIndex int64) (map[string]interface{}, int64) {
-	gameinfo := getGameInfo(1, gameRules.GameIndex())
-	result := gameRules.Result(BetIndex, gameinfo.FreeCount)
+func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
+	attach := GetAttach(playerID)
+	result := gameRules.Result(betIndex, attach.FreeCount)
 
-	gameinfo.FreeCount = foundation.InterfaceToInt(result.(map[string]interface{})["freecount"])
-	saveGameInfo(1, gameRules.GameIndex(), gameinfo)
+	attach.FreeCount = foundation.InterfaceToInt(result.(map[string]interface{})["freecount"])
+	if attach.FreeCount >= gameRules.FreeGameTrigger {
+		attach.FreeCount %= gameRules.FreeGameTrigger
+	}
+	saveAttach(1, gameRules.GameIndex(), attach)
 	return result.(map[string]interface{}), foundation.InterfaceToInt64(result.(map[string]interface{})["totalwinscore"])
 }
 
-// 0:free game count
-func getGameInfo(playerID int64, gameIndex int64) gameInfo {
-	var info gameInfo
-	gameinfo := mycache.GetGameInfo(playerID)
+// GetAttach 0:free game count
+func GetAttach(playerID int64) Attach {
+	var info Attach
+	gameIndex := gameRules.GameIndex()
+	attach := mycache.GetAttach(playerID)
 
-	if gameinfo == nil {
+	if attach == nil {
 		row, err := db.GetAttachKind(playerID, gameIndex)
 
 		if len(row) > 0 && err.ErrorCode == code.OK {
 			// db data
-			info = toGameInfo(row)
+			info = toAttach(row)
 		} else {
 
 			// new data
 			db.NewAttach(playerID, gameIndex, 0, 0)
-			info = newGameInfo()
+			info = newAttach()
 		}
 	} else {
 		// cache data
-		if errMsg := json.Unmarshal(gameinfo.([]byte), &info); errMsg != nil {
-			errorlog.ErrorLogPrintln("GameLogic", playerID, gameIndex, string(gameinfo.([]byte)))
-			info = newGameInfo()
+		if errMsg := json.Unmarshal(attach.([]byte), &info); errMsg != nil {
+			errorlog.ErrorLogPrintln("GameLogic", playerID, gameIndex, string(attach.([]byte)))
+			info = newAttach()
 		}
 	}
 
 	return info
 }
-func saveGameInfo(playerid int64, gameIndex int64, info gameInfo) {
-	mycache.SetGameInfo(playerid, info.ToJSONStr())
+func saveAttach(playerid int64, gameIndex int64, info Attach) {
+	mycache.SetAttach(playerid, info.ToJSONStr())
 	db.UpdateAttach(playerid, gameIndex, 0, info.FreeCount)
 }
-func newGameInfo() gameInfo {
-	return gameInfo{}
+func newAttach() Attach {
+	return Attach{}
 }
-func toGameInfo(rows []map[string]interface{}) gameInfo {
-	var info gameInfo
+func toAttach(rows []map[string]interface{}) Attach {
+	var info Attach
 
 	for _, row := range rows {
 		switch foundation.InterfaceToInt64(row["Type"]) {

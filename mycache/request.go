@@ -10,18 +10,18 @@ import (
 )
 
 // SetToken ...
-func SetToken(GameAccount, Token string) {
+func SetToken(gameAccount, Token string) {
 	now := time.Now()
 	lastHour := 23 - now.Hour()
 	lastMinute := 59 - now.Minute()
 	lastsecod := 60 - now.Second()
 	lasttime := time.Duration(lastHour*60*60+lastMinute*60+lastsecod) * time.Second
-	runSet(fmt.Sprintf("TOK%s", GameAccount), Token, lasttime)
+	runSet(fmt.Sprintf("TOK%s", gameAccount), Token, lasttime)
 }
 
 // GetToken ...
-func GetToken(GameAccount string) string {
-	value, err := getString(fmt.Sprintf("TOK%s", GameAccount))
+func GetToken(gameAccount string) string {
+	value, err := getString(fmt.Sprintf("TOK%s", gameAccount))
 
 	if err != nil {
 		return ""
@@ -30,12 +30,12 @@ func GetToken(GameAccount string) string {
 }
 
 // GetAccountInfo Get Account Struct
-func GetAccountInfo(GameAccount string) (interface{}, errorlog.ErrorMsg) {
+func GetAccountInfo(gameAccount string) (interface{}, errorlog.ErrorMsg) {
 	err := errorlog.New()
-	info, errMsg := get(fmt.Sprintf("ACC%s", GameAccount))
+	info, errMsg := get(fmt.Sprintf("ACC%s", gameAccount))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetAccountInfo", GameAccount, errMsg)
+		errorlog.ErrorLogPrintln("Cache GetAccountInfo", gameAccount, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -45,8 +45,8 @@ func GetAccountInfo(GameAccount string) (interface{}, errorlog.ErrorMsg) {
 }
 
 // SetAccountInfo Set Account Struct
-func SetAccountInfo(GameAccount string, Value interface{}) {
-	runSet(fmt.Sprintf("ACC%s", GameAccount), Value, data.CacheDeleteTime)
+func SetAccountInfo(gameAccount string, Value interface{}) {
+	runSet(fmt.Sprintf("ACC%s", gameAccount), Value, data.CacheDeleteTime)
 }
 
 // GetPlayerInfo Get PlayerInfo Struct
@@ -70,10 +70,10 @@ func SetPlayerInfo(playerid int64, Value interface{}) {
 }
 
 // ClearPlayerCache ...
-func ClearPlayerCache(playerid int64, GameAccount string) {
+func ClearPlayerCache(playerid int64, gameAccount string) {
 	del(fmt.Sprintf("ID%dJS", playerid))
-	del(fmt.Sprintf("ACC%s", GameAccount))
-	del(fmt.Sprintf("TOK%s", GameAccount))
+	del(fmt.Sprintf("ACC%s", gameAccount))
+	del(fmt.Sprintf("TOK%s", gameAccount))
 }
 
 // ClearAllCache ...
@@ -107,16 +107,16 @@ func GetULGInfoCache(playerid int64) interface{} {
 
 // game info per each player
 
-// SetGameInfo ...
-func SetGameInfo(playerid int64, value interface{}) {
-	key := fmt.Sprintf("gameinfo%d", playerid)
+// SetAttach ...
+func SetAttach(playerid int64, value interface{}) {
+	key := fmt.Sprintf("attach%d", playerid)
 	runSet(key, value, data.CacheDeleteTime)
 }
 
-// GetGameInfo game data request
-func GetGameInfo(playerid int64) interface{} {
+// GetAttach game data request
+func GetAttach(playerid int64) interface{} {
 	err := errorlog.New()
-	key := fmt.Sprintf("gameinfo%d", playerid)
+	key := fmt.Sprintf("attach%d", playerid)
 	info, errMsg := get(key)
 
 	if errMsg != nil {

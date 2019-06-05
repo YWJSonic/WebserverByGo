@@ -68,8 +68,8 @@ func UpdateAttach(args ...interface{}) errorlog.ErrorMsg {
 }
 
 // GetAccountInfo Check Account existence and get
-func GetAccountInfo(Account string) ([]map[string]interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap(gameBDSQL.DB, "AccountGet_Read", Account)
+func GetAccountInfo(account string) ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "AccountGet_Read", account)
 	return result, err
 }
 
@@ -120,14 +120,14 @@ func NewGameAccount(args ...interface{}) (int64, errorlog.ErrorMsg) {
 }
 
 // GetPlayerInfoByGameAccount ...
-func GetPlayerInfoByGameAccount(GameAccount string) ([]map[string]interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", GameAccount)
+func GetPlayerInfoByGameAccount(gameAccount string) ([]map[string]interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", gameAccount)
 	return result, err
 }
 
 // GetPlayerInfoByPlayerID ...
-func GetPlayerInfoByPlayerID(PlayerID int64) (interface{}, errorlog.ErrorMsg) {
-	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", PlayerID)
+func GetPlayerInfoByPlayerID(playerID int64) (interface{}, errorlog.ErrorMsg) {
+	result, err := CallReadOutMap(gameBDSQL.DB, "GameAccountGet_Read", playerID)
 	return result, err
 }
 
@@ -187,12 +187,12 @@ func ULGMaintainCheckOutUpdate() errorlog.ErrorMsg {
 /////////////////		Log DB		/////////////////
 
 // NewLogTable Create new LogTable if table alerady exists return FailedPrecondition Error
-func NewLogTable(TableName string) {
-	query := fmt.Sprintf("CREATE TABLE `%s` (`index` BIGINT NOT NULL AUTO_INCREMENT,`Account` VARCHAR(128) NOT NULL,`PlayerID` BIGINT NOT NULL,`Time` BIGINT NOT NULL,`ActivityEvent` INT NOT NULL,`IValue1` BIGINT NOT NULL DEFAULT 0,`IValue2` BIGINT NOT NULL DEFAULT 0,`IValue3` BIGINT NOT NULL DEFAULT 0,`SValue1` VARCHAR(128) NOT NULL DEFAULT '',`SValue2` VARCHAR(128) NOT NULL DEFAULT '',`SValue3` VARCHAR(128) NOT NULL DEFAULT '',`Msg` TEXT NOT NULL,PRIMARY KEY (`index`));", TableName)
+func NewLogTable(tableName string) {
+	query := fmt.Sprintf("CREATE TABLE `%s` (`index` BIGINT NOT NULL AUTO_INCREMENT,`Account` VARCHAR(128) NOT NULL,`PlayerID` BIGINT NOT NULL,`Time` BIGINT NOT NULL,`ActivityEvent` INT NOT NULL,`IValue1` BIGINT NOT NULL DEFAULT 0,`IValue2` BIGINT NOT NULL DEFAULT 0,`IValue3` BIGINT NOT NULL DEFAULT 0,`SValue1` VARCHAR(128) NOT NULL DEFAULT '',`SValue2` VARCHAR(128) NOT NULL DEFAULT '',`SValue3` VARCHAR(128) NOT NULL DEFAULT '',`Msg` TEXT NOT NULL,PRIMARY KEY (`index`));", tableName)
 	_, errMsg := logDBSQL.DB.Exec(query)
 	err := errorlog.New()
 
-	errorlog.LogPrintln("DB NewLogTable", TableName)
+	errorlog.LogPrintln("DB NewLogTable", tableName)
 	if errMsg != nil {
 		mysqlerr := errMsg.(*mysql.MySQLError)
 		if mysqlerr.Number == 1050 { // Table alerady exists
@@ -205,9 +205,9 @@ func NewLogTable(TableName string) {
 }
 
 // SetLog new goruting set log
-func SetLog(Account string, PlayerID, Time int64, ActivityEvent int, IValue1, IValue2, IValue3 int64, SValue1, SValue2, SValue3, Msg string) {
-	TableName := foundation.ServerNow().Format("20060102")
-	query := fmt.Sprintf("INSERT INTO `%s` VALUE(NULL,\"%s\",%d,%d, %d, %d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\");", TableName, Account, PlayerID, Time, ActivityEvent, IValue1, IValue2, IValue3, SValue1, SValue2, SValue3, Msg)
+func SetLog(account string, playerID, time int64, activityEvent int, iValue1, iValue2, iValue3 int64, sValue1, sValue2, sValue3, msg string) {
+	tableName := foundation.ServerNow().Format("20060102")
+	query := fmt.Sprintf("INSERT INTO `%s` VALUE(NULL,\"%s\",%d,%d, %d, %d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\");", tableName, account, playerID, time, activityEvent, iValue1, iValue2, iValue3, sValue1, sValue2, sValue3, msg)
 
 	if UseChanQueue {
 		go func() { QueryLogChan <- query }()
