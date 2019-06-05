@@ -28,6 +28,7 @@ const (
 	AccountTypeError  = 20
 	NoThisGameAccount = 21
 	NoThisPlayer      = 22
+	NoMoneyToBet      = 23
 
 	// ulg error
 	AuthorizedError    = 50
