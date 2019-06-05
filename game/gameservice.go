@@ -1,11 +1,16 @@
 package game
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
+	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -34,49 +39,52 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// var result = make(map[string]interface{})
 	postData := foundation.PostData(r)
-	// gametoken := foundation.InterfaceToString(postData["token"])
-	BetIndex := foundation.InterfaceToInt64(postData["bet"])
+	betIndex := foundation.InterfaceToInt64(postData["bet"])
+	betMoney := GetBetMoney(betIndex)
 
 	// gametype check
 	err := errorlog.New()
-	// gametypeid := foundation.InterfaceToString(postData["gametypeid"])
-	// if gametypeid != data.GameTypeID {
-	// 	err.ErrorCode = code.GameTypeError
-	// 	err.Msg = "GameTypeError"
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	return
-	// }
+	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
+	if gametypeid != data.GameTypeID {
+		err.ErrorCode = code.GameTypeError
+		err.Msg = "GameTypeError"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
 
 	// get player
-	// playerid := foundation.InterfaceToInt64(postData["playerid"])
-	// playerinfo, err := player.GetPlayerInfoByPlayerID(playerid)
-	// if err.ErrorCode != code.OK {
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	return
-	// }
+	playerid := foundation.InterfaceToInt64(postData["playerid"])
+	playerinfo, err := player.GetPlayerInfoByPlayerID(playerid)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
+
+	if playerinfo.Money < betMoney {
+		err.ErrorCode = code.NoMoneyToBet
+		err.Msg = "NoMoneyToBet"
+		foundation.HTTPResponse(w, "", err)
+		return
+	}
 
 	// get thirdparty info data
-	// var ulginfo *ulg.ULGInfo
-	// ulginfo, err = ulg.GetULGInfo(playerinfo.GameToken)
-	// if err.ErrorCode != code.OK {
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	fmt.Println(ulginfo)
-	// 	return
-	// }
+	var ulginfo *ulg.ULGInfo
+	ulginfo, err = ulg.GetULGInfo(playerinfo.ID, playerinfo.GameToken)
+	if err.ErrorCode != code.OK {
+		foundation.HTTPResponse(w, "", err)
+		fmt.Println(ulginfo)
+		return
+	}
 
-	result, totalwinscore := gameRequest(1, BetIndex)
-	result["playermoney"] = totalwinscore
-	// loginfo := log.New(log.GameResult)
-	// loginfo.PlayerID = playerid
-	// loginfo.IValue1 = int64(WinBet * BetMoney)
-	// loginfo.SValue1 = fmt.Sprint(newplate)
-	// loginfo.SValue2 = fmt.Sprint(ScatterIndex)
-	// log.SaveLog(loginfo)
+	result, totalwinscore := gameRequest(playerinfo.ID, betMoney)
+	playerinfo.Money = playerinfo.Money + totalwinscore - betMoney
+	result["playermoney"] = playerinfo.Money
 
-	// result["ScatterGame"] = ScatterIndex
-	// result["NormalGameIndex"] = newplateIndex
-	// result["NormalGame"] = newplate
-	// result["WinMoney"] = WinMoney
+	ulginfo.TotalBet += betMoney
+	ulginfo.TotalWin += totalwinscore
+	player.SavePlayerInfo(playerinfo)
+	ulg.SaveULGInfo(ulginfo)
+
 	foundation.HTTPResponse(w, result, err)
 
 }

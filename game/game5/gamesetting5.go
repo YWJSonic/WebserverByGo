@@ -9,7 +9,7 @@ const gameIndex = 5
 const isSingleLine = true
 
 // BetRate ...
-var betRate = []int64{1, 5, 10, 50, 100, 500}
+var betRate = []int64{1, 5, 10, 25, 100}
 
 // ScrollSize ...
 var scrollSize = []int{1, 1, 1}
