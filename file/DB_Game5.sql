@@ -32,7 +32,7 @@ CREATE TABLE `exchange` (
   `OldGameMoney` bigint(20) NOT NULL DEFAULT '0',
   `Time` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`Index`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,7 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-03 15:08:22
+-- Dump completed on 2019-06-05 15:12:06
 -- MySQL dump 10.13  Distrib 8.0.16, for Win64 (x86_64)
 --
 -- Host: 192.168.1.14    Database: logdb
@@ -98,7 +98,7 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-03 15:08:23
+-- Dump completed on 2019-06-05 15:12:06
 -- MySQL dump 10.13  Distrib 8.0.16, for Win64 (x86_64)
 --
 -- Host: 192.168.1.14    Database: gamedb
@@ -262,6 +262,29 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `AttachGame5Set_Update` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AttachGame5Set_Update`(IN attplayerid BIGINT, IN attkind BIGINT, IN atttype BIGINT,IN attvalue BIGINT)
+BEGIN
+UPDATE attach 
+SET IValue = attvalue
+WHERE PlayerID = attplayerid
+AND Kind = attkind
+AND Type = attType;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `AttachKindGet_Read` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -272,7 +295,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `AttachKindGet_Read`(IN attplayerid BIGINT, IN attkind BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AttachKindGet_Read`(IN attplayerid BIGINT, IN attkind BIGINT)
 BEGIN
 SELECT * FROM attach WHERE PlayerID = attplayerid AND Kind = attkind;
 END ;;
@@ -291,7 +314,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `AttachNew_Write`(IN playerid BIGINT, IN attkind BIGINT, IN atttype BIGINT, IN ivalue BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AttachNew_Write`(IN playerid BIGINT, IN attkind BIGINT, IN atttype BIGINT, IN ivalue BIGINT)
 BEGIN
 INSERT INTO attach VALUE(playerid, attkind, atttype, ivalue);
 END ;;
@@ -310,32 +333,9 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `AttachPlayerGet_Read`(IN playerid BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AttachPlayerGet_Read`(IN playerid BIGINT)
 BEGIN
 SELECT * FROM attach WHERE PlayerID = playerid;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `AttachSet_Update` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `AttachSet_Update`(IN attplayerid BIGINT, IN attkind BIGINT, IN atttype BIGINT,IN attvalue BIGINT)
-BEGIN
-UPDATE attach 
-SET IValue = attvalue
-WHERE PlayerID = attplayerid
-AND Kind = attkind
-AND Type = attType;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -352,7 +352,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `AttachTypeGet_Read`(IN playerid BIGINT, IN attkind BIGINT, IN atttype BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AttachTypeGet_Read`(IN playerid BIGINT, IN attkind BIGINT, IN atttype BIGINT)
 BEGIN
 SELECT * FROM attach WHERE PlayerID = playerid AND kind = attkind AND type = atttype;
 END ;;
@@ -451,7 +451,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`%` PROCEDURE `SettingKeyGet_Read`(IN settingkey VARCHAR(40))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SettingKeyGet_Read`(IN settingkey VARCHAR(40))
 BEGIN
 SELECT * FROM setting WHERE setting.Key = settingkey ;
 END ;;
@@ -569,7 +569,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`serverConnect`@`192.168.1.32` PROCEDURE `ULGMaintainCheckOutSet_Update`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ULGMaintainCheckOutSet_Update`()
 BEGIN
 	UPDATE gameaccount 
     SET GameMoney = 0,
@@ -638,4 +638,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-03 15:08:23
+-- Dump completed on 2019-06-05 15:12:07
