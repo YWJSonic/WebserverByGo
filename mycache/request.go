@@ -90,12 +90,13 @@ func SetULGInfo(playerid int64, value interface{}) {
 }
 
 // GetULGInfoCache Get ULG info
-func GetULGInfoCache(gametoken string) interface{} {
+func GetULGInfoCache(playerid int64) interface{} {
 	err := errorlog.New()
-	info, errMsg := get(gametoken)
+	key := fmt.Sprintf("ULG%d", playerid)
+	info, errMsg := get(key)
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", gametoken)
+		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", key)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil
