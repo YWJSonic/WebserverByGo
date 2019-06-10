@@ -7,8 +7,6 @@ import (
 	"gitlab.com/WeberverByGo/log"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
 	gameRules "gitlab.com/WeberverByGo/game/game5"
 	"gitlab.com/WeberverByGo/mycache"
@@ -27,20 +25,17 @@ func GetBetRate() interface{} {
 // GetBetMoney ...
 func GetBetMoney(betIndex int64) int64 {
 	betrate := gameRules.BetRate()
-
 	return betrate[betIndex]
 }
 
 // GameRequest ...
-func gameRequest(playerID, betMoney int64) (map[string]interface{}, int64) {
+func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
 	attach := GetAttach(playerID)
+	betMoney := GetBetMoney(betIndex)
 	result := gameRules.Result(betMoney, attach.FreeCount)
 
 	attach.FreeCount = foundation.InterfaceToInt(result["freecount"])
-	if attach.FreeCount >= gameRules.FreeGameTrigger {
-		attach.FreeCount %= gameRules.FreeGameTrigger
-	}
-	saveAttach(playerID, gameRules.GameIndex(), attach)
+	saveAttach(playerID, attach)
 
 	msg := foundation.JSONToString(result)
 	msg = strings.ReplaceAll(msg, "\"", "\\\"")
@@ -53,24 +48,31 @@ func gameRequest(playerID, betMoney int64) (map[string]interface{}, int64) {
 	return result, foundation.InterfaceToInt64(result["totalwinscore"])
 }
 
+// InitAttach game start init attach
+func InitAttach(playerid int64) {
+	att := newAttach()
+	saveAttach(playerid, att)
+}
+
 // GetAttach 0:free game count
 func GetAttach(playerID int64) Attach {
 	var info Attach
-	gameIndex := gameRules.GameIndex()
+	gameIndex := gameRules.GameIndex
 	attach := mycache.GetAttach(playerID)
 
 	if attach == nil {
-		row, err := db.GetAttachKind(playerID, gameIndex)
+		// attach in db
+		// row, err := db.GetAttachKind(playerID, gameIndex)
+		// if len(row) > 0 && err.ErrorCode == code.OK {
+		// 	// db data
+		// 	info = toAttach(row)
+		// } else {
+		// 	// new data
+		// 	db.NewAttach(playerID, gameIndex, 0, 0)
+		// 	info = newAttach()
+		// }
 
-		if len(row) > 0 && err.ErrorCode == code.OK {
-			// db data
-			info = toAttach(row)
-		} else {
-
-			// new data
-			db.NewAttach(playerID, gameIndex, 0, 0)
-			info = newAttach()
-		}
+		info = newAttach()
 	} else {
 		// cache data
 		if errMsg := json.Unmarshal(attach.([]byte), &info); errMsg != nil {
@@ -81,9 +83,9 @@ func GetAttach(playerID int64) Attach {
 
 	return info
 }
-func saveAttach(playerid int64, gameIndex int64, info Attach) {
+func saveAttach(playerid int64, info Attach) {
 	mycache.SetAttach(playerid, info.ToJSONStr())
-	db.UpdateAttach(playerid, gameIndex, 0, info.FreeCount)
+	// db.UpdateAttach(playerid, gameRules.GameIndex, 0, info.FreeCount)
 }
 func newAttach() Attach {
 	return Attach{}

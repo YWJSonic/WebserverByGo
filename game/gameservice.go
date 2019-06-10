@@ -84,7 +84,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	result, totalwinscore := gameRequest(playerinfo.ID, betMoney)
+	result, totalwinscore := gameRequest(playerinfo.ID, betIndex)
 	playerinfo.Money = playerinfo.Money + totalwinscore - betMoney
 	result["playermoney"] = playerinfo.Money
 

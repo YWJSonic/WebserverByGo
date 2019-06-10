@@ -87,11 +87,12 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	game.InitAttach(playerInfo.ID)
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = game.GetInitScroll()
 	result["betrate"] = game.GetBetRate()
-	result["gameattach"] = game.GetAttach(playerInfo.ID)
+	// result["gameattach"] = game.GetAttach(playerInfo.ID)
 
 	foundation.HTTPResponse(w, result, err)
 }
