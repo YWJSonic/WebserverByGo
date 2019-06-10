@@ -2,6 +2,9 @@ package game6
 
 // 花開富貴
 
+// Version ...
+const Version = "0.0.1"
+
 // GameIndex game sort id
 const GameIndex = 6
 
