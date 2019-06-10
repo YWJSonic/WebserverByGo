@@ -3,7 +3,9 @@ package game5
 // 貓下去
 
 // GameIndex game sort id
-const gameIndex = 5
+const GameIndex = 5
+
+const limitWinBetRate = 100
 
 // IsSingleLine game result only output one result
 const isSingleLine = true

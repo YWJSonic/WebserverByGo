@@ -6,16 +6,12 @@ import (
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game/gamesystem"
 	"gitlab.com/WeberverByGo/math"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-}
-
-// GameIndex ...
-func GameIndex() int64 {
-	return gameIndex
 }
 
 // BetRate ...
@@ -33,23 +29,31 @@ func Scroll() interface{} {
 	return scrollmap
 }
 
-// Result ...
-func Result(betMoney int64, freeCount int) map[string]interface{} {
+// Result att 0: freecount
+func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	var result = make(map[string]interface{})
 	var totalWin int64
+	freeCount := foundation.InterfaceToInt(att[0])
 
-	fmt.Println("----")
+	if freeCount >= FreeGameTrigger {
+		freeCount %= FreeGameTrigger
+	}
+
+	fmt.Println("----------------------------------------------------------------------------------")
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
-	result = otherdata
+	result = foundation.AppendMap(result, otherdata)
 	result["normalresult"] = normalresult
+	result["islockbet"] = 0
 	totalWin += normaltotalwin
 
+	if freeCount > 0 {
+		result["islockbet"] = 1
+	}
 	if otherdata["isrespin"].(int) == 1 {
 		result["isrespin"] = 1
 		respinresult, respintotalwin := outRespin(totalWin)
 		totalWin = respintotalwin
 		result["respin"] = respinresult
-
 	}
 
 	if otherdata["isfreegame"].(int) == 1 {
@@ -57,11 +61,16 @@ func Result(betMoney int64, freeCount int) map[string]interface{} {
 		freeresult, freetotalwin := outputFreeSpin(betMoney)
 		totalWin += freetotalwin
 		result["freegame"] = freeresult
-
+		result["islockbet"] = 1
 	}
 
 	result["totalwinscore"] = totalWin
+
+	if gamesystem.IsTotalWinLimit(betMoney, totalWin) {
+		return Result(betMoney, freeCount)
+	}
 	return result
+
 }
 
 var count int
