@@ -3,7 +3,7 @@ package game7
 //
 
 // Version ...
-const Version = "0.0.1"
+const Version = "0.0.2"
 
 // GameIndex game sort id
 const GameIndex = 7
