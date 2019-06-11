@@ -148,6 +148,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"token":   {token},
 		"game_id": {gameid},
 	}
+	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := foundation.HTTPPostRequest(getuserURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
@@ -171,6 +172,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 		"token":   {token},
 		"game_id": {gametypeid},
 	}
+	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := foundation.HTTPPostRequest(authorizedURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
@@ -197,6 +199,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_type":   {fmt.Sprint(cointype)},
 		"coin_amount": {fmt.Sprint(coinamount)},
 	}
+	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := foundation.HTTPPostRequest(exchangeURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
@@ -224,6 +227,7 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 		"win":        {totalwin},
 		"lost":       {totalost},
 	}
+	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError

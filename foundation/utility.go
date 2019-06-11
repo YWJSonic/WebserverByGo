@@ -68,6 +68,7 @@ func InterfaceToInt64(v interface{}) int64 {
 	case int64:
 		return v.(int64)
 	default:
+		errorlog.ErrorLogPrintln("Conver", v)
 		panic("Conver Error")
 	}
 }
