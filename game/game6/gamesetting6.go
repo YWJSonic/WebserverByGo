@@ -9,6 +9,7 @@ const Version = "0.0.1"
 const GameIndex = 6
 
 const limitWinBetRate = 100
+const limitWinMoneyRate = 20000
 
 // IsSingleLine game result only output one result
 const isSingleLine = true
@@ -41,11 +42,8 @@ var Scatter1Range = [][]int{
 	[]int{80, 70, 20, 15, 5, 5},
 	[]int{50, 50, 30, 20, 10, 5}}
 
-// Scatter1Score bonus game 1 rate sum
-var Scatter1Score = []int{10, 20, 80, 200, 500, 1000}
-
-// Scatter2RangeSum ...
-var Scatter2RangeSum = 50 + 50 + 50 + 30 + 20 + 21
+// Scatter1WinRate bonus game 1 rate sum
+var Scatter1WinRate = []int64{10, 20, 80, 200, 500, 1000}
 
 // Scatter2Setting Scatter2Range Index
 var Scatter2Setting = 3
@@ -57,10 +55,16 @@ var Scatter2Range = [][]int{
 	[]int{70, 70, 50, 30, 20, 21},
 	[]int{50, 50, 50, 30, 20, 21}}
 
-// Scatter2Score ...
-var Scatter2Score = []int{3, 8, 20, 50, 100, 0}
+// Scatter2WinRate ...
+var Scatter2WinRate = []int64{3, 8, 20, 50, 100, -100}
 
 var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+const scatter1 = 0
+const scatter2 = 1
+
+const wild1 = 2
+const wild2 = 3
 
 // ItemResults 0~10 item
 // -1000 any
@@ -68,7 +72,7 @@ var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 // -1002 any bar
 // -100 bonus game 1
 // -101 bonus game 2
-var ItemResults = [][]int{
+var itemResults = [][]int{
 	{0, 0, 0, -100},
 	{1, 1, 1, -101},
 	{2, 2, 3, 1000},

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game/gamesystem"
 )
 
 func init() {
@@ -35,6 +36,23 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	result["normalresult"] = normalresult
 	totalWin += normaltotalwin
 
+	if otherdata["isscatter2"].(int) == 1 {
+		s2Result, otherdata, scatter2totalwin := scatter2Result(betMoney)
+		totalWin += scatter2totalwin
+		result["scatter2result"] = s2Result
+
+		if otherdata["isscatter1"].(int) == 1 {
+			s1Result, scatter1totalwin := scatter1Result(betMoney)
+			totalWin += scatter1totalwin
+			result["scatter1result"] = s1Result
+		}
+
+	} else if otherdata["isscatter1"].(int) == 1 {
+		s1Result, scatter1totalwin := scatter1Result(betMoney)
+		totalWin += scatter1totalwin
+		result["scatter1result"] = s1Result
+	}
+
 	result["totalwinscore"] = totalWin
 
 	if (totalWin / betMoney) > limitWinBetRate {
@@ -49,52 +67,46 @@ var count int
 
 func outputGame(betMoney int64) (map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
+	var result map[string]interface{}
 	otherdata := make(map[string]interface{})
-	result := make(map[string]interface{})
+	islink := false
 
-	ScrollIndex, plate := newPlate(scrollSize, [][]int{Scroll1, Scroll2, Scroll3})
+	ScrollIndex, plate := gamesystem.NewPlate(scrollSize, [][]int{Scroll1, Scroll2, Scroll3})
 
 	count++
 	plate = TestPlate(count % 4)
 	gameresult := winresultArray(plate)
 	fmt.Println(ScrollIndex, plate, gameresult)
 
-	result["plateindex"] = ScrollIndex
-	result["plate"] = plate
-	result["scores"] = 0
-	result["islink"] = 0
+	otherdata["isscatter1"] = 0
+	otherdata["isscatter2"] = 0
+
+	if isScatter1(plate) {
+		otherdata["isscatter1"] = 1
+	}
+	if isScatter2(plate) {
+		otherdata["isscatter2"] = 1
+	}
 
 	if len(gameresult) > 0 {
 		totalScores = betMoney * int64(gameresult[0][3])
-		result["scores"] = totalScores
-		result["islink"] = 1
+		islink = true
 	}
 
+	result = gamesystem.ResultMap(ScrollIndex, plate, totalScores, islink)
 	return result, otherdata, foundation.InterfaceToInt64(result["scores"])
-}
-
-// NewPlate ...
-func newPlate(plateSize []int, scroll [][]int) ([]int, []int) {
-	var ScrollIndex []int
-	var plate []int
-	var index int
-
-	for i := range plateSize {
-		index = rand.Intn(len(scroll[i]))
-		plate = append(plate, scroll[i][index])
-		ScrollIndex = append(ScrollIndex, index)
-	}
-
-	return ScrollIndex, plate
 }
 
 // GameResult ...
 func winresultArray(plate []int) [][]int {
 	var result [][]int
 
-	for _, ItemResult := range ItemResults {
+	for _, ItemResult := range itemResults {
 		if isWin(plate, ItemResult) {
 			result = append(result, ItemResult)
+			if isSingleLine {
+				break
+			}
 		}
 	}
 	return result
@@ -109,7 +121,11 @@ func isWin(plates []int, result []int) bool {
 		case plate:
 			IsWin = true
 		case -1000:
-			IsWin = true
+			if plate == scatter1 || plate == scatter2 {
+				IsWin = false
+			} else {
+				IsWin = true
+			}
 		case -1001:
 			if isAny7(plate) {
 				IsWin = true
@@ -127,31 +143,59 @@ func isWin(plates []int, result []int) bool {
 	return IsWin
 }
 
-func isAny7(Item int) bool {
-	if Item == 4 || Item == 5 || Item == 6 || Item == 7 {
+func isScatter1(itemResult []int) bool {
+	if itemResult[3] == -100 {
+		return true
+	}
+	return false
+}
+func isScatter2(itemResult []int) bool {
+	if itemResult[3] == -101 {
 		return true
 	}
 	return false
 }
 
-func isAnyBay(Item int) bool {
-	if Item == 7 || Item == 8 || Item == 9 || Item == 10 {
+func isAny7(item int) bool {
+	if item == 4 || item == 5 || item == 6 {
 		return true
 	}
 	return false
 }
 
-func scatter1() (int, int) {
+func isAnyBay(item int) bool {
+	if item == 7 || item == 8 || item == 9 || item == 10 {
+		return true
+	}
+	return false
+}
+
+func scatter1Result(betMoney int64) (map[string]interface{}, int64) {
+	var result map[string]interface{}
 
 	scatterIndex := foundation.RangeRandom(Scatter1Range[Scatter1Setting])
-	scatterBet := Scatter1Score[scatterIndex]
-	return scatterIndex, scatterBet
+	scatterWinRate := Scatter1WinRate[scatterIndex]
+	totalScores := betMoney * scatterWinRate
+	result = gamesystem.ResultMap([]int{scatterIndex}, []int{scatterIndex}, totalScores, true)
+	return result, totalScores
 }
-func scatter2() (int, int) {
+func scatter2Result(betMoney int64) (map[string]interface{}, map[string]interface{}, int64) {
+	var result map[string]interface{}
+	otherdata := make(map[string]interface{})
+	var totalScores int64
 
 	scatterIndex := foundation.RangeRandom(Scatter2Range[Scatter2Setting])
-	scatterBet := Scatter2Score[scatterIndex]
-	return scatterIndex, scatterBet
+	scatterWinRate := Scatter2WinRate[scatterIndex]
+
+	otherdata["isscatter1"] = 0
+
+	if scatterWinRate < 0 {
+		otherdata["isscatter1"] = 1
+		totalScores = betMoney * scatterWinRate
+	}
+	result = gamesystem.ResultMap([]int{scatterIndex}, []int{scatterIndex}, totalScores, true)
+	return result, otherdata, totalScores
+
 }
 
 // TestPlate ...
@@ -179,7 +223,7 @@ func TestPlate(index int) []int {
 	// for _, plate := range demoplate {
 	// 	fmt.Println(vcount, ":", plate, winresultArray(plate))
 	// }
-	demoplate := [][]int{{7, 1, 0}, {8, 1, 9}, {6, 9, 5}, {10, 1, 0}}
+	demoplate := [][]int{{0, 0, 0}, {1, 1, 1}, {3, 2, 9}, {3, 8, 2}, {2, 5, 7}}
 	plate := demoplate[index]
 	return plate
 }

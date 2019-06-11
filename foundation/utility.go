@@ -13,6 +13,10 @@ import (
 	"gitlab.com/WeberverByGo/mycache"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // DeleteArrayElement ...
 func DeleteArrayElement(elementIndex interface{}, array []interface{}) []interface{} {
 	count := len(array)
@@ -134,7 +138,6 @@ func MD5Code(data string) string {
 // RangeRandom array random index
 func RangeRandom(rangeInt []int) int {
 	Sum := 0
-	rand.Seed(time.Now().UnixNano())
 
 	for _, value := range rangeInt {
 		Sum += value

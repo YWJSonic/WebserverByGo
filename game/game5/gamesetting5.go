@@ -9,6 +9,7 @@ const Version = "0.0.1"
 const GameIndex = 5
 
 const limitWinBetRate = 100
+const limitWinMoneyRate = 20000
 
 // IsSingleLine game result only output one result
 const isSingleLine = true
@@ -53,10 +54,8 @@ var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 // Space Space item index
 const space = 10
-
-const any1 = 0
-
-const any2 = 1
+const wild1 = 0
+const wild2 = 1
 
 // ItemResults 0~10 item
 // {item, item, item, result}
