@@ -1,9 +1,17 @@
 package gamesystem
 
-// IsTotalWinLimit if int limit return true
-func IsTotalWinLimit(betMoney, totalWin int64) bool {
-	if (totalWin / betMoney) > 100 {
-		return true
+// IsInTotalMoneyWinLimit if int limit return true
+func IsInTotalMoneyWinLimit(betMoney, totalWin int64) bool {
+	if totalWin > 20000 {
+		return false
 	}
-	return false
+	return true
+}
+
+// IsInTotalBetRateWinLimit if int limit return true
+func IsInTotalBetRateWinLimit(betMoney, totalWin int64) bool {
+	if (totalWin / betMoney) > 100 {
+		return false
+	}
+	return true
 }

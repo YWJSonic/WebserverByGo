@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/game/gamesystem"
 	"gitlab.com/WeberverByGo/math"
 )
 
@@ -29,9 +30,10 @@ func Scroll() interface{} {
 }
 
 // Result ...
-func Result(betMoney int64, freeCount int) map[string]interface{} {
+func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	var result = make(map[string]interface{})
 	var totalWin int64
+	freeCount := foundation.InterfaceToInt(att[0])
 
 	fmt.Println("----")
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
@@ -55,6 +57,9 @@ func Result(betMoney int64, freeCount int) map[string]interface{} {
 
 	}
 
+	if !(gamesystem.IsInTotalMoneyWinLimit(betMoney, totalWin) || gamesystem.IsInTotalBetRateWinLimit(betMoney, totalWin)) {
+		return Result(betMoney, att...)
+	}
 	result["totalwinscore"] = totalWin
 	return result
 }

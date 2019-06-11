@@ -8,9 +8,6 @@ const Version = "0.0.1"
 // GameIndex game sort id
 const GameIndex = 6
 
-const limitWinBetRate = 100
-const limitWinMoneyRate = 20000
-
 // IsSingleLine game result only output one result
 const isSingleLine = true
 
