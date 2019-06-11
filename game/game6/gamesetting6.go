@@ -1,16 +1,23 @@
-package game
-
-import (
-	"math/rand"
-	"time"
-
-	"gitlab.com/WeberverByGo/foundation"
-)
+package game6
 
 // 花開富貴
 
+// Version ...
+const Version = "0.0.1"
+
 // GameIndex game sort id
 const GameIndex = 6
+
+const limitWinBetRate = 100
+
+// IsSingleLine game result only output one result
+const isSingleLine = true
+
+// BetRate ...
+var betRate = []int64{1, 5, 10, 25, 100}
+
+// ScrollSize ...
+var scrollSize = []int{1, 1, 1}
 
 // Scroll1 roll 1
 var Scroll1 = []int{5, 10, 2, 9, 7, 4, 1, 1, 1, 1, 3, 6, 9, 0, 0, 0, 8, 5, 7, 4, 8, 9, 5, 9, 7, 5, 6, 1, 1, 1, 1, 7, 6, 7, 8, 9, 4, 1, 1, 1, 1, 8, 7, 10, 1, 0, 1, 10, 9, 4, 10, 5, 10, 8, 7, 8, 10, 8, 7, 6, 1, 0, 1, 8, 6, 10, 1, 0, 1, 10, 4, 6, 10, 4, 8, 10}
@@ -189,89 +196,4 @@ var ItemResults = [][]int{
 	{10, 10, 10, 2},
 	{-1001, -1001, -1001, 1},
 	{-1002, -1002, -1002, 1},
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-// NewPlate ...
-func NewPlate(plateSize []int, scroll [][]int) ([]int, []int) {
-	var ScrollIndex []int
-	var plate []int
-	var index int
-
-	for i := range plateSize {
-		index = rand.Intn(len(scroll[i]))
-		plate = append(plate, scroll[i][index])
-		ScrollIndex = append(ScrollIndex, index)
-	}
-
-	return ScrollIndex, plate
-}
-
-// GameResult ...
-func GameResult(plate []int) [][]int {
-	var result [][]int
-
-	for _, ItemResult := range ItemResults {
-		if isWin(plate, ItemResult) {
-			result = append(result, ItemResult)
-		}
-	}
-	return result
-}
-
-func isWin(plates []int, result []int) bool {
-	IsWin := false
-
-	for i, plate := range plates {
-		IsWin = false
-		switch result[i] {
-		case plate:
-			IsWin = true
-		case -1000:
-			IsWin = true
-		case -1001:
-			if isAny7(plate) {
-				IsWin = true
-			}
-		case -1002:
-			if isAnyBay(plate) {
-				IsWin = true
-			}
-		}
-		if !IsWin {
-			return IsWin
-		}
-	}
-
-	return IsWin
-}
-
-func isAny7(Item int) bool {
-	if Item == 4 || Item == 5 || Item == 6 || Item == 7 {
-		return true
-	}
-	return false
-}
-
-func isAnyBay(Item int) bool {
-	if Item == 7 || Item == 8 || Item == 9 || Item == 10 {
-		return true
-	}
-	return false
-}
-
-func scatter1() (int, int) {
-
-	scatterIndex := foundation.RangeRandom(Scatter1Range[Scatter1Setting])
-	scatterBet := Scatter1Score[scatterIndex]
-	return scatterIndex, scatterBet
-}
-func scatter2() (int, int) {
-
-	scatterIndex := foundation.RangeRandom(Scatter2Range[Scatter2Setting])
-	scatterBet := Scatter2Score[scatterIndex]
-	return scatterIndex, scatterBet
 }

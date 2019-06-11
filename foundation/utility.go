@@ -168,3 +168,11 @@ func ServerNow() time.Time {
 func ConevrToTimeInt64(year int, month time.Month, day, hour, min, sec, nsec int) int64 {
 	return time.Date(year, month, day, hour, min, sec, nsec, time.Local).Unix()
 }
+
+// AppendMap map append map
+func AppendMap(Target map[string]interface{}, Source map[string]interface{}) map[string]interface{} {
+	for Key, Value := range Source {
+		Target[Key] = Value
+	}
+	return Target
+}

@@ -1,20 +1,18 @@
-package game5
+package game7
 
-// 貓下去
+//
 
 // Version ...
 const Version = "0.0.1"
 
 // GameIndex game sort id
-const GameIndex = 5
-
-const limitWinBetRate = 100
+const GameIndex = 7
 
 // IsSingleLine game result only output one result
 const isSingleLine = true
 
 // BetRate ...
-var betRate = []int64{1, 5, 10, 25, 100}
+var betRate = []int64{10, 25, 50, 100, 250}
 
 // ScrollSize ...
 var scrollSize = []int{1, 1, 1}
@@ -28,6 +26,9 @@ var normalScroll = [][]int{
 
 // FreeGameTrigger free count equal FreeGameTrigger free game start
 const FreeGameTrigger = 10
+
+// FreeGameWinRate ...
+var FreeGameWinRate = []int64{1, 2, 3, 4, 5}
 
 // FreeScroll ...
 var freeScroll = [][]int{

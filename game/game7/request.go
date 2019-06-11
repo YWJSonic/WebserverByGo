@@ -1,4 +1,4 @@
-package game5
+package game7
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game/gamesystem"
 	"gitlab.com/WeberverByGo/math"
 )
 
@@ -29,31 +28,23 @@ func Scroll() interface{} {
 	return scrollmap
 }
 
-// Result att 0: freecount
-func Result(betMoney int64, att ...interface{}) map[string]interface{} {
+// Result ...
+func Result(betMoney int64, freeCount int) map[string]interface{} {
 	var result = make(map[string]interface{})
 	var totalWin int64
-	freeCount := foundation.InterfaceToInt(att[0])
 
-	if freeCount >= FreeGameTrigger {
-		freeCount %= FreeGameTrigger
-	}
-
-	fmt.Println("----------------------------------------------------------------------------------")
+	fmt.Println("----")
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
-	result = foundation.AppendMap(result, otherdata)
+	result = otherdata
 	result["normalresult"] = normalresult
-	result["islockbet"] = 0
 	totalWin += normaltotalwin
 
-	if freeCount > 0 {
-		result["islockbet"] = 1
-	}
 	if otherdata["isrespin"].(int) == 1 {
 		result["isrespin"] = 1
 		respinresult, respintotalwin := outRespin(totalWin)
 		totalWin = respintotalwin
 		result["respin"] = respinresult
+
 	}
 
 	if otherdata["isfreegame"].(int) == 1 {
@@ -61,16 +52,11 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 		freeresult, freetotalwin := outputFreeSpin(betMoney)
 		totalWin += freetotalwin
 		result["freegame"] = freeresult
-		result["islockbet"] = 1
+
 	}
 
 	result["totalwinscore"] = totalWin
-
-	if gamesystem.IsTotalWinLimit(betMoney, totalWin) {
-		return Result(betMoney, freeCount)
-	}
 	return result
-
 }
 
 var count int
@@ -123,7 +109,7 @@ func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
 	var result []interface{}
 	var totalScores int64
 
-	for i, max := 0, 5; i < max; i++ {
+	for i, max := 0, len(FreeGameWinRate); i < max; i++ {
 		freeresult := make(map[string]interface{})
 		ScrollIndex, plate := newPlate(scrollSize, freeScroll)
 		gameresult := winresultArray(plate)
@@ -136,7 +122,7 @@ func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
 
 		if len(gameresult) > 0 {
 			freeresult["islink"] = 1
-			freeresult["scores"] = betMoney * int64(gameresult[0][3])
+			freeresult["scores"] = betMoney * int64(gameresult[0][3]) * FreeGameWinRate[i]
 			totalScores += foundation.InterfaceToInt64(freeresult["scores"])
 		}
 

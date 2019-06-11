@@ -1,4 +1,4 @@
-package game5
+package game6
 
 import (
 	"fmt"
@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game/gamesystem"
-	"gitlab.com/WeberverByGo/math"
 )
 
 func init() {
@@ -22,93 +20,49 @@ func BetRate() []int64 {
 // Scroll ...
 func Scroll() interface{} {
 	scrollmap := map[string][][]int{
-		"normalreel": normalScroll,
-		"freereel":   freeScroll,
-		"respinreel": {respuinScroll()},
+		"normalreel": {Scroll1, Scroll2, Scroll3},
 	}
 	return scrollmap
 }
 
-// Result att 0: freecount
+// Result no att value
 func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	var result = make(map[string]interface{})
 	var totalWin int64
-	freeCount := foundation.InterfaceToInt(att[0])
 
-	if freeCount >= FreeGameTrigger {
-		freeCount %= FreeGameTrigger
-	}
-
-	fmt.Println("----------------------------------------------------------------------------------")
-	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
-	result = foundation.AppendMap(result, otherdata)
+	normalresult, otherdata, normaltotalwin := outputGame(betMoney)
+	result = otherdata
 	result["normalresult"] = normalresult
-	result["islockbet"] = 0
 	totalWin += normaltotalwin
-
-	if freeCount > 0 {
-		result["islockbet"] = 1
-	}
-	if otherdata["isrespin"].(int) == 1 {
-		result["isrespin"] = 1
-		respinresult, respintotalwin := outRespin(totalWin)
-		totalWin = respintotalwin
-		result["respin"] = respinresult
-	}
-
-	if otherdata["isfreegame"].(int) == 1 {
-		result["isfreegame"] = 1
-		freeresult, freetotalwin := outputFreeSpin(betMoney)
-		totalWin += freetotalwin
-		result["freegame"] = freeresult
-		result["islockbet"] = 1
-	}
 
 	result["totalwinscore"] = totalWin
 
-	if gamesystem.IsTotalWinLimit(betMoney, totalWin) {
-		return Result(betMoney, freeCount)
+	if (totalWin / betMoney) > limitWinBetRate {
+		return Result(betMoney, att...)
 	}
+
 	return result
 
 }
 
 var count int
 
-func outputGame(betMoney int64, freecount int) (map[string]interface{}, map[string]interface{}, int64) {
+func outputGame(betMoney int64) (map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
 	otherdata := make(map[string]interface{})
 	result := make(map[string]interface{})
 
-	ScrollIndex, plate := newPlate(scrollSize, normalScroll)
+	ScrollIndex, plate := newPlate(scrollSize, [][]int{Scroll1, Scroll2, Scroll3})
 
 	count++
 	plate = TestPlate(count % 4)
 	gameresult := winresultArray(plate)
 	fmt.Println(ScrollIndex, plate, gameresult)
 
-	otherdata["isfreegame"] = 0
-	otherdata["freecount"] = freecount % FreeGameTrigger
-	otherdata["isrespin"] = 0
-
 	result["plateindex"] = ScrollIndex
 	result["plate"] = plate
 	result["scores"] = 0
 	result["islink"] = 0
-
-	if isFreeGameCount(plate) {
-		freecount++
-		if freecount >= FreeGameTrigger {
-			otherdata["isfreegame"] = 1
-			otherdata["freecount"] = freecount
-		} else {
-			otherdata["freecount"] = freecount
-		}
-	}
-
-	if isRespin(plate) {
-		otherdata["isrespin"] = 1
-	}
 
 	if len(gameresult) > 0 {
 		totalScores = betMoney * int64(gameresult[0][3])
@@ -119,125 +73,7 @@ func outputGame(betMoney int64, freecount int) (map[string]interface{}, map[stri
 	return result, otherdata, foundation.InterfaceToInt64(result["scores"])
 }
 
-func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
-	var result []interface{}
-	var totalScores int64
-
-	for i, max := 0, 5; i < max; i++ {
-		freeresult := make(map[string]interface{})
-		ScrollIndex, plate := newPlate(scrollSize, freeScroll)
-		gameresult := winresultArray(plate)
-		fmt.Println(ScrollIndex, plate, gameresult)
-
-		freeresult["plateindex"] = ScrollIndex
-		freeresult["plate"] = plate
-		freeresult["scores"] = 0
-		freeresult["islink"] = 0
-
-		if len(gameresult) > 0 {
-			freeresult["islink"] = 1
-			freeresult["scores"] = betMoney * int64(gameresult[0][3])
-			totalScores += foundation.InterfaceToInt64(freeresult["scores"])
-		}
-
-		result = append(result, freeresult)
-	}
-	return result, totalScores
-}
-
-func outRespin(normalScore int64) (map[string]interface{}, int64) {
-	var totalscores int64
-
-	ScrollIndex, plate := newPlate([]int{1}, [][]int{respuinScroll()})
-	gameresult := respinResult(plate)
-	fmt.Println(ScrollIndex, plate, gameresult)
-
-	result := make(map[string]interface{})
-	result["plateindex"] = ScrollIndex
-	result["plate"] = plate
-	result["scores"] = normalScore
-	result["islink"] = 0
-
-	if len(gameresult) > 0 {
-		result["islink"] = 1
-		result["scores"] = normalScore * int64(gameresult[0][1])
-		totalscores += foundation.InterfaceToInt64(result["scores"])
-	}
-
-	return result, totalscores
-}
-
-// RespuinScroll ...
-func respuinScroll() []int {
-	if RespinSetting == 1 {
-		return respinScroll1
-	} else if RespinSetting == 2 {
-		return respinScroll2
-	} else {
-		return respinScroll3
-	}
-}
-
-// winresultArray ...
-func winresultArray(plate []int) [][]int {
-	var result [][]int
-	var dynamicresult []int
-
-	for _, ItemResult := range itemResults {
-		if isWin(plate, ItemResult) {
-
-			if isDynamicResult(ItemResult) {
-				dynamicresult = dynamicScore(plate, ItemResult)
-				result = append(result, dynamicresult)
-				if isSingleLine {
-					break
-				}
-			} else {
-				result = append(result, ItemResult)
-				if isSingleLine {
-					break
-				}
-			}
-		}
-	}
-
-	return result
-}
-
-// RespinResult result 0: icon index, 1: win rate
-func respinResult(plate []int) [][]int {
-	var result [][]int
-
-	switch plate[0] {
-	case 2:
-		result = append(result, []int{2, 5})
-	case 3:
-		result = append(result, []int{3, 7})
-	case 4:
-		result = append(result, []int{4, 10})
-	}
-
-	return result
-}
-
-// IsFreeGameCount ...
-func isFreeGameCount(plate []int) bool {
-	if plate[1] == 1 {
-		return true
-	}
-	return false
-
-}
-
-// IsRespin ...
-func isRespin(plate []int) bool {
-	if plate[0] != 10 && plate[1] == 1 && plate[2] == 0 {
-		return true
-	}
-	return false
-
-}
-
+// NewPlate ...
 func newPlate(plateSize []int, scroll [][]int) ([]int, []int) {
 	var ScrollIndex []int
 	var plate []int
@@ -252,41 +88,35 @@ func newPlate(plateSize []int, scroll [][]int) ([]int, []int) {
 	return ScrollIndex, plate
 }
 
+// GameResult ...
+func winresultArray(plate []int) [][]int {
+	var result [][]int
+
+	for _, ItemResult := range ItemResults {
+		if isWin(plate, ItemResult) {
+			result = append(result, ItemResult)
+		}
+	}
+	return result
+}
+
 func isWin(plates []int, result []int) bool {
 	IsWin := false
 
-	if isBounsGame(result) {
-		if isRespin(plates) {
-			return true
-		}
-
-		return false
-	}
-
 	for i, plate := range plates {
 		IsWin = false
-
-		if plate == space {
-			return false
-		}
-
-		if plate == any1 || plate == any2 {
+		switch result[i] {
+		case plate:
 			IsWin = true
-		} else {
-
-			switch result[i] {
-			case plate:
+		case -1000:
+			IsWin = true
+		case -1001:
+			if isAny7(plate) {
 				IsWin = true
-			case -1000:
+			}
+		case -1002:
+			if isAnyBay(plate) {
 				IsWin = true
-			case -1001: // any 7
-				if math.IsInclude(plate, []int{5, 6}) {
-					IsWin = true
-				}
-			case -1002: // any bar
-				if math.IsInclude(plate, []int{6, 7, 8, 9}) {
-					IsWin = true
-				}
 			}
 		}
 		if !IsWin {
@@ -297,36 +127,31 @@ func isWin(plates []int, result []int) bool {
 	return IsWin
 }
 
-// isBounsGame bouns game reul: itemresult score < 0
-func isBounsGame(plates []int) bool {
-	if plates[len(plates)-1] < 0 {
+func isAny7(Item int) bool {
+	if Item == 4 || Item == 5 || Item == 6 || Item == 7 {
 		return true
 	}
 	return false
 }
 
-func dynamicScore(plant, currendResult []int) []int {
-	dynamicresult := make([]int, len(currendResult))
-	copy(dynamicresult, currendResult)
-
-	switch currendResult[3] {
-	case -100:
-		for _, result := range itemResults {
-			if result[0] == plant[0] {
-				dynamicresult[3] = result[3]
-				break
-			}
-		}
-	}
-
-	return dynamicresult
-}
-
-func isDynamicResult(result []int) bool {
-	if result[3] < 0 {
+func isAnyBay(Item int) bool {
+	if Item == 7 || Item == 8 || Item == 9 || Item == 10 {
 		return true
 	}
 	return false
+}
+
+func scatter1() (int, int) {
+
+	scatterIndex := foundation.RangeRandom(Scatter1Range[Scatter1Setting])
+	scatterBet := Scatter1Score[scatterIndex]
+	return scatterIndex, scatterBet
+}
+func scatter2() (int, int) {
+
+	scatterIndex := foundation.RangeRandom(Scatter2Range[Scatter2Setting])
+	scatterBet := Scatter2Score[scatterIndex]
+	return scatterIndex, scatterBet
 }
 
 // TestPlate ...
