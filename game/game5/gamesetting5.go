@@ -3,7 +3,7 @@ package game5
 // 貓下去
 
 // Version ...
-const Version = "0.0.1"
+const Version = "0.0.2"
 
 // GameIndex game sort id
 const GameIndex = 5
@@ -26,6 +26,8 @@ var normalScroll = [][]int{
 
 // FreeGameTrigger free count equal FreeGameTrigger free game start
 const FreeGameTrigger = 10
+
+var freeGameWinRate = []int64{1, 2, 3, 4, 5}
 
 // FreeScroll ...
 var freeScroll = [][]int{

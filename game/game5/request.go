@@ -67,7 +67,7 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 
 }
 
-var count int
+// var count int
 
 func outputGame(betMoney int64, freecount int) (map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
@@ -77,8 +77,8 @@ func outputGame(betMoney int64, freecount int) (map[string]interface{}, map[stri
 
 	ScrollIndex, plate := gamesystem.NewPlate(scrollSize, normalScroll)
 
-	count++
-	plate = TestPlate(count % 4)
+	// count++
+	// plate = TestPlate(count % 4)
 	gameresult := winresultArray(plate)
 	fmt.Println(ScrollIndex, plate, gameresult)
 
@@ -116,7 +116,7 @@ func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
 	var freeresult map[string]interface{}
 	islink := false
 
-	for i, max := 0, 5; i < max; i++ {
+	for i, max := 0, len(freeGameWinRate); i < max; i++ {
 		ScrollIndex, plate := gamesystem.NewPlate(scrollSize, freeScroll)
 		gameresult := winresultArray(plate)
 		fmt.Println(ScrollIndex, plate, gameresult)
@@ -125,7 +125,7 @@ func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
 		islink = false
 		if len(gameresult) > 0 {
 			islink = true
-			freewinScore = betMoney * int64(gameresult[0][3])
+			freewinScore = betMoney * int64(gameresult[0][3]) * freeGameWinRate[i]
 		}
 
 		totalScores += freewinScore
