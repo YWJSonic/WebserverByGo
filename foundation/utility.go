@@ -39,6 +39,21 @@ func JSONToString(v interface{}) (out string) {
 	return
 }
 
+// StringToJSON ...
+func StringToJSON(jsStr string) map[string]interface{} {
+	return ByteToJSON([]byte(jsStr))
+}
+
+// ByteToJSON ...
+func ByteToJSON(jsByte []byte) map[string]interface{} {
+	var data map[string]interface{}
+	if errMsg := json.Unmarshal(jsByte, &data); errMsg != nil {
+		panic(errMsg)
+	}
+
+	return data
+}
+
 // InterfaceTofloat64 ...
 func InterfaceTofloat64(v interface{}) float64 {
 	return v.(float64)

@@ -1,0 +1,14 @@
+{
+"GameTypeID":"A173D52E01A6EB65A5D6EDFB71A8C39C",
+"IP":"192.168.1.32",
+"PORT":"8006",
+"DBIP":"192.168.1.14",
+"DBPORT":"3306",
+"DBUser":"serverConnect",
+"DBPassword":"123qweasdzxc",
+"AccountEncodeStr":"yrgb$",
+"RedisURL":"192.168.1.14:6379",
+"MaintainStartTime":"0 0 15 * * *",
+"MaintainFinishTime": "0 0 16 * * *",
+"Maintain":false
+}
