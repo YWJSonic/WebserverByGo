@@ -8,7 +8,7 @@ import (
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
 	"gitlab.com/WeberverByGo/foundation"
-	gameRules "gitlab.com/WeberverByGo/game/game5"
+	gameRules "gitlab.com/WeberverByGo/game/game6"
 	"gitlab.com/WeberverByGo/mycache"
 )
 
@@ -34,8 +34,8 @@ func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
 	betMoney := GetBetMoney(betIndex)
 	result := gameRules.Result(betMoney, attach.FreeCount)
 
-	attach.FreeCount = foundation.InterfaceToInt(result["freecount"])
-	saveAttach(playerID, attach)
+	// attach.FreeCount = foundation.InterfaceToInt(result["freecount"])
+	// saveAttach(playerID, attach)
 
 	msg := foundation.JSONToString(result)
 	msg = strings.ReplaceAll(msg, "\"", "\\\"")
