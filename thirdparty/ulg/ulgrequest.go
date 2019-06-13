@@ -38,7 +38,7 @@ func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, error
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
-	mycache.SetULGInfo(playerid, info.ToJSONStr())
+	mycache.SetULGInfo(playerid, foundation.JSONToString(info))
 	return &info, err
 }
 
@@ -118,7 +118,7 @@ func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
 
 // SaveULGInfo ...
 func SaveULGInfo(info *ULGInfo) {
-	mycache.SetULGInfo(info.PlayerID, info.ToJSONStr())
+	mycache.SetULGInfo(info.PlayerID, foundation.JSONToString(info))
 	db.UpdateULGInfoRow(info.GameToken, info.TotalBet, info.TotalWin, info.TotalLost, info.IsCheckOut)
 }
 

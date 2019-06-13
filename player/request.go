@@ -33,7 +33,7 @@ func GetAccountInfoByGameAccount(gameAccount string) (*AccountInfo, errorlog.Err
 
 // SaveAccountInfo ...
 func SaveAccountInfo(accInfo *AccountInfo) {
-	mycache.SetAccountInfo(accInfo.GameAccount, accInfo.ToJSONStr())
+	mycache.SetAccountInfo(accInfo.GameAccount, foundation.JSONToString(accInfo))
 	mycache.SetToken(accInfo.GameAccount, accInfo.Token)
 }
 
@@ -61,8 +61,7 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 func SavePlayerInfo(playerInfo *PlayerInfo) {
 	playerInfo.LastCheckTime = time.Now().Unix()
 
-	// (*data.CacheRef).Set(fmt.Sprintf("ID%dJS", playerInfo.ID), playerInfo.ToJSONStr(), time.Hour)
-	mycache.SetPlayerInfo(playerInfo.ID, playerInfo.ToJSONStr())
+	mycache.SetPlayerInfo(playerInfo.ID, foundation.JSONToString(playerInfo))
 	db.UpdatePlayerInfo(playerInfo.ID, playerInfo.Money, playerInfo.GameToken)
 
 }

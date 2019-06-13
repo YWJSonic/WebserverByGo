@@ -1,9 +1,7 @@
 package ulg
 
 import (
-	"encoding/json"
 	"strconv"
-	"strings"
 
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/player"
@@ -19,14 +17,6 @@ type ULGInfo struct {
 	IsCheckOut bool   `json:"CheckOut"`
 
 	AccountToken string `json:"AccountToken"` // Maintan checkout use
-}
-
-// ToJSONStr ...
-func (ulg ULGInfo) ToJSONStr() string {
-	data, _ := json.MarshalIndent(ulg, "", " ")
-	STR := string(data)
-	STR = strings.ReplaceAll(STR, string(10), ``)
-	return STR
 }
 
 // UlgResult plant ULG API Result

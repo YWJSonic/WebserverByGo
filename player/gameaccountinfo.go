@@ -1,8 +1,6 @@
 package player
 
 import (
-	"encoding/json"
-	"strings"
 	"time"
 
 	"gitlab.com/WeberverByGo/foundation"
@@ -46,12 +44,4 @@ func NewAccountInfo(account, gameAccount string, accountType int64) AccountInfo 
 		LoginTime:   time.Now().Unix(),
 		AccountType: accountType,
 	}
-}
-
-// ToJSONStr account info to json string
-func (a AccountInfo) ToJSONStr() string {
-	data, _ := json.MarshalIndent(a, "", " ")
-	STR := string(data)
-	STR = strings.ReplaceAll(STR, string(10), ``)
-	return STR
 }

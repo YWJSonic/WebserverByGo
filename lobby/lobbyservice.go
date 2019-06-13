@@ -9,8 +9,8 @@ import (
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/game"
-	"gitlab.com/WeberverByGo/log"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
 

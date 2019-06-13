@@ -1,8 +1,6 @@
 package player
 
 import (
-	"encoding/json"
-	"strings"
 	"time"
 
 	"gitlab.com/WeberverByGo/data"
@@ -31,20 +29,6 @@ func (p PlayerInfo) ToJSONClient() map[string]interface{} {
 	clientdata["money"] = p.Money
 	clientdata["gameaccount"] = p.GameAccount
 	return clientdata
-}
-
-// ToJSONStr ...
-func (p PlayerInfo) ToJSONStr() string {
-	data, _ := json.MarshalIndent(p, "", " ")
-	STR := string(data)
-	STR = strings.ReplaceAll(STR, string(10), ``)
-	return STR
-}
-
-// ToJson conver to json string
-func (p PlayerInfo) ToJson() []byte {
-	data, _ := json.MarshalIndent(p, "", " ")
-	return data
 }
 
 // ResultMap player conver to map, client data

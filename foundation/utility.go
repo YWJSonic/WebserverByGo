@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/mycache"
 )
 
 func init() {
@@ -29,14 +28,11 @@ func DeleteArrayElement(elementIndex interface{}, array []interface{}) []interfa
 }
 
 // JSONToString conver JsonStruct to JsonString
-func JSONToString(v interface{}) (out string) {
-	str, err := json.Marshal(v)
-	if err != nil {
-		return
-	}
-
-	out = string(str)
-	return
+func JSONToString(v interface{}) string {
+	data, _ := json.MarshalIndent(v, "", " ")
+	STR := string(data)
+	STR = strings.ReplaceAll(STR, string(10), ``)
+	return STR
 }
 
 // StringToJSON ...
@@ -110,42 +106,6 @@ func InterfaceToString(v interface{}) string {
 	return v.(string)
 }
 
-// NewAccount convert all plant account to server account
-func NewAccount(plant, account string) string {
-	return fmt.Sprintf("%s:%s", plant, account)
-}
-
-// NewGameAccount new game account
-func NewGameAccount(account string) string {
-	return MD5Code(data.AccountEncodeStr + account)
-}
-
-// NewToken ...
-func NewToken(gameAccount string) string {
-	return MD5Code(fmt.Sprintf("%s%d", gameAccount, ServerNowTime()))
-}
-
-// CheckToken Check Token func
-func CheckToken(gameAccount, token string) errorlog.ErrorMsg {
-	err := errorlog.New()
-	ServerToken := mycache.GetToken(gameAccount)
-	if ServerToken != token {
-		err.ErrorCode = code.Unauthenticated
-		err.Msg = "TokenError"
-	}
-	return err
-}
-
-// CheckGameType Check Game Type
-func CheckGameType(gameTypeID string) errorlog.ErrorMsg {
-	err := errorlog.New()
-	if gameTypeID != data.GameTypeID {
-		err.ErrorCode = code.GameTypeError
-		err.Msg = "GameTypeError"
-	}
-	return err
-}
-
 // MD5Code encode MD5
 func MD5Code(data string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(data)))
@@ -170,16 +130,6 @@ func RangeRandom(rangeInt []int) int {
 	}
 	return -1
 
-}
-
-// ServerNowTime Get now Unix time
-func ServerNowTime() int64 {
-	return time.Now().Unix()
-}
-
-// ServerNow Get now time
-func ServerNow() time.Time {
-	return time.Now()
 }
 
 // ConevrToTimeInt64 Get time point

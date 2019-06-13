@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"gitlab.com/WeberverByGo/log"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGo/messagehandle/log"
 
 	"gitlab.com/WeberverByGo/foundation"
 	gameRules "gitlab.com/WeberverByGo/game/game6"
@@ -84,7 +84,7 @@ func GetAttach(playerID int64) Attach {
 	return info
 }
 func saveAttach(playerid int64, info Attach) {
-	mycache.SetAttach(playerid, info.ToJSONStr())
+	mycache.SetAttach(playerid, foundation.JSONToString(info))
 	// db.UpdateAttach(playerid, gameRules.GameIndex, 0, info.FreeCount)
 }
 func newAttach() Attach {
