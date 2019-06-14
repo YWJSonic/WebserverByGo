@@ -3,7 +3,7 @@ package game5
 // 貓下去
 
 // Version ...
-const Version = "0.0.2"
+const Version = "0.1.3"
 
 // GameIndex game sort id
 const GameIndex = 5
