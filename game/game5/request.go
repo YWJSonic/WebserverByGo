@@ -8,8 +8,12 @@ import (
 )
 
 // BetRate ...
-func BetRate() []int64 {
-	return betRate
+func BetRate() map[string]interface{} {
+	tmp := make(map[string]interface{})
+	tmp["betrate"] = betRate
+	tmp["betratelinkindex"] = betRateLinkIndex
+	tmp["betratedefaultindex"] = betRateDefaultIndex
+	return tmp
 }
 
 // Scroll ...
