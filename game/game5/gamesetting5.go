@@ -13,7 +13,7 @@ const isSingleLine = true
 
 // BetRate ...
 var betRate = []int64{1, 10, 100, 500, 1000, 2000, 5000, 10000, 20000, 500000}
-var betRateLinkIndex = []int64{1, 2, 3, 4, 5}
+var betRateLinkIndex = []int64{1, 2, 3, 4, 6}
 var betRateDefaultIndex int64 = 1
 
 // ScrollSize ...
