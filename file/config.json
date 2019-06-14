@@ -1,7 +1,7 @@
 {
 "GameTypeID":"A173D52E01A6EB65A5D6EDFB71A8C39C",
 "IP":"192.168.1.32",
-"PORT":"8006",
+"PORT":"8000",
 "DBIP":"192.168.1.14",
 "DBPORT":"3306",
 "DBUser":"serverConnect",

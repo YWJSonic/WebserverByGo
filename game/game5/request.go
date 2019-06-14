@@ -7,13 +7,18 @@ import (
 	"gitlab.com/WeberverByGo/game/gamesystem"
 )
 
-// BetRate ...
-func BetRate() map[string]interface{} {
+// BetInitInfo init info
+func BetInitInfo() map[string]interface{} {
 	tmp := make(map[string]interface{})
 	tmp["betrate"] = betRate
 	tmp["betratelinkindex"] = betRateLinkIndex
 	tmp["betratedefaultindex"] = betRateDefaultIndex
 	return tmp
+}
+
+// BetRate ...
+func BetRate() []int64 {
+	return betRate
 }
 
 // Scroll ...

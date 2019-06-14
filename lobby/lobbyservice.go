@@ -91,7 +91,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = game.GetInitScroll()
-	result["betrate"] = game.GetBetRate()
+	result["betrate"] = game.GetInitBetRate()
 	// result["gameattach"] = game.GetAttach(playerInfo.ID)
 
 	foundation.HTTPResponse(w, result, err)
