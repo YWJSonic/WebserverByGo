@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	jsStr := fileload.Load("file/config.json")
+	jsStr := fileload.Load("./file/config.json")
 	config := foundation.StringToJSON(jsStr)
 
 	data.GameTypeID = foundation.InterfaceToString(config["GameTypeID"])

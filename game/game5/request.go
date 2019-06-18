@@ -293,7 +293,7 @@ func isWin(plates []int, result []int) bool {
 					IsWin = true
 				}
 			case -1002: // any bar
-				if foundation.IsInclude(plate, []int{7, 8, 9}) {
+				if foundation.IsInclude(plate, []int{6, 7, 8, 9}) {
 					IsWin = true
 				}
 			}
