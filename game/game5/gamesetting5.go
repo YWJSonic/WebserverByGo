@@ -48,7 +48,7 @@ var respinScroll2 = []int{4, 3, 4, 2, 2, 2, 2, 2, 3, 2, 2, 3, 4, 4, 2, 3, 4, 3, 
 var respinScroll3 = []int{3, 2, 4, 4, 3, 3, 4, 4, 2, 4, 4, 4, 2, 4, 4, 2, 4, 4, 3, 4}
 
 // RespinSetting 1 RTP:93, 2 RTP:96, 3 RTP:99
-const RespinSetting = 1
+var RespinSetting = 1
 
 // Items item index
 var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}

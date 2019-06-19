@@ -5,6 +5,7 @@ import (
 
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/game/gamesystem"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 // BetInitInfo init info
@@ -73,6 +74,16 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	}
 	return result
 
+}
+
+// SetInfo ...
+func SetInfo(gameIndex int, att map[string]interface{}) {
+	if GameIndex != gameIndex {
+		errorlog.ErrorLogPrintln("game5", "SetInfo Index Error")
+		return
+	}
+
+	RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
 }
 
 // TestPlate ...
