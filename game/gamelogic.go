@@ -23,18 +23,32 @@ func GetInitBetRate() interface{} {
 }
 
 // GetBetMoney ...
-func GetBetMoney(betIndex int64) int64 {
+func GetBetMoney(betIndex int) int64 {
 	betrate := gameRules.BetRate()
 	return betrate[betIndex]
 }
 
 // GameRequest ...
-func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
+func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
 	attach := GetAttach(playerID)
+	if attach.FreeCount >= gameRules.FreeGameTrigger {
+		attach.FreeCount %= gameRules.FreeGameTrigger
+	}
+	if attach.IsLockBet != 0 {
+		betIndex = attach.LockBetIndex
+	}
+
 	betMoney := GetBetMoney(betIndex)
 	result := gameRules.Result(betMoney, attach.FreeCount)
+	freeCount := foundation.InterfaceToInt(result["freecount"])
+	attach.FreeCount = freeCount
 
-	attach.FreeCount = foundation.InterfaceToInt(result["freecount"])
+	if freeCount != 0 {
+		attach = lockBet(attach, betIndex)
+		result["lockbetindex"] = betIndex
+	} else {
+		attach = unlockBet(attach)
+	}
 	saveAttach(playerID, attach)
 
 	msg := foundation.JSONToString(result)
@@ -46,6 +60,17 @@ func gameRequest(playerID, betIndex int64) (map[string]interface{}, int64) {
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 	return result, foundation.InterfaceToInt64(result["totalwinscore"])
+}
+
+func lockBet(att Attach, betindex int) Attach {
+	att.LockBetIndex = betindex
+	att.IsLockBet = 1
+	return att
+}
+func unlockBet(att Attach) Attach {
+	att.LockBetIndex = 1
+	att.IsLockBet = 0
+	return att
 }
 
 // InitAttach game start init attach
@@ -88,7 +113,11 @@ func saveAttach(playerid int64, info Attach) {
 	// db.UpdateAttach(playerid, gameRules.GameIndex, 0, info.FreeCount)
 }
 func newAttach() Attach {
-	return Attach{}
+	return Attach{
+		FreeCount:    0,
+		IsLockBet:    0,
+		LockBetIndex: 1,
+	}
 }
 func toAttach(rows []map[string]interface{}) Attach {
 	var info Attach

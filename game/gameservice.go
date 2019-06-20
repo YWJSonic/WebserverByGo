@@ -39,7 +39,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
-	betIndex := foundation.InterfaceToInt64(postData["bet"])
+	betIndex := foundation.InterfaceToInt(postData["bet"])
 	betMoney := GetBetMoney(betIndex)
 
 	// gametype check
