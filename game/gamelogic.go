@@ -33,6 +33,7 @@ func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
 	attach := GetAttach(playerID)
 	if attach.FreeCount >= gameRules.FreeGameTrigger {
 		attach.FreeCount %= gameRules.FreeGameTrigger
+		attach = newAttach()
 	}
 	if attach.IsLockBet != 0 {
 		betIndex = attach.LockBetIndex
@@ -43,12 +44,16 @@ func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
 	freeCount := foundation.InterfaceToInt(result["freecount"])
 	attach.FreeCount = freeCount
 
-	if freeCount != 0 {
+	result["islockbet"] = 0
+	result["lockbetindex"] = 1
+	if freeCount%gameRules.FreeGameTrigger > 0 {
 		attach = lockBet(attach, betIndex)
+		result["islockbet"] = 1
 		result["lockbetindex"] = betIndex
-	} else {
+	} else if freeCount%gameRules.FreeGameTrigger == 0 && freeCount > 0 {
 		attach = unlockBet(attach)
 	}
+
 	saveAttach(playerID, attach)
 
 	msg := foundation.JSONToString(result)
