@@ -45,9 +45,6 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	result["islockbet"] = 0
 	totalWin += normaltotalwin
 
-	if freeCount > 0 {
-		result["islockbet"] = 1
-	}
 	if otherdata["isrespin"].(int) == 1 {
 		respinresult, respintotalwin := outRespin(totalWin)
 		totalWin = respintotalwin
@@ -59,7 +56,6 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 		freeresult, freetotalwin := outputFreeSpin(betMoney)
 		totalWin += freetotalwin
 		result["freegame"] = freeresult
-		result["islockbet"] = 1
 		result["isfreegame"] = 1
 	}
 
