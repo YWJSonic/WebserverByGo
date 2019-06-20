@@ -5,6 +5,7 @@ import (
 
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/game/gamesystem"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 // BetInitInfo init info
@@ -73,6 +74,16 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	}
 	return result
 
+}
+
+// SetInfo ...
+func SetInfo(gameIndex int, att map[string]interface{}) {
+	if GameIndex != gameIndex {
+		errorlog.ErrorLogPrintln("game5", "SetInfo Index Error")
+		return
+	}
+
+	RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
 }
 
 // TestPlate ...
@@ -293,7 +304,7 @@ func isWin(plates []int, result []int) bool {
 					IsWin = true
 				}
 			case -1002: // any bar
-				if foundation.IsInclude(plate, []int{7, 8, 9}) {
+				if foundation.IsInclude(plate, []int{6, 7, 8, 9}) {
 					IsWin = true
 				}
 			}

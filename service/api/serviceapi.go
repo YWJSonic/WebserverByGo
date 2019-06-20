@@ -10,6 +10,7 @@ import (
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
+	gameRules "gitlab.com/WeberverByGo/game/game5"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
@@ -40,6 +41,7 @@ func ServiceStart() []foundation.RESTfulURL {
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: foundation.Backend})
 
 	return HandleURL
 }
@@ -96,4 +98,16 @@ func MaintainCheckout() {
 // ClearAllCache clear all cache data
 func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mycache.ClearAllCache()
+}
+
+func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	postData := foundation.PostData(r)
+	configstr := foundation.InterfaceToString(postData["configstr"])
+	gameindex := foundation.InterfaceToInt(postData["gameindex"])
+
+	config := foundation.StringToJSON(configstr)
+	gameRules.SetInfo(gameindex, config)
 }

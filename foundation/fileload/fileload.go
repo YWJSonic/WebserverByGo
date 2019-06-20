@@ -1,7 +1,6 @@
 package fileload
 
 import (
-	"fmt"
 	"io/ioutil"
 )
 
@@ -11,6 +10,5 @@ func Load(path string) string {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(string(dat))
 	return string(dat)
 }
