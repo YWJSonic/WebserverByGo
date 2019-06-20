@@ -38,10 +38,6 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	var totalWin int64
 	freeCount := foundation.InterfaceToInt(att[0])
 
-	if freeCount >= FreeGameTrigger {
-		freeCount %= FreeGameTrigger
-	}
-
 	fmt.Println("----------------------------------------------------------------------------------")
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
 	result = foundation.AppendMap(result, otherdata)
