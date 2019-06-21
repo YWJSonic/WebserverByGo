@@ -1,7 +1,11 @@
 package crontab
 
 import (
+	"time"
+
 	"github.com/robfig/cron"
+	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/foundation"
 )
 
 func init() {
@@ -32,4 +36,10 @@ func NewCronBaseJob(spec string, job cron.Job) {
 // NewCronJob add new params job
 func NewCronJob(spec string, job *ParamsJob) {
 	c.AddJob(spec, job)
+}
+
+// SpecToTime  conver spec string to time
+func SpecToTime(spec string) time.Time {
+	target, _ := cron.Parse(data.MaintainStartTime)
+	return target.Next(foundation.ServerNow())
 }

@@ -12,6 +12,7 @@ import (
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/WeberverByGo/setting"
 	"gitlab.com/WeberverByGo/thirdparty/guest"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
@@ -93,7 +94,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SaveAccountInfo(&accountInfo)
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
-	result["servertime"] = foundation.ServerNowTime()
+	result["serversetting"] = setting.New()
 
 	loginfo := log.New(log.Login)
 	loginfo.Account = accountInfo.GameAccount
