@@ -14,7 +14,8 @@
 "AccountEncodeStr":"yrgb$",
 "RedisURL":"192.168.1.14:6379",
 "MaintainStartTime":"0 0 15 * * *",
-"MaintainFinishTime": "0 0 16 * * *",
+"MaintainFinishTime": "0 5 15 * * *",
+"ULGMaintainCheckoutTime":"0 10 15 * * *",
 "Maintain":false,
 "DebugLog":true
 }

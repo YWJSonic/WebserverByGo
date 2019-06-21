@@ -1,8 +1,6 @@
 package game5
 
 import (
-	"fmt"
-
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/game/gamesystem"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
@@ -38,7 +36,6 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	var totalWin int64
 	freeCount := foundation.InterfaceToInt(att[0])
 
-	fmt.Println("----------------------------------------------------------------------------------")
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, freeCount)
 	result = foundation.AppendMap(result, otherdata)
 	result["normalresult"] = normalresult
@@ -121,7 +118,6 @@ func outputGame(betMoney int64, freecount int) (map[string]interface{}, map[stri
 	// count++
 	// plate = TestPlate(count % 4)
 	gameresult := winresultArray(plate)
-	fmt.Println(ScrollIndex, plate, gameresult)
 
 	otherdata["isfreegame"] = 0
 	otherdata["freecount"] = freecount % FreeGameTrigger
@@ -160,8 +156,6 @@ func outputFreeSpin(betMoney int64) ([]interface{}, int64) {
 	for i, max := 0, len(freeGameWinRate); i < max; i++ {
 		ScrollIndex, plate := gamesystem.NewPlate(scrollSize, freeScroll)
 		gameresult := winresultArray(plate)
-		fmt.Println(ScrollIndex, plate, gameresult)
-
 		freewinScore = 0
 		islink = false
 		if len(gameresult) > 0 {
@@ -182,7 +176,6 @@ func outRespin(normalScore int64) (map[string]interface{}, int64) {
 
 	ScrollIndex, plate := gamesystem.NewPlate([]int{1}, [][]int{respuinScroll()})
 	gameresult := respinResult(plate)
-	fmt.Println(ScrollIndex, plate, gameresult)
 
 	if len(gameresult) > 0 {
 		islink = true

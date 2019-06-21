@@ -2,20 +2,10 @@ package crontab
 
 import (
 	"github.com/robfig/cron"
-	"gitlab.com/WeberverByGo/data"
 )
 
 func init() {
 	c = cron.New()
-
-	c.AddFunc(data.MaintainStartTime, func() {
-		data.Maintain = true
-	})
-
-	c.AddFunc(data.MaintainFinishTime, func() {
-		data.Maintain = false
-	})
-
 	c.Start()
 }
 
