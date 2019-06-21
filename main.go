@@ -11,6 +11,7 @@ import (
 	"gitlab.com/WeberverByGo/game"
 	"gitlab.com/WeberverByGo/lobby"
 	"gitlab.com/WeberverByGo/login"
+	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/service/api"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
@@ -32,6 +33,7 @@ func main() {
 	data.MaintainStartTime = foundation.InterfaceToString(config["MaintainStartTime"])
 	data.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
 	data.Maintain = foundation.InterfaceToBool(config["Maintain"])
+	errorlog.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
 
 	ulg.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
 	ulg.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
