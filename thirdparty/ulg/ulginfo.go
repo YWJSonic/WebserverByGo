@@ -115,9 +115,10 @@ type AmountCoin struct {
 
 // platform api url
 var (
-	LoginURL      = ""
-	GetuserURL    = ""
-	AuthorizedURL = ""
-	ExchangeURL   = ""
-	CheckoutURL   = ""
+	ULGMaintainCheckoutTime = ""
+	LoginURL                = ""
+	GetuserURL              = ""
+	AuthorizedURL           = ""
+	ExchangeURL             = ""
+	CheckoutURL             = ""
 )

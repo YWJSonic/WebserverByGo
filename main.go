@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	_ "gitlab.com/WeberverByGo/crontab"
+	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/event"
@@ -40,6 +40,7 @@ func main() {
 	ulg.AuthorizedURL = foundation.InterfaceToString(config["ULGAuthorizedURL"])
 	ulg.ExchangeURL = foundation.InterfaceToString(config["ULGExchangeURL"])
 	ulg.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
+	ulg.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
 	var initArray [][]foundation.RESTfulURL
 	initArray = append(initArray, login.ServiceStart())
@@ -47,6 +48,15 @@ func main() {
 	initArray = append(initArray, game.ServiceStart())
 	initArray = append(initArray, api.ServiceStart())
 	db.SetDBConn()
+
+	crontab.NewCron(data.MaintainStartTime, func() {
+		data.Maintain = true
+	})
+
+	crontab.NewCron(data.MaintainFinishTime, func() {
+		data.Maintain = false
+	})
+	crontab.NewCron(ulg.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
 	go event.Update()
 	foundation.HTTPLisentRun(data.ServerURL(), initArray...)

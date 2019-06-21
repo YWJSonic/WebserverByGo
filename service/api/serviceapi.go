@@ -32,9 +32,6 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	crontab.NewCron("0 20 15 * * *", MaintainCheckout)
-	// crontab.NewCron("*/10 * * * * *", MaintainCheckout)
-
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
 	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
