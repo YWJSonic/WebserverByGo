@@ -115,9 +115,9 @@ type AmountCoin struct {
 
 // platform api url
 var (
-	LoginURL      = "http://54.65.188.126/api/v1/game/login"
-	GetuserURL    = "http://54.65.188.126/api/v1/game/get_user"
-	AuthorizedURL = "http://54.65.188.126/api/v1/game/authorized"
-	ExchangeURL   = "http://54.65.188.126/api/v1/game/exchange"
-	CheckoutURL   = "http://54.65.188.126/api/v1/game/checkout"
+	LoginURL      = ""
+	GetuserURL    = ""
+	AuthorizedURL = ""
+	ExchangeURL   = ""
+	CheckoutURL   = ""
 )
