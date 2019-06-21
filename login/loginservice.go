@@ -93,6 +93,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SaveAccountInfo(&accountInfo)
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
+	result["servertime"] = foundation.ServerNowTime()
 
 	loginfo := log.New(log.Login)
 	loginfo.Account = accountInfo.GameAccount
