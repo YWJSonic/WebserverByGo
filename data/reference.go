@@ -11,38 +11,31 @@ const CacheDeleteTime time.Duration = time.Hour
 // ConnectTimeOut Client connect time out
 const ConnectTimeOut int64 = 15e9
 
-// MaintainStartTime cron maintain schedule
-var MaintainStartTime = "0 0 15 * * *"
-
-// MaintainFinishTime cron maintain schedule
-var MaintainFinishTime = "0 0 16 * * *"
-
-// GameTypeID this server game id
-var GameTypeID = "A173D52E01A6EB65A5D6EDFB71A8C39C"
-
-// IP Server Listen address
-var IP = "127.0.0.1"
-
-// PORT ServerListen PORT
-var PORT = "8000"
-
-// DBIP server connect DB address
-var DBIP = "127.0.0.1"
-
-// DBPORT server connect DB port
-var DBPORT = "3306"
-
-// DBUser Connect name
-var DBUser = "serverConnect"
-
-// DBPassword connect Password
-var DBPassword = "123qweasdzxc"
-
-// AccountEncodeStr account encode noise
-var AccountEncodeStr = "yrgb$"
-
-// RedisURL cache server address
-var RedisURL = "127.0.0.1:6379"
+// platform api url
+var (
+	// MaintainStartTime cron maintain schedule
+	MaintainStartTime = "0 0 15 * * *"
+	// MaintainFinishTime cron maintain schedule
+	MaintainFinishTime = "0 0 16 * * *"
+	// GameTypeID this server game id
+	GameTypeID = "A173D52E01A6EB65A5D6EDFB71A8C39C"
+	// IP Server Listen address
+	IP = "127.0.0.1"
+	// PORT ServerListen PORT
+	PORT = "8000"
+	// DBIP server connect DB address
+	DBIP = "127.0.0.1"
+	// DBPORT server connect DB port
+	DBPORT = "3306"
+	// DBUser Connect name
+	DBUser = "serverConnect"
+	// DBPassword connect Password
+	DBPassword = "123qweasdzxc"
+	// AccountEncodeStr account encode noise
+	AccountEncodeStr = "yrgb$"
+	// RedisURL cache server address
+	RedisURL = "127.0.0.1:6379"
+)
 
 // Maintain Is sow maintain time
 var Maintain = false
