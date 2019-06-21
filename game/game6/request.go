@@ -42,7 +42,7 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 		result["scatter2result"] = s2Result
 
 		if otherdata["isscatter1"].(int) == 1 {
-			s1Result, scatter1totalwin := scatter1Result(betMoney) 
+			s1Result, scatter1totalwin := scatter1Result(betMoney)
 			totalWin += scatter1totalwin
 			result["scatter1result"] = s1Result
 		}
@@ -77,7 +77,6 @@ func outputGame(betMoney int64) (map[string]interface{}, map[string]interface{},
 	// plate = TestPlate(count % 1331)
 	plate = []int{1, 1, 1}
 	gameresult := winresultArray(plate)
-	fmt.Println(ScrollIndex, plate, gameresult)
 
 	otherdata["isscatter1"] = 0
 	otherdata["isscatter2"] = 0

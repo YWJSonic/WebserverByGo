@@ -15,5 +15,6 @@
 "RedisURL":"192.168.1.14:6379",
 "MaintainStartTime":"0 0 15 * * *",
 "MaintainFinishTime": "0 0 16 * * *",
-"Maintain":false
+"Maintain":false,
+"DebugLog":true
 }
