@@ -1,4 +1,9 @@
 {
+"ULGLoginURL":"http://54.65.188.126/api/v1/game/login",
+"ULGGetuserURL":"http://54.65.188.126/api/v1/game/get_user",
+"ULGAuthorizedURL":"http://54.65.188.126/api/v1/game/authorized",
+"ULGExchangeURL":"http://54.65.188.126/api/v1/game/exchange",
+"ULGCheckoutURL":"http://54.65.188.126/api/v1/game/checkout",
 "GameTypeID":"A173D52E01A6EB65A5D6EDFB71A8C39C",
 "IP":"192.168.1.32",
 "PORT":"8000",

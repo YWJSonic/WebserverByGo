@@ -12,6 +12,7 @@ import (
 	"gitlab.com/WeberverByGo/lobby"
 	"gitlab.com/WeberverByGo/login"
 	"gitlab.com/WeberverByGo/service/api"
+	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
 
 func main() {
@@ -31,6 +32,12 @@ func main() {
 	data.MaintainStartTime = foundation.InterfaceToString(config["MaintainStartTime"])
 	data.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
 	data.Maintain = foundation.InterfaceToBool(config["Maintain"])
+
+	ulg.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
+	ulg.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
+	ulg.AuthorizedURL = foundation.InterfaceToString(config["ULGAuthorizedURL"])
+	ulg.ExchangeURL = foundation.InterfaceToString(config["ULGExchangeURL"])
+	ulg.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
 
 	var initArray [][]foundation.RESTfulURL
 	initArray = append(initArray, login.ServiceStart())

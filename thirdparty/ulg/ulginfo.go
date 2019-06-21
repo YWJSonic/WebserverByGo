@@ -114,10 +114,10 @@ type AmountCoin struct {
 }
 
 // platform api url
-const (
-	loginURL      string = "http://54.65.188.126/api/v1/game/login"
-	getuserURL    string = "http://54.65.188.126/api/v1/game/get_user"
-	authorizedURL string = "http://54.65.188.126/api/v1/game/authorized"
-	exchangeURL   string = "http://54.65.188.126/api/v1/game/exchange"
-	checkoutURL   string = "http://54.65.188.126/api/v1/game/checkout"
+var (
+	LoginURL      = "http://54.65.188.126/api/v1/game/login"
+	GetuserURL    = "http://54.65.188.126/api/v1/game/get_user"
+	AuthorizedURL = "http://54.65.188.126/api/v1/game/authorized"
+	ExchangeURL   = "http://54.65.188.126/api/v1/game/exchange"
+	CheckoutURL   = "http://54.65.188.126/api/v1/game/checkout"
 )

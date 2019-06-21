@@ -149,7 +149,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gameid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(getuserURL, postData)
+	jsbyte := foundation.HTTPPostRequest(GetuserURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
@@ -173,7 +173,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gametypeid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(authorizedURL, postData)
+	jsbyte := foundation.HTTPPostRequest(AuthorizedURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
@@ -200,7 +200,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_amount": {fmt.Sprint(coinamount)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(exchangeURL, postData)
+	jsbyte := foundation.HTTPPostRequest(ExchangeURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
@@ -228,7 +228,7 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 		"lost":       {totalost},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(checkoutURL, postData)
+	jsbyte := foundation.HTTPPostRequest(CheckoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"
