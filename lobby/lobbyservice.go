@@ -87,6 +87,14 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
+	// ulg result info
+	thirdpartyresult := make(map[string]interface{})
+	thirdpartyresult["isexchange"] = 0
+	if playerInfo.GameToken != "" {
+		thirdpartyresult["isexchange"] = 1
+	}
+	result["thirdparty"] = thirdpartyresult
+
 	game.InitAttach(playerInfo.ID)
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
