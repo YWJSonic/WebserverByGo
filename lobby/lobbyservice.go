@@ -146,8 +146,8 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	accountToken := foundation.InterfaceToString(postData["accounttoken"])
 	gametypeid := postData["gametypeid"].(string)
-	cointype := foundation.InterfaceToInt(postData["cointype"])
-	coinamount := foundation.InterfaceToInt(postData["coinamount"])
+	cointype := foundation.InterfaceToInt64(postData["cointype"])
+	coinamount := foundation.InterfaceToInt64(postData["coinamount"])
 
 	err := errorlog.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
@@ -192,7 +192,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	_, err = ulg.NewULGInfo(playerInfo.ID, ulguser.GameToken, accountToken)
+	_, err = ulg.NewULGInfo(playerInfo.ID, coinamount, ulguser.GameToken, accountToken)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
@@ -283,6 +283,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	result := make(map[string]interface{})
 	result["userCoinQuota"] = ulgCheckOutResult.UserCoinQuota
+	result["exchangeamount"] = ulginfo.ExchangeAmount
 
 	foundation.HTTPResponse(w, result, err)
 }

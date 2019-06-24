@@ -28,17 +28,18 @@ import (
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, errorlog.ErrorMsg) {
+func NewULGInfo(playerid, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
-		PlayerID:     playerid,
-		GameToken:    gametoken,
-		AccountToken: accounttoken,
+		PlayerID:       playerid,
+		GameToken:      gameToken,
+		AccountToken:   accountToken,
+		ExchangeAmount: exchangAmount,
 	}
-	err := db.NewULGInfoRow(playerid, gametoken, accounttoken)
+	err := db.NewULGInfoRow(playerid, gameToken, accountToken, exchangAmount)
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
-	mycache.SetULGInfo(playerid, foundation.JSONToString(info))
+	mycache.SetULGInfo(info.PlayerID, foundation.JSONToString(info))
 	return &info, err
 }
 
@@ -125,12 +126,13 @@ func SaveULGInfo(info *ULGInfo) {
 // MakeULGInfo get ulg info form db
 func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 	info := &ULGInfo{
-		PlayerID:   foundation.InterfaceToInt64(row["PlayerID"]),
-		GameToken:  foundation.InterfaceToString(row["GameToken"]),
-		TotalBet:   foundation.InterfaceToInt64(row["TotalBet"]),
-		TotalWin:   foundation.InterfaceToInt64(row["TotalWin"]),
-		TotalLost:  foundation.InterfaceToInt64(row["TotalLost"]),
-		IsCheckOut: foundation.InterfaceToBool(row["CheckOut"]),
+		PlayerID:       foundation.InterfaceToInt64(row["PlayerID"]),
+		GameToken:      foundation.InterfaceToString(row["GameToken"]),
+		ExchangeAmount: foundation.InterfaceToInt64(row["ExchangeAmount"]),
+		TotalBet:       foundation.InterfaceToInt64(row["TotalBet"]),
+		TotalWin:       foundation.InterfaceToInt64(row["TotalWin"]),
+		TotalLost:      foundation.InterfaceToInt64(row["TotalLost"]),
+		IsCheckOut:     foundation.InterfaceToBool(row["CheckOut"]),
 	}
 
 	if _, ok := row["AccountToken"]; ok {
@@ -189,7 +191,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 }
 
 // Exchange ...
-func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
+func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int64) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
 	var info UlgResult
 	err := errorlog.New()
 	postData := map[string][]string{
