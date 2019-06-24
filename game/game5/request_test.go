@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	game5 "./"
+	"gitlab.com/WeberverByGo/game/game5"
 )
 
 func TestResult(t *testing.T) {
