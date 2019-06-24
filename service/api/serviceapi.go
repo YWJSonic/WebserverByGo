@@ -81,7 +81,7 @@ func MaintainCheckout() {
 	fmt.Println(infos, err)
 
 	for _, ulginfo := range infos {
-		_, err = ulg.Checkout(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
 			errorlog.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}

@@ -218,16 +218,16 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 }
 
 // Checkout ...
-func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
+func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.ErrorMsg) { //accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
 	var info UlgCheckOutResult
 	err := errorlog.New()
 	postData := map[string][]string{
-		"game_token": {gametoken},
+		"game_token": {ulgInfo.GameToken},
 		"game_id":    {gameid},
-		"token":      {accounttoken},
-		"amount":     {amount},
-		"win":        {totalwin},
-		"lost":       {totalost},
+		"token":      {ulgInfo.AccountToken},
+		"amount":     {fmt.Sprint(ulgInfo.TotalBet)},
+		"win":        {fmt.Sprint(ulgInfo.TotalWin)},
+		"lost":       {fmt.Sprint(ulgInfo.TotalLost)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := foundation.HTTPPostRequest(CheckoutURL, postData)
@@ -238,6 +238,19 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 
 	if info.Result == 1 {
 		err.ErrorCode = code.OK
+		if info.UserCoinQuota.Coin1Out > 0 {
+			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin1Out - ulgInfo.ExchangeAmount
+
+		} else if info.UserCoinQuota.Coin2Out > 0 {
+			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin2Out - ulgInfo.ExchangeAmount
+
+		} else if info.UserCoinQuota.Coin3Out > 0 {
+			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin3Out - ulgInfo.ExchangeAmount
+
+		} else if info.UserCoinQuota.Coin4Out > 0 {
+			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin4Out - ulgInfo.ExchangeAmount
+
+		}
 	} else {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = info.ErrorMsg
