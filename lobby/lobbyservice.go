@@ -282,7 +282,6 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	result := make(map[string]interface{})
 	result["userCoinQuota"] = ulgCheckOutResult.UserCoinQuota
-	result["exchangeamount"] = ulginfo.ExchangeAmount
 
 	foundation.HTTPResponse(w, result, err)
 }
