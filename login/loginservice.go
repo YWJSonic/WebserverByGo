@@ -63,6 +63,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
 			err.ErrorCode = code.FailedPrecondition
+			err.Msg = "ULG User Error"
 			foundation.HTTPResponse(w, "", err)
 			return
 		}
