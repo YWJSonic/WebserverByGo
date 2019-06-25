@@ -28,14 +28,15 @@ import (
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
+func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
 		PlayerID:       playerid,
 		GameToken:      gameToken,
 		AccountToken:   accountToken,
+		ExchangeType:   cointype,
 		ExchangeAmount: exchangAmount,
 	}
-	err := db.NewULGInfoRow(playerid, gameToken, accountToken, exchangAmount)
+	err := db.NewULGInfoRow(playerid, gameToken, accountToken, exchangAmount, cointype)
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
@@ -128,6 +129,8 @@ func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 	info := &ULGInfo{
 		PlayerID:       foundation.InterfaceToInt64(row["PlayerID"]),
 		GameToken:      foundation.InterfaceToString(row["GameToken"]),
+		AccountToken:   foundation.InterfaceToString(row["AccountToken"]),
+		ExchangeType:   foundation.InterfaceToInt64(row["ExchangeType"]),
 		ExchangeAmount: foundation.InterfaceToInt64(row["ExchangeAmount"]),
 		TotalBet:       foundation.InterfaceToInt64(row["TotalBet"]),
 		TotalWin:       foundation.InterfaceToInt64(row["TotalWin"]),
@@ -238,18 +241,15 @@ func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.Erro
 
 	if info.Result == 1 {
 		err.ErrorCode = code.OK
-		if info.UserCoinQuota.Coin1Out > 0 {
+		switch ulgInfo.ExchangeType {
+		case 1:
 			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin1Out - ulgInfo.ExchangeAmount
-
-		} else if info.UserCoinQuota.Coin2Out > 0 {
-			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin2Out - ulgInfo.ExchangeAmount
-
-		} else if info.UserCoinQuota.Coin3Out > 0 {
-			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin3Out - ulgInfo.ExchangeAmount
-
-		} else if info.UserCoinQuota.Coin4Out > 0 {
-			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin4Out - ulgInfo.ExchangeAmount
-
+		case 2:
+			info.UserCoinQuota.Coin2Out = info.UserCoinQuota.Coin2Out - ulgInfo.ExchangeAmount
+		case 3:
+			info.UserCoinQuota.Coin3Out = info.UserCoinQuota.Coin3Out - ulgInfo.ExchangeAmount
+		case 4:
+			info.UserCoinQuota.Coin4Out = info.UserCoinQuota.Coin4Out - ulgInfo.ExchangeAmount
 		}
 	} else {
 		err.ErrorCode = code.ExchangeError

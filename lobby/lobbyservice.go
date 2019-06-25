@@ -191,7 +191,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	_, err = ulg.NewULGInfo(playerInfo.ID, coinamount, ulguser.GameToken, accountToken)
+	_, err = ulg.NewULGInfo(playerInfo.ID, cointype, coinamount, ulguser.GameToken, accountToken)
 	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return

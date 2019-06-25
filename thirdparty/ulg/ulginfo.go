@@ -11,6 +11,7 @@ import (
 type ULGInfo struct {
 	PlayerID       int64  `json:"PlayerID"`
 	GameToken      string `json:"GameToken"` // platform GameToken
+	ExchangeType   int64  `json:"ExchangeType"`
 	ExchangeAmount int64  `json:"ExchangeAmount"`
 	TotalBet       int64  `json:"TotalBet"`
 	TotalWin       int64  `json:"TotalWin"`
