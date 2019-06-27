@@ -62,17 +62,17 @@ func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 // MaintainStart Maintain API
 func MaintainStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.Maintain = true
+	data.EnableMaintain(true)
 }
 
 // MaintainEnd Maintain API
 func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.Maintain = false
+	data.EnableMaintain(false)
 }
 
 // MaintainCheckout auto checkout ulg
 func MaintainCheckout() {
-	if !data.Maintain {
+	if !data.IsMaintain() {
 		errorlog.LogPrintln("API Warning: MaintainCheckout not in maintain")
 		return
 	}
@@ -98,9 +98,6 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
-
 	postData := foundation.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
 	gameindex := foundation.InterfaceToInt(postData["gameindex"])

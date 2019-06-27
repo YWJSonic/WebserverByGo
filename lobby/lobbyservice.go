@@ -37,10 +37,7 @@ func ServiceStart() []foundation.RESTfulURL {
 }
 
 func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
 	result := make(map[string]interface{})
-	// loginfo := log.New(log.GetPlayer)
 	err := errorlog.New()
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
@@ -105,8 +102,6 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
 	err := errorlog.New()
 	postData := foundation.PostData(r)
 	//
@@ -138,8 +133,6 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
@@ -214,8 +207,6 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
 	playerID := foundation.InterfaceToInt64(postData["playerid"])

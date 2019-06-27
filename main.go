@@ -32,8 +32,9 @@ func main() {
 	data.RedisURL = foundation.InterfaceToString(config["RedisURL"])
 	data.MaintainStartTime = foundation.InterfaceToString(config["MaintainStartTime"])
 	data.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
-	data.Maintain = foundation.InterfaceToBool(config["Maintain"])
 	errorlog.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
+
+	data.EnableMaintain(foundation.InterfaceToBool(config["Maintain"]))
 
 	ulg.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
 	ulg.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
@@ -50,11 +51,11 @@ func main() {
 	db.SetDBConn()
 
 	crontab.NewCron(data.MaintainStartTime, func() {
-		data.Maintain = true
+		data.EnableMaintain(true)
 	})
 
 	crontab.NewCron(data.MaintainFinishTime, func() {
-		data.Maintain = false
+		data.EnableMaintain(false)
 	})
 	crontab.NewCron(ulg.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
