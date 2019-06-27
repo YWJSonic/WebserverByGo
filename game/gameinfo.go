@@ -2,7 +2,7 @@ package game
 
 // Attach game att data
 type Attach struct {
-	FreeCount    int `json:"freecount"`
-	IsLockBet    int `json:"islockbet"`
-	LockBetIndex int `json:"lockbetindex"`
+	FreeCount    int64 `json:"freecount"`
+	IsLockBet    int64 `json:"islockbet"`
+	LockBetIndex int64 `json:"lockbetindex"`
 }

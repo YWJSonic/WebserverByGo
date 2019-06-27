@@ -57,10 +57,6 @@ func Result(betMoney int64, att ...interface{}) map[string]interface{} {
 	}
 
 	result["totalwinscore"] = totalWin
-
-	if !(gamesystem.IsInTotalMoneyWinLimit(betMoney, totalWin) || gamesystem.IsInTotalBetRateWinLimit(betMoney, totalWin)) {
-		return Result(betMoney, freeCount)
-	}
 	return result
 
 }

@@ -9,6 +9,7 @@ import (
 
 	"gitlab.com/WeberverByGo/foundation"
 	gameRules "gitlab.com/WeberverByGo/game/game5"
+	"gitlab.com/WeberverByGo/game/gamesystem"
 	"gitlab.com/WeberverByGo/mycache"
 )
 
@@ -23,13 +24,13 @@ func GetInitBetRate() interface{} {
 }
 
 // GetBetMoney ...
-func GetBetMoney(betIndex int) int64 {
+func GetBetMoney(betIndex int64) int64 {
 	betrate := gameRules.BetRate()
 	return betrate[betIndex]
 }
 
 // GameRequest ...
-func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
+func gameRequest(playerID, playerMoney int64, betIndex int64) (map[string]interface{}, map[string]int64) {
 	attach := GetAttach(playerID)
 	if attach.FreeCount >= gameRules.FreeGameTrigger {
 		attach.FreeCount %= gameRules.FreeGameTrigger
@@ -39,9 +40,23 @@ func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
 		betIndex = attach.LockBetIndex
 	}
 
+	var result map[string]interface{}
+	var totalWinScore, freeCount int64
+	otherData := make(map[string]int64)
 	betMoney := GetBetMoney(betIndex)
-	result := gameRules.Result(betMoney, attach.FreeCount)
-	freeCount := foundation.InterfaceToInt(result["freecount"])
+
+	for index, max := 0, 2; index < max; index++ {
+
+		result = gameRules.Result(betMoney, attach.FreeCount)
+		totalWinScore = foundation.InterfaceToInt64(result["totalwinscore"])
+
+		if gamesystem.IsInTotalMoneyWinLimit(betMoney, totalWinScore, gameRules.WinScoreLimit) && gamesystem.IsInTotalBetRateWinLimit(betMoney, totalWinScore, gameRules.WinBetRateLimit) {
+			break
+		}
+	}
+
+	totalWinScore = foundation.InterfaceToInt64(result["totalwinscore"])
+	freeCount = foundation.InterfaceToInt64(result["freecount"])
 	attach.FreeCount = freeCount
 
 	result["islockbet"] = 0
@@ -53,21 +68,24 @@ func gameRequest(playerID int64, betIndex int) (map[string]interface{}, int64) {
 	} else if freeCount%gameRules.FreeGameTrigger == 0 && freeCount > 0 {
 		attach = unlockBet(attach)
 	}
-
 	saveAttach(playerID, attach)
+
+	otherData["betindex"] = betIndex
+	otherData["totalwinscore"] = totalWinScore
+	otherData["playermoney"] = playerMoney + totalWinScore - betMoney
 
 	msg := foundation.JSONToString(result)
 	msg = strings.ReplaceAll(msg, "\"", "\\\"")
 	loginfo := log.New(log.GameResult)
 	loginfo.PlayerID = playerID
-	loginfo.IValue1 = foundation.InterfaceToInt64(result["totalwinscore"])
+	loginfo.IValue1 = totalWinScore
 	loginfo.IValue2 = betMoney
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
-	return result, foundation.InterfaceToInt64(result["totalwinscore"])
+	return result, otherData
 }
 
-func lockBet(att Attach, betindex int) Attach {
+func lockBet(att Attach, betindex int64) Attach {
 	att.LockBetIndex = betindex
 	att.IsLockBet = 1
 	return att
@@ -130,7 +148,7 @@ func toAttach(rows []map[string]interface{}) Attach {
 	for _, row := range rows {
 		switch foundation.InterfaceToInt64(row["Type"]) {
 		case 0:
-			info.FreeCount = foundation.InterfaceToInt(row["IValue"])
+			info.FreeCount = foundation.InterfaceToInt64(row["IValue"])
 		}
 	}
 	return info

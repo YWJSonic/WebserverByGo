@@ -34,12 +34,9 @@ func ServiceStart() []foundation.RESTfulURL {
 }
 
 func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
-
 	postData := foundation.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
-	betIndex := foundation.InterfaceToInt(postData["bet"])
+	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	betMoney := GetBetMoney(betIndex)
 
 	// gametype check
@@ -83,12 +80,12 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	result, totalwinscore := gameRequest(playerinfo.ID, betIndex)
-	playerinfo.Money = playerinfo.Money + totalwinscore - betMoney
+	result, otherData := gameRequest(playerinfo.ID, playerinfo.Money, betIndex)
+	playerinfo.Money = otherData["playermoney"]
 	result["playermoney"] = playerinfo.Money
 
-	ulginfo.TotalBet += betMoney
-	ulginfo.TotalWin += totalwinscore
+	ulginfo.TotalBet += GetBetMoney(otherData["betindex"])
+	ulginfo.TotalWin += otherData["totalwinscore"]
 	player.SavePlayerInfo(playerinfo)
 	ulg.SaveULGInfo(ulginfo)
 
