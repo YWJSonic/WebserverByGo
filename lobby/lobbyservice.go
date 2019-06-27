@@ -8,13 +8,13 @@ import (
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
+	gameRule "gitlab.com/game7"
 )
 
 var isInit = false
@@ -95,11 +95,11 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	result["thirdparty"] = thirdpartyresult
 
-	game.InitAttach(playerInfo.ID)
+	gameRule.InitAttach(playerInfo.ID)
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
-	result["reel"] = game.GetInitScroll()
-	result["betrate"] = game.GetInitBetRate()
+	result["reel"] = gameRule.GetInitScroll()
+	result["betrate"] = gameRule.GetInitBetRate()
 	// result["gameattach"] = game.GetAttach(playerInfo.ID)
 
 	foundation.HTTPResponse(w, result, err)

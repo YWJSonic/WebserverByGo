@@ -10,10 +10,10 @@ import (
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
-	gameRules "gitlab.com/WeberverByGo/game/game5"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
+	gameRule "gitlab.com/game7"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -97,6 +97,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet set game config
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -106,5 +107,5 @@ func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	gameindex := foundation.InterfaceToInt(postData["gameindex"])
 
 	config := foundation.StringToJSON(configstr)
-	gameRules.SetInfo(gameindex, config)
+	gameRule.SetInfo(gameindex, config)
 }

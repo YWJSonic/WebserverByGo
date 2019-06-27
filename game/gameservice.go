@@ -1,16 +1,15 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/db"
+
+	gameRule "gitlab.com/game7"
+
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/player"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -38,59 +37,61 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 
 	postData := foundation.PostData(r)
-	token := foundation.InterfaceToString(postData["token"])
-	betIndex := foundation.InterfaceToInt(postData["bet"])
-	betMoney := GetBetMoney(betIndex)
+	// token := foundation.InterfaceToString(postData["token"])
+	betIndex := foundation.InterfaceToInt64(postData["bet"])
+	// betMoney := gameRule.GetBetMoney(betIndex)
 
-	// gametype check
+	// // gametype check
 	err := errorlog.New()
-	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
-	if gametypeid != data.GameTypeID {
-		err.ErrorCode = code.GameTypeError
-		err.Msg = "GameTypeError"
-		foundation.HTTPResponse(w, "", err)
-		return
-	}
+	// gametypeid := foundation.InterfaceToString(postData["gametypeid"])
+	// if gametypeid != data.GameTypeID {
+	// 	err.ErrorCode = code.GameTypeError
+	// 	err.Msg = "GameTypeError"
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	return
+	// }
 
-	// get player
+	// // get player
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
-	playerinfo, err := player.GetPlayerInfoByPlayerID(playerID)
-	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "", err)
-		return
-	}
+	// playerinfo, err := player.GetPlayerInfoByPlayerID(playerID)
+	// if err.ErrorCode != code.OK {
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	return
+	// }
 
-	// check token
-	if err = foundation.CheckToken(playerinfo.GameAccount, token); err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "", err)
-		return
-	}
+	// // check token
+	// if err = foundation.CheckToken(playerinfo.GameAccount, token); err.ErrorCode != code.OK {
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	return
+	// }
 
-	// money check
-	if playerinfo.Money < betMoney {
-		err.ErrorCode = code.NoMoneyToBet
-		err.Msg = "NoMoneyToBet"
-		foundation.HTTPResponse(w, "", err)
-		return
-	}
+	// // money check
+	// if playerinfo.Money < betMoney {
+	// 	err.ErrorCode = code.NoMoneyToBet
+	// 	err.Msg = "NoMoneyToBet"
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	return
+	// }
 
-	// get thirdparty info data
-	var ulginfo *ulg.ULGInfo
-	ulginfo, err = ulg.GetULGInfo(playerinfo.ID, playerinfo.GameToken)
-	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "", err)
-		fmt.Println(ulginfo)
-		return
-	}
+	// // get thirdparty info data
+	// var ulginfo *ulg.ULGInfo
+	// ulginfo, err = ulg.GetULGInfo(playerinfo.ID, playerinfo.GameToken)
+	// if err.ErrorCode != code.OK {
+	// 	foundation.HTTPResponse(w, "", err)
+	// 	fmt.Println(ulginfo)
+	// 	return
+	// }
 
-	result, totalwinscore := gameRequest(playerinfo.ID, betIndex)
-	playerinfo.Money = playerinfo.Money + totalwinscore - betMoney
-	result["playermoney"] = playerinfo.Money
+	att, _ := db.GetAttachKind(4, 7)
+	// att := make([]map[string]interface{}, 0)
+	result, att, _ := gameRule.GameRequest(playerID, betIndex, att)
+	// playerinfo.Money = playerinfo.Money + totalwinscore - betMoney
+	// result["playermoney"] = playerinfo.Money
 
-	ulginfo.TotalBet += betMoney
-	ulginfo.TotalWin += totalwinscore
-	player.SavePlayerInfo(playerinfo)
-	ulg.SaveULGInfo(ulginfo)
+	// ulginfo.TotalBet += betMoney
+	// ulginfo.TotalWin += totalwinscore
+	// player.SavePlayerInfo(playerinfo)
+	// ulg.SaveULGInfo(ulginfo)
 
 	foundation.HTTPResponse(w, result, err)
 

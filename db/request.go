@@ -42,7 +42,7 @@ func UpdateSetting(args ...interface{}) errorlog.ErrorMsg {
 }
 
 // GetAttachKind get db attach kind
-func GetAttachKind(playerid int64, kind int64) ([]map[string]interface{}, errorlog.ErrorMsg) {
+func GetAttachKind(playerid int64, kind int) ([]map[string]interface{}, errorlog.ErrorMsg) {
 	result, err := CallReadOutMap(gameBDSQL.DB, "AttachKindGet_Read", playerid, kind)
 	return result, err
 }
