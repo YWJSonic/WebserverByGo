@@ -12,7 +12,7 @@ const GameIndex = 5
 const isSingleLine = true
 
 var WinScoreLimit int64 = 2000000
-var WinBetRateLimit int64 = 100
+var WinBetRateLimit int64 = 80
 
 // BetRate ...
 var betRate = []int64{1, 10, 100, 500, 1000, 2000, 5000, 10000, 20000}
