@@ -79,8 +79,8 @@ func connectGameDB() (db *sql.DB, err error) {
 		db, err := sql.Open("mysql", sqlstr)
 
 		connMaxLifetime := 59 * time.Second
-		maxIdleConns := 5
-		maxOpenConns := 15
+		maxIdleConns := 50
+		maxOpenConns := 50
 
 		errorlog.LogPrintf("connMaxLifetime:%d\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
@@ -110,8 +110,8 @@ func connectLogDB() (db *sql.DB, err error) {
 		db, err := sql.Open("mysql", sqlstr)
 
 		connMaxLifetime := 59 * time.Second
-		maxIdleConns := 5
-		maxOpenConns := 15
+		maxIdleConns := 50
+		maxOpenConns := 50
 
 		errorlog.LogPrintf("connMaxLifetime:%d second\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
@@ -140,8 +140,8 @@ func connectPayDB() (db *sql.DB, err error) {
 		db, err := sql.Open("mysql", sqlstr)
 
 		connMaxLifetime := 59 * time.Second
-		maxIdleConns := 3
-		maxOpenConns := 6
+		maxIdleConns := 50
+		maxOpenConns := 50
 
 		errorlog.LogPrintf("connMaxLifetime:%d second\n", connMaxLifetime/time.Second)
 		db.SetConnMaxLifetime(time.Duration(connMaxLifetime))
