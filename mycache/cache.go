@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"github.com/gomodule/redigo/redis"
 )
 
 var CachePool *redis.Pool
@@ -21,9 +21,9 @@ const WriteTimeout time.Duration = 10 * time.Second
 
 func newCachePool() {
 	CachePool = &redis.Pool{
-		MaxIdle:     10,
+		MaxIdle:     50,
 		IdleTimeout: 240 * time.Second,
-		MaxActive:   20,
+		MaxActive:   50,
 		Wait:        true,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", data.RedisURL,

@@ -9,12 +9,14 @@ import (
 
 // ULGInfo plant ULG game play data
 type ULGInfo struct {
-	PlayerID   int64  `json:"PlayerID"`
-	GameToken  string `json:"GameToken"` // platform GameToken
-	TotalBet   int64  `json:"TotalBet"`
-	TotalWin   int64  `json:"TotalWin"`
-	TotalLost  int64  `json:"TotalLost"`
-	IsCheckOut bool   `json:"CheckOut"`
+	PlayerID       int64  `json:"PlayerID"`
+	GameToken      string `json:"GameToken"` // platform GameToken
+	ExchangeType   int64  `json:"ExchangeType"`
+	ExchangeAmount int64  `json:"ExchangeAmount"`
+	TotalBet       int64  `json:"TotalBet"`
+	TotalWin       int64  `json:"TotalWin"`
+	TotalLost      int64  `json:"TotalLost"`
+	IsCheckOut     bool   `json:"CheckOut"`
 
 	AccountToken string `json:"AccountToken"` // Maintan checkout use
 }

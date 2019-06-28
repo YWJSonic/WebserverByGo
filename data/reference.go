@@ -2,8 +2,11 @@ package data
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
+
+var mu *sync.RWMutex
 
 // CacheDeleteTime cache keep time
 const CacheDeleteTime time.Duration = time.Hour
@@ -38,7 +41,7 @@ var (
 )
 
 // Maintain Is sow maintain time
-var Maintain = false
+var maintain = false
 
 // GameResultURL gamelogic server API URL
 // const GameResultURL = "http://192.168.1.146:9781/api/entry"
@@ -51,10 +54,24 @@ var Setting map[string]interface{}
 
 func init() {
 	Setting = make(map[string]interface{})
-	// NewCache()
+	mu = new(sync.RWMutex)
 }
 
 // ServerURL ...
 func ServerURL() string {
 	return fmt.Sprintf("%s:%s", IP, PORT)
+}
+
+// IsMaintain ...
+func IsMaintain() bool {
+	mu.RLock()
+	defer mu.RUnlock()
+	return maintain
+}
+
+// EnableMaintain ...
+func EnableMaintain(enable bool) {
+	mu.Lock()
+	defer mu.Unlock()
+	maintain = enable
 }

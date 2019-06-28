@@ -7,7 +7,6 @@ import (
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 )
@@ -29,17 +28,19 @@ import (
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid int64, gametoken, accounttoken string) (*ULGInfo, errorlog.ErrorMsg) {
+func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
-		PlayerID:     playerid,
-		GameToken:    gametoken,
-		AccountToken: accounttoken,
+		PlayerID:       playerid,
+		GameToken:      gameToken,
+		AccountToken:   accountToken,
+		ExchangeType:   cointype,
+		ExchangeAmount: exchangAmount,
 	}
-	err := db.NewULGInfoRow(playerid, gametoken, accounttoken)
+	err := db.NewULGInfoRow(playerid, gameToken, accountToken, exchangAmount, cointype)
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
-	mycache.SetULGInfo(playerid, foundation.JSONToString(info))
+	mycache.SetULGInfo(info.PlayerID, foundation.JSONToString(info))
 	return &info, err
 }
 
@@ -126,12 +127,15 @@ func SaveULGInfo(info *ULGInfo) {
 // MakeULGInfo get ulg info form db
 func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 	info := &ULGInfo{
-		PlayerID:   foundation.InterfaceToInt64(row["PlayerID"]),
-		GameToken:  foundation.InterfaceToString(row["GameToken"]),
-		TotalBet:   foundation.InterfaceToInt64(row["TotalBet"]),
-		TotalWin:   foundation.InterfaceToInt64(row["TotalWin"]),
-		TotalLost:  foundation.InterfaceToInt64(row["TotalLost"]),
-		IsCheckOut: foundation.InterfaceToBool(row["CheckOut"]),
+		PlayerID:       foundation.InterfaceToInt64(row["PlayerID"]),
+		GameToken:      foundation.InterfaceToString(row["GameToken"]),
+		AccountToken:   foundation.InterfaceToString(row["AccountToken"]),
+		ExchangeType:   foundation.InterfaceToInt64(row["ExchangeType"]),
+		ExchangeAmount: foundation.InterfaceToInt64(row["ExchangeAmount"]),
+		TotalBet:       foundation.InterfaceToInt64(row["TotalBet"]),
+		TotalWin:       foundation.InterfaceToInt64(row["TotalWin"]),
+		TotalLost:      foundation.InterfaceToInt64(row["TotalLost"]),
+		IsCheckOut:     foundation.InterfaceToBool(row["CheckOut"]),
 	}
 
 	if _, ok := row["AccountToken"]; ok {
@@ -150,7 +154,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gameid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
+	jsbyte := foundation.HTTPPostRequest(GetuserURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
@@ -174,7 +178,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gametypeid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(AuthorizedURL, foundation.ToJSONStr(postData))
+	jsbyte := foundation.HTTPPostRequest(AuthorizedURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
@@ -190,7 +194,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 }
 
 // Exchange ...
-func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
+func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int64) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
 	var info UlgResult
 	err := errorlog.New()
 	postData := map[string][]string{
@@ -201,7 +205,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_amount": {fmt.Sprint(coinamount)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(ExchangeURL, foundation.ToJSONStr(postData))
+	jsbyte := foundation.HTTPPostRequest(ExchangeURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
@@ -217,19 +221,19 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 }
 
 // Checkout ...
-func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
+func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.ErrorMsg) { //accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
 	var info UlgCheckOutResult
 	err := errorlog.New()
 	postData := map[string][]string{
-		"game_token": {gametoken},
+		"game_token": {ulgInfo.GameToken},
 		"game_id":    {gameid},
-		"token":      {accounttoken},
-		"amount":     {amount},
-		"win":        {totalwin},
-		"lost":       {totalost},
+		"token":      {ulgInfo.AccountToken},
+		"amount":     {fmt.Sprint(ulgInfo.TotalBet)},
+		"win":        {fmt.Sprint(ulgInfo.TotalWin)},
+		"lost":       {fmt.Sprint(ulgInfo.TotalLost)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(CheckoutURL, foundation.ToJSONStr(postData))
+	jsbyte := foundation.HTTPPostRequest(CheckoutURL, postData)
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"
@@ -237,6 +241,16 @@ func Checkout(accounttoken, gametoken, gameid, amount, totalwin, totalost string
 
 	if info.Result == 1 {
 		err.ErrorCode = code.OK
+		switch ulgInfo.ExchangeType {
+		case 1:
+			info.UserCoinQuota.Coin1Out = info.UserCoinQuota.Coin1Out - ulgInfo.ExchangeAmount
+		case 2:
+			info.UserCoinQuota.Coin2Out = info.UserCoinQuota.Coin2Out - ulgInfo.ExchangeAmount
+		case 3:
+			info.UserCoinQuota.Coin3Out = info.UserCoinQuota.Coin3Out - ulgInfo.ExchangeAmount
+		case 4:
+			info.UserCoinQuota.Coin4Out = info.UserCoinQuota.Coin4Out - ulgInfo.ExchangeAmount
+		}
 	} else {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = info.ErrorMsg

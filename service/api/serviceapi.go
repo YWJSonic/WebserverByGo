@@ -10,11 +10,10 @@ import (
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
-	gameRule "gitlab.com/game7"
+	gameRules "gitlab.com/game5"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -23,8 +22,8 @@ var isInit bool
 var mu *sync.RWMutex
 
 // ServiceStart ...
-func ServiceStart() []myhttp.RESTfulURL {
-	var HandleURL []myhttp.RESTfulURL
+func ServiceStart() []foundation.RESTfulURL {
+	var HandleURL []foundation.RESTfulURL
 
 	if isInit {
 		return HandleURL
@@ -33,13 +32,13 @@ func ServiceStart() []myhttp.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: myhttp.Backend})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: foundation.Backend})
 
 	return HandleURL
 }
@@ -63,17 +62,17 @@ func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 // MaintainStart Maintain API
 func MaintainStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.Maintain = true
+	data.EnableMaintain(true)
 }
 
 // MaintainEnd Maintain API
 func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.Maintain = false
+	data.EnableMaintain(false)
 }
 
 // MaintainCheckout auto checkout ulg
 func MaintainCheckout() {
-	if !data.Maintain {
+	if !data.IsMaintain() {
 		errorlog.LogPrintln("API Warning: MaintainCheckout not in maintain")
 		return
 	}
@@ -82,7 +81,7 @@ func MaintainCheckout() {
 	fmt.Println(infos, err)
 
 	for _, ulginfo := range infos {
-		_, err = ulg.Checkout(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
 			errorlog.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}
@@ -98,15 +97,11 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
-// GameRulesSet set game config
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	postData := myhttp.PostData(r)
+	postData := foundation.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
 	gameindex := foundation.InterfaceToInt(postData["gameindex"])
 
 	config := foundation.StringToJSON(configstr)
-	gameRule.SetInfo(gameindex, config)
+	gameRules.SetInfo(gameindex, config)
 }
