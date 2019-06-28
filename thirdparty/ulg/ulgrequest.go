@@ -7,6 +7,7 @@ import (
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 )
@@ -20,7 +21,7 @@ import (
 // 		"username": {username},
 // 		"password": {password},
 // 	}
-// 	jsbyte := foundation.HTTPPostRequest(loginURL, postData)
+// 	jsbyte := myrestful.PostRawRequest(loginURL, postData)
 // 	if err := json.Unmarshal(jsbyte, &info); err != nil {
 // 		panic(err)
 // 	}
@@ -154,7 +155,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gameid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(GetuserURL, postData)
+	jsbyte := myrestful.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
@@ -178,7 +179,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gametypeid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(AuthorizedURL, postData)
+	jsbyte := myrestful.PostRawRequest(AuthorizedURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
@@ -205,7 +206,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_amount": {fmt.Sprint(coinamount)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(ExchangeURL, postData)
+	jsbyte := myrestful.PostRawRequest(ExchangeURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
@@ -233,7 +234,7 @@ func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.Erro
 		"lost":       {fmt.Sprint(ulgInfo.TotalLost)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(CheckoutURL, postData)
+	jsbyte := myrestful.PostRawRequest(CheckoutURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"

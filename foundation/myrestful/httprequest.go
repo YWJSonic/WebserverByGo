@@ -53,7 +53,7 @@ func ListenProxy(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	switch RESTfulInfo.ConnType {
 	case myhttp.Client:
-		if data.Maintain {
+		if data.IsMaintain() {
 			maintain(w, r, ps)
 		} else {
 			RESTfulInfo.Fun(w, r, ps)

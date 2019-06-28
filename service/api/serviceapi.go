@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
@@ -13,7 +14,7 @@ import (
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
-	gameRules "gitlab.com/game5"
+	gameRules "gitlab.com/game7"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -22,8 +23,8 @@ var isInit bool
 var mu *sync.RWMutex
 
 // ServiceStart ...
-func ServiceStart() []foundation.RESTfulURL {
-	var HandleURL []foundation.RESTfulURL
+func ServiceStart() []myhttp.RESTfulURL {
+	var HandleURL []myhttp.RESTfulURL
 
 	if isInit {
 		return HandleURL
@@ -32,13 +33,13 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: foundation.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: myhttp.Backend})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: myhttp.Backend})
 
 	return HandleURL
 }
@@ -98,7 +99,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	postData := foundation.PostData(r)
+	postData := myhttp.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
 	gameindex := foundation.InterfaceToInt(postData["gameindex"])
 

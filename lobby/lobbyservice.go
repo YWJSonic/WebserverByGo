@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -148,8 +147,8 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	accountToken := foundation.InterfaceToString(postData["accounttoken"])
 	gametypeid := postData["gametypeid"].(string)
-	cointype := foundation.InterfaceToInt(postData["cointype"])
-	coinamount := foundation.InterfaceToInt(postData["coinamount"])
+	cointype := foundation.InterfaceToInt64(postData["cointype"])
+	coinamount := foundation.InterfaceToInt64(postData["coinamount"])
 
 	err := errorlog.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
@@ -194,7 +193,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	_, err = ulg.NewULGInfo(playerInfo.ID, ulguser.GameToken, accountToken)
+	_, err = ulg.NewULGInfo(playerInfo.ID, cointype, coinamount, ulguser.GameToken, accountToken)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
@@ -265,7 +264,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	var ulgCheckOutResult ulg.UlgCheckOutResult
-	ulgCheckOutResult, err = ulg.Checkout(ulginfo.AccountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+	ulgCheckOutResult, err = ulg.Checkout(ulginfo, gametypeid)
 	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
 		myrestful.HTTPResponse(w, "", err)
 		return
