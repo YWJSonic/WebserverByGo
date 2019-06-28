@@ -5,9 +5,11 @@ import (
 	"sync"
 
 	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/foundation/myrestful"
 
 	gameRule "gitlab.com/game7"
 
+	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
@@ -20,15 +22,15 @@ var mu *sync.RWMutex
 var RoomCount = 0
 
 // HandleURL ...
-var HandleURL []foundation.RESTfulURL
+var HandleURL []myhttp.RESTfulURL
 
 func init() {
 	mu = new(sync.RWMutex)
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "game/gameresult", Fun: gameresult, ConnType: foundation.Client})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "game/gameresult", Fun: gameresult, ConnType: myhttp.Client})
 }
 
 // ServiceStart ...
-func ServiceStart() []foundation.RESTfulURL {
+func ServiceStart() []myhttp.RESTfulURL {
 	return HandleURL
 }
 
@@ -36,7 +38,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	postData := foundation.PostData(r)
+	postData := myhttp.PostData(r)
 	// token := foundation.InterfaceToString(postData["token"])
 	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	// betMoney := gameRule.GetBetMoney(betIndex)
@@ -93,6 +95,6 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// player.SavePlayerInfo(playerinfo)
 	// ulg.SaveULGInfo(ulginfo)
 
-	foundation.HTTPResponse(w, result, err)
+	myrestful.HTTPResponse(w, result, err)
 
 }

@@ -2,12 +2,14 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/event"
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/foundation/fileload"
+	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/game"
 	"gitlab.com/WeberverByGo/lobby"
 	"gitlab.com/WeberverByGo/login"
@@ -42,7 +44,7 @@ func main() {
 	ulg.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
 	ulg.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
-	var initArray [][]foundation.RESTfulURL
+	var initArray [][]myhttp.RESTfulURL
 	initArray = append(initArray, login.ServiceStart())
 	initArray = append(initArray, lobby.ServiceStart())
 	initArray = append(initArray, game.ServiceStart())
@@ -59,5 +61,5 @@ func main() {
 	crontab.NewCron(ulg.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
 	go event.Update()
-	foundation.HTTPLisentRun(data.ServerURL(), initArray...)
+	myrestful.HTTPLisentRun(data.ServerURL(), initArray...)
 }

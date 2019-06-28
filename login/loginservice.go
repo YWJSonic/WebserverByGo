@@ -6,9 +6,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
+	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
@@ -21,8 +23,8 @@ var isInit = false
 var mu *sync.RWMutex
 
 // ServiceStart ...
-func ServiceStart() []foundation.RESTfulURL {
-	var HandleURL []foundation.RESTfulURL
+func ServiceStart() []myhttp.RESTfulURL {
+	var HandleURL []myhttp.RESTfulURL
 
 	if isInit {
 		return HandleURL
@@ -31,19 +33,19 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "account/login", Fun: login, ConnType: foundation.Client})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "account/login", Fun: login, ConnType: myhttp.Client})
 	return HandleURL
 }
 func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var result = make(map[string]interface{})
 
-	postData := foundation.PostData(r)
+	postData := myhttp.PostData(r)
 	logintype := foundation.InterfaceToInt(postData["logintype"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
 	err := errorlog.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "", err)
+		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -63,7 +65,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
 			err.ErrorCode = code.FailedPrecondition
-			foundation.HTTPResponse(w, "", err)
+			myrestful.HTTPResponse(w, "", err)
 			return
 		}
 
@@ -76,7 +78,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	Info, err := db.GetAccountInfo(iPratyAccount.PartyAccount())
 	if err.ErrorCode != code.OK {
-		foundation.HTTPResponse(w, "LoginType", err)
+		myrestful.HTTPResponse(w, "LoginType", err)
 		return
 	}
 
@@ -99,5 +101,5 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo := log.New(log.Login)
 	loginfo.Account = accountInfo.GameAccount
 	log.SaveLog(loginfo)
-	foundation.HTTPResponse(w, result, err)
+	myrestful.HTTPResponse(w, result, err)
 }

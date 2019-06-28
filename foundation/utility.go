@@ -50,6 +50,16 @@ func ByteToJSON(jsByte []byte) map[string]interface{} {
 	return data
 }
 
+// ToJSONStr Convert to json string
+func ToJSONStr(data interface{}) []byte {
+	jsonString, err := json.Marshal(data)
+	if err != nil {
+		return nil
+	}
+
+	return jsonString
+}
+
 // InterfaceTofloat64 ...
 func InterfaceTofloat64(v interface{}) float64 {
 	return v.(float64)
