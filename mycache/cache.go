@@ -80,10 +80,9 @@ func runExist(key string) (bool, error) {
 
 	if _, err := Conn.Do("EXISTS", key); err != redis.ErrNil {
 		return false, err
-	} else {
-		return false, nil
 	}
-	return true, nil
+	return false, nil
+
 }
 
 func runAdd(key string, v interface{}, d time.Duration) error {
