@@ -1,53 +1,10 @@
 package mycache
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
-
-var CachePool *redis.Pool
-
-func init() {
-	newCachePool()
-}
-
-const ConnectTimeout time.Duration = 20 * time.Second
-const ReadTimeout time.Duration = 5 * time.Second
-const WriteTimeout time.Duration = 10 * time.Second
-
-func newCachePool() {
-	CachePool = &redis.Pool{
-		MaxIdle:     50,
-		IdleTimeout: 240 * time.Second,
-		MaxActive:   50,
-		Wait:        true,
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", data.RedisURL,
-				redis.DialConnectTimeout(ConnectTimeout),
-				redis.DialReadTimeout(ReadTimeout),
-				redis.DialWriteTimeout(WriteTimeout))
-			if err != nil {
-				return nil, fmt.Errorf("redis connection error: %s", err)
-			}
-			//验证redis密码
-			// if _, authErr := c.Do("AUTH", RedisPassword); authErr != nil {
-			// 	return nil, fmt.Errorf("redis auth password error: %s", authErr)
-			// }
-			return c, nil
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			if err != nil {
-				return fmt.Errorf("ping redis error: %s", err)
-			}
-			return nil
-		},
-	}
-}
 
 func get(ket string) (interface{}, error) {
 	Conn := CachePool.Get()
@@ -110,9 +67,6 @@ func runSet(key string, v interface{}, d time.Duration) error {
 	args := []interface{}{key, v}
 
 	_, err := set(args, d)
-	if err != nil {
-		errorlog.ErrorLogPrintln("Cache Set", key, err)
-	}
 	return err
 }
 
