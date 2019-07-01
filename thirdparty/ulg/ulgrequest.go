@@ -150,9 +150,9 @@ func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 	var info UlgResult
 	err := errorlog.New()
-	postData := map[string][]string{
-		"token":   {token},
-		"game_id": {gameid},
+	postData := map[string]string{
+		"token":   token,
+		"game_id": gameid,
 	}
 	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := myrestful.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
@@ -174,9 +174,9 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 	var info UlgResult
 	err := errorlog.New()
-	postData := map[string][]string{
-		"token":   {token},
-		"game_id": {gametypeid},
+	postData := map[string]string{
+		"token":   token,
+		"game_id": gametypeid,
 	}
 	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := myrestful.PostRawRequest(AuthorizedURL, foundation.ToJSONStr(postData))
@@ -198,12 +198,12 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int64) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
 	var info UlgResult
 	err := errorlog.New()
-	postData := map[string][]string{
-		"game_token":  {gametoken},
-		"game_id":     {gametypeid},
-		"token":       {accounttoken},
-		"coin_type":   {fmt.Sprint(cointype)},
-		"coin_amount": {fmt.Sprint(coinamount)},
+	postData := map[string]string{
+		"game_token":  gametoken,
+		"game_id":     gametypeid,
+		"token":       accounttoken,
+		"coin_type":   fmt.Sprint(cointype),
+		"coin_amount": fmt.Sprint(coinamount),
 	}
 	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := myrestful.PostRawRequest(ExchangeURL, foundation.ToJSONStr(postData))
@@ -225,13 +225,13 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.ErrorMsg) { //accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
 	var info UlgCheckOutResult
 	err := errorlog.New()
-	postData := map[string][]string{
-		"game_token": {ulgInfo.GameToken},
-		"game_id":    {gameid},
-		"token":      {ulgInfo.AccountToken},
-		"amount":     {fmt.Sprint(ulgInfo.TotalBet)},
-		"win":        {fmt.Sprint(ulgInfo.TotalWin)},
-		"lost":       {fmt.Sprint(ulgInfo.TotalLost)},
+	postData := map[string]string{
+		"game_token": ulgInfo.GameToken,
+		"game_id":    gameid,
+		"token":      ulgInfo.AccountToken,
+		"amount":     fmt.Sprint(ulgInfo.TotalBet),
+		"win":        fmt.Sprint(ulgInfo.TotalWin),
+		"lost":       fmt.Sprint(ulgInfo.TotalLost),
 	}
 	errorlog.LogPrintln("Ulg", postData)
 	jsbyte := myrestful.PostRawRequest(CheckoutURL, foundation.ToJSONStr(postData))
