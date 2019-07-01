@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 )
@@ -18,7 +18,7 @@ func GetAttach(playerID int64, gameIndex int) map[string]interface{} {
 	} else {
 		// cache data
 		if errMsg := json.Unmarshal(attach.([]byte), &info); errMsg != nil {
-			errorlog.ErrorLogPrintln("GameLogic", playerID, gameIndex, string(attach.([]byte)))
+			messagehandle.ErrorLogPrintln("GameLogic", playerID, gameIndex, string(attach.([]byte)))
 			info = newAttach()
 		}
 	}

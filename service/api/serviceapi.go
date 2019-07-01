@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/code"
 	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
 	gameRules "gitlab.com/game7"
@@ -74,7 +74,7 @@ func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 // MaintainCheckout auto checkout ulg
 func MaintainCheckout() {
 	if !data.IsMaintain() {
-		errorlog.LogPrintln("API Warning: MaintainCheckout not in maintain")
+		messagehandle.LogPrintln("API Warning: MaintainCheckout not in maintain")
 		return
 	}
 
@@ -84,7 +84,7 @@ func MaintainCheckout() {
 	for _, ulginfo := range infos {
 		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
-			errorlog.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
+			messagehandle.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}
 
 		mycache.ClearAllCache()

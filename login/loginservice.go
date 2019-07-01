@@ -6,12 +6,14 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/loginfo"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/setting"
@@ -43,24 +45,24 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	logintype := foundation.InterfaceToInt(postData["logintype"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
-	err := errorlog.New()
+	err := messagehandle.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
 	// mutility party switch
-	var iPratyAccount player.IPratyAccount
+	var iPratyAccount playerinfo.IPratyAccount
 	switch logintype {
-	case player.Guest:
+	case playerinfo.Guest:
 		account := foundation.InterfaceToString(postData["account"])
 		guestinfo := guest.GuestInfo{
 			Account: account,
 		}
 
 		iPratyAccount = &guestinfo
-	case player.Self:
-	case player.Ulg:
+	case playerinfo.Self:
+	case playerinfo.Ulg:
 		accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
@@ -73,7 +75,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		result["userCoinQuota"] = UserInfo.UserCoinQuota
 		result["gameInfo"] = UserInfo.GameInfo
 	default:
-		errorlog.ErrorLogPrintln("logintype Error", logintype, gametypeid, postData)
+		messagehandle.ErrorLogPrintln("logintype Error", logintype, gametypeid, postData)
 	}
 
 	Info, err := db.GetAccountInfo(iPratyAccount.PartyAccount())
@@ -82,14 +84,14 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	var accountInfo player.AccountInfo
+	var accountInfo playerinfo.AccountInfo
 	if len(Info) < 1 {
-		accountInfo = player.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(), iPratyAccount.AccountType())
+		accountInfo = playerinfo.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(), foundation.NewToken(iPratyAccount.PartyAccount()), iPratyAccount.AccountType())
 		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.AccountType)
 
 	} else {
 		result := Info[0]
-		accountInfo = player.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), result["AccountType"].(int64))
+		accountInfo = playerinfo.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), foundation.NewToken(result["Account"].(string)), result["AccountType"].(int64))
 		// db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
 	}
 
@@ -98,7 +100,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["token"] = accountInfo.Token
 	result["serversetting"] = setting.New()
 
-	loginfo := log.New(log.Login)
+	loginfo := loginfo.New(loginfo.Login)
 	loginfo.Account = accountInfo.GameAccount
 	log.SaveLog(loginfo)
 	myrestful.HTTPResponse(w, result, err)

@@ -2,20 +2,20 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/foundation/fileload"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
+	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
 	"gitlab.com/WeberverByGo/db"
 	"gitlab.com/WeberverByGo/event"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/foundation/fileload"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/game"
 	"gitlab.com/WeberverByGo/lobby"
 	"gitlab.com/WeberverByGo/login"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/service/api"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
 
 func main() {
@@ -34,15 +34,15 @@ func main() {
 	data.RedisURL = foundation.InterfaceToString(config["RedisURL"])
 	data.MaintainStartTime = foundation.InterfaceToString(config["MaintainStartTime"])
 	data.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
-	errorlog.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
+	messagehandle.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
 	data.EnableMaintain(foundation.InterfaceToBool(config["Maintain"]))
 
-	ulg.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
-	ulg.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
-	ulg.AuthorizedURL = foundation.InterfaceToString(config["ULGAuthorizedURL"])
-	ulg.ExchangeURL = foundation.InterfaceToString(config["ULGExchangeURL"])
-	ulg.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
-	ulg.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
+	ulginfo.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
+	ulginfo.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
+	ulginfo.AuthorizedURL = foundation.InterfaceToString(config["ULGAuthorizedURL"])
+	ulginfo.ExchangeURL = foundation.InterfaceToString(config["ULGExchangeURL"])
+	ulginfo.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
+	ulginfo.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
 	var initArray [][]myhttp.RESTfulURL
 	initArray = append(initArray, login.ServiceStart())
@@ -58,7 +58,7 @@ func main() {
 	crontab.NewCron(data.MaintainFinishTime, func() {
 		data.EnableMaintain(false)
 	})
-	crontab.NewCron(ulg.ULGMaintainCheckoutTime, api.MaintainCheckout)
+	crontab.NewCron(ulginfo.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
 	go event.Update()
 	myrestful.HTTPLisentRun(data.ServerURL(), initArray...)

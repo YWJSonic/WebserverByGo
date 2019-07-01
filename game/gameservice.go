@@ -9,9 +9,9 @@ import (
 
 	gameRule "gitlab.com/game7"
 
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -44,7 +44,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// betMoney := gameRule.GetBetMoney(betIndex)
 
 	// // gametype check
-	err := errorlog.New()
+	err := messagehandle.New()
 	// gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	// if gametypeid != data.GameTypeID {
 	// 	err.ErrorCode = code.GameTypeError
@@ -55,7 +55,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// // get player
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
-	// playerinfo, err := player.GetPlayerInfoByPlayerID(playerID)
+	// playerinfo, err := playerinfo.GetPlayerInfoByPlayerID(playerID)
 	// if err.ErrorCode != code.OK {
 	// 	foundation.HTTPResponse(w, "", err)
 	// 	return
@@ -92,7 +92,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// ulginfo.TotalBet += betMoney
 	// ulginfo.TotalWin += totalwinscore
-	// player.SavePlayerInfo(playerinfo)
+	// playerinfo.SavePlayerInfo(playerinfo)
 	// ulg.SaveULGInfo(ulginfo)
 
 	myrestful.HTTPResponse(w, result, err)

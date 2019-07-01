@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/messagehandle"
+	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 )
 
@@ -29,8 +30,8 @@ import (
 // }
 
 // NewULGInfo New ULGInfo
-func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
-	info := ULGInfo{
+func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken string) (*ulginfo.Info, messagehandle.ErrorMsg) {
+	info := ulginfo.Info{
 		PlayerID:       playerid,
 		GameToken:      gameToken,
 		AccountToken:   accountToken,
@@ -46,9 +47,9 @@ func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken
 }
 
 // GetULGInfo ...
-func GetULGInfo(playerid int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) {
-	var ulginfo *ULGInfo
-	var err errorlog.ErrorMsg
+func GetULGInfo(playerid int64, gametoken string) (*ulginfo.Info, messagehandle.ErrorMsg) {
+	var ulginfo *ulginfo.Info
+	var err messagehandle.ErrorMsg
 
 	ULGJsStr := mycache.GetULGInfoCache(playerid)
 	// cache no data
@@ -58,11 +59,11 @@ func GetULGInfo(playerid int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) 
 
 		// db no data
 		if err.ErrorCode != code.OK {
-			errorlog.ErrorLogPrintln("DB GetULGInfo", err)
+			messagehandle.ErrorLogPrintln("DB GetULGInfo", err)
 			return nil, err
 		}
 		if len(ulginfomap) < 1 {
-			errorlog.ErrorLogPrintln("DB GetULGInfo", err)
+			messagehandle.ErrorLogPrintln("DB GetULGInfo", err)
 			err.ErrorCode = code.NoExchange
 			err.Msg = "NoExchange"
 			return nil, err
@@ -71,7 +72,7 @@ func GetULGInfo(playerid int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) 
 
 	} else {
 		if errMsg := json.Unmarshal(ULGJsStr.([]byte), &ulginfo); errMsg != nil {
-			errorlog.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
+			messagehandle.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
 			err.ErrorCode = code.ULGInfoFormatError
 			err.Msg = "ULGInfoFormatError"
 			return nil, err
@@ -82,17 +83,17 @@ func GetULGInfo(playerid int64, gametoken string) (*ULGInfo, errorlog.ErrorMsg) 
 }
 
 // MaintainULGInfos ...
-func MaintainULGInfos() ([]ULGInfo, errorlog.ErrorMsg) {
-	var Infos []ULGInfo
+func MaintainULGInfos() ([]ulginfo.Info, messagehandle.ErrorMsg) {
+	var Infos []ulginfo.Info
 	result, err := db.ULGMaintainCheckoutRow()
 
 	// db no data
 	if err.ErrorCode != code.OK {
-		errorlog.ErrorLogPrintln("Cache GetULGInfo", err)
+		messagehandle.ErrorLogPrintln("Cache GetULGInfo", err)
 		return nil, err
 	}
 
-	Infos = make([]ULGInfo, len(result))
+	Infos = make([]ulginfo.Info, len(result))
 	for i, row := range result {
 
 		Infos[i] = *MakeULGInfo(row)
@@ -102,7 +103,7 @@ func MaintainULGInfos() ([]ULGInfo, errorlog.ErrorMsg) {
 }
 
 // UpdateULGInfo ...
-func UpdateULGInfo(ulginfo *ULGInfo, BetMoney, WinBet int64) {
+func UpdateULGInfo(ulginfo *ulginfo.Info, BetMoney, WinBet int64) {
 	WinMoney := WinBet * BetMoney
 
 	ulginfo.TotalBet += BetMoney
@@ -114,20 +115,20 @@ func UpdateULGInfo(ulginfo *ULGInfo, BetMoney, WinBet int64) {
 }
 
 // UpdateUlgInfoCheckOut ...
-func UpdateUlgInfoCheckOut(gametoken string) errorlog.ErrorMsg {
+func UpdateUlgInfoCheckOut(gametoken string) messagehandle.ErrorMsg {
 	err := db.UpdateCheckUlgRow(gametoken)
 	return err
 }
 
 // SaveULGInfo ...
-func SaveULGInfo(info *ULGInfo) {
+func SaveULGInfo(info *ulginfo.Info) {
 	mycache.SetULGInfo(info.PlayerID, foundation.JSONToString(info))
 	db.UpdateULGInfoRow(info.GameToken, info.TotalBet, info.TotalWin, info.TotalLost, info.IsCheckOut)
 }
 
 // MakeULGInfo get ulg info form db
-func MakeULGInfo(row map[string]interface{}) *ULGInfo {
-	info := &ULGInfo{
+func MakeULGInfo(row map[string]interface{}) *ulginfo.Info {
+	info := &ulginfo.Info{
 		PlayerID:       foundation.InterfaceToInt64(row["PlayerID"]),
 		GameToken:      foundation.InterfaceToString(row["GameToken"]),
 		AccountToken:   foundation.InterfaceToString(row["AccountToken"]),
@@ -147,15 +148,15 @@ func MakeULGInfo(row map[string]interface{}) *ULGInfo {
 }
 
 // GetUser client request getplayer info
-func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
-	var info UlgResult
-	err := errorlog.New()
+func GetUser(token, gameid string) (ulginfo.Result, messagehandle.ErrorMsg) {
+	var info ulginfo.Result
+	err := messagehandle.New()
 	postData := map[string]string{
 		"token":   token,
 		"game_id": gameid,
 	}
-	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
+	messagehandle.LogPrintln("Ulg", postData)
+	jsbyte := myrestful.PostRawRequest(ulginfo.GetuserURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
@@ -171,15 +172,15 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 }
 
 // Authorized ...
-func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
-	var info UlgResult
-	err := errorlog.New()
+func Authorized(token, gametypeid string) (ulginfo.Result, messagehandle.ErrorMsg) {
+	var info ulginfo.Result
+	err := messagehandle.New()
 	postData := map[string]string{
 		"token":   token,
 		"game_id": gametypeid,
 	}
-	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(AuthorizedURL, foundation.ToJSONStr(postData))
+	messagehandle.LogPrintln("Ulg", postData)
+	jsbyte := myrestful.PostRawRequest(ulginfo.AuthorizedURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
@@ -195,9 +196,9 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 }
 
 // Exchange ...
-func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int64) (UlgResult, errorlog.ErrorMsg) { // map[string]interface{} {
-	var info UlgResult
-	err := errorlog.New()
+func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount int64) (ulginfo.Result, messagehandle.ErrorMsg) { // map[string]interface{} {
+	var info ulginfo.Result
+	err := messagehandle.New()
 	postData := map[string]string{
 		"game_token":  gametoken,
 		"game_id":     gametypeid,
@@ -205,8 +206,8 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_type":   fmt.Sprint(cointype),
 		"coin_amount": fmt.Sprint(coinamount),
 	}
-	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(ExchangeURL, foundation.ToJSONStr(postData))
+	messagehandle.LogPrintln("Ulg", postData)
+	jsbyte := myrestful.PostRawRequest(ulginfo.ExchangeURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
@@ -222,9 +223,9 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 }
 
 // Checkout ...
-func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.ErrorMsg) { //accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, errorlog.ErrorMsg) {
-	var info UlgCheckOutResult
-	err := errorlog.New()
+func Checkout(ulgInfo *ulginfo.Info, gameid string) (ulginfo.CheckOutResult, messagehandle.ErrorMsg) { //accounttoken, gametoken, gameid, amount, totalwin, totalost string) (UlgCheckOutResult, messagehandle.ErrorMsg) {
+	var info ulginfo.CheckOutResult
+	err := messagehandle.New()
 	postData := map[string]string{
 		"game_token": ulgInfo.GameToken,
 		"game_id":    gameid,
@@ -233,8 +234,8 @@ func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.Erro
 		"win":        fmt.Sprint(ulgInfo.TotalWin),
 		"lost":       fmt.Sprint(ulgInfo.TotalLost),
 	}
-	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := myrestful.PostRawRequest(CheckoutURL, foundation.ToJSONStr(postData))
+	messagehandle.LogPrintln("Ulg", postData)
+	jsbyte := myrestful.PostRawRequest(ulginfo.CheckoutURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"

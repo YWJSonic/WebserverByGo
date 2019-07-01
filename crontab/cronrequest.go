@@ -4,9 +4,12 @@ import (
 	"time"
 
 	"github.com/robfig/cron"
+	"gitlab.com/ServerUtility/crontabinfo"
+	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/foundation"
 )
+
+var c *cron.Cron
 
 func init() {
 	c = cron.New()
@@ -34,7 +37,7 @@ func NewCronBaseJob(spec string, job cron.Job) {
 }
 
 // NewCronJob add new params job
-func NewCronJob(spec string, job *ParamsJob) {
+func NewCronJob(spec string, job *crontabinfo.ParamsJob) {
 	c.AddJob(spec, job)
 }
 

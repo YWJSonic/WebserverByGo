@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 )
 
 var CachePool *redis.Pool
@@ -71,12 +71,12 @@ func GetToken(gameAccount string) string {
 }
 
 // GetAccountInfo Get Account Struct
-func GetAccountInfo(gameAccount string) (interface{}, errorlog.ErrorMsg) {
-	err := errorlog.New()
+func GetAccountInfo(gameAccount string) (interface{}, messagehandle.ErrorMsg) {
+	err := messagehandle.New()
 	info, errMsg := get(fmt.Sprintf("ACC%s", gameAccount))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetAccountInfo", gameAccount, errMsg)
+		messagehandle.ErrorLogPrintln("Cache GetAccountInfo", gameAccount, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -91,12 +91,12 @@ func SetAccountInfo(gameAccount string, Value interface{}) {
 }
 
 // GetPlayerInfo Get PlayerInfo Struct
-func GetPlayerInfo(playerid int64) (interface{}, errorlog.ErrorMsg) {
-	err := errorlog.New()
+func GetPlayerInfo(playerid int64) (interface{}, messagehandle.ErrorMsg) {
+	err := messagehandle.New()
 	info, errMsg := get(fmt.Sprintf("ID%dJS", playerid))
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetPlayerInfo", playerid, errMsg)
+		messagehandle.ErrorLogPrintln("Cache GetPlayerInfo", playerid, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil, err
@@ -132,12 +132,12 @@ func SetULGInfo(playerid int64, value interface{}) {
 
 // GetULGInfoCache Get ULG info
 func GetULGInfoCache(playerid int64) interface{} {
-	err := errorlog.New()
+	err := messagehandle.New()
 	key := fmt.Sprintf("ULG%d", playerid)
 	info, errMsg := get(key)
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", key)
+		messagehandle.ErrorLogPrintln("Cache GetULGInfoCache", key)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil
@@ -156,12 +156,12 @@ func SetAttach(playerid int64, value interface{}) {
 
 // GetAttach game data request
 func GetAttach(playerid int64) interface{} {
-	err := errorlog.New()
+	err := messagehandle.New()
 	key := fmt.Sprintf("attach%d", playerid)
 	info, errMsg := get(key)
 
 	if errMsg != nil {
-		errorlog.ErrorLogPrintln("Cache GetULGInfoCache", key)
+		messagehandle.ErrorLogPrintln("Cache GetULGInfoCache", key)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
 		return nil

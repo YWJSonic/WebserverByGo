@@ -3,10 +3,11 @@ package event
 import (
 	"time"
 
+	"gitlab.com/ServerUtility/eventinfo"
 	"gitlab.com/WeberverByGo/db"
 )
 
-var eventList []EventInfo
+var eventList []eventinfo.Info
 
 // Update event check loop
 func Update() {
@@ -25,25 +26,7 @@ func Update() {
 	}
 }
 
-func init() {
-	// eventList = append(eventList, EventInfo{
-	// 	IsLaunch:  false,
-	// 	EventType: LoopEvent,
-	// 	LoopTime:  5 * time.Second,
-	// 	Do: func(interface{}) interface{} {
-	// 		return nil
-	// 	}})
-
-	// eventList = append(eventList, EventInfo{
-	// 	IsLaunch:  false,
-	// 	EventType: AtTimeEvent,
-	// 	DoTime:    time.Date(2019, 5, 15, 14, 58, 0, 0, time.Local).Unix(),
-	// 	Do: func(interface{}) interface{} {
-	// 		return nil
-	// 	}})
-}
-
 // AddNewEvent add new event
-func AddNewEvent(event EventInfo) {
+func AddNewEvent(event eventinfo.Info) {
 	eventList = append(eventList, event)
 }

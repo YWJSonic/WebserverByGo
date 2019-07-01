@@ -1,8 +1,8 @@
 package guest
 
 import (
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/playerinfo"
 )
 
 // GuestInfo ...
@@ -20,6 +20,7 @@ func (g *GuestInfo) GameAccount() string {
 	return foundation.NewGameAccount(string(g.Account))
 }
 
+// AccountType ...
 func (g *GuestInfo) AccountType() int64 {
-	return player.Guest
+	return playerinfo.Guest
 }

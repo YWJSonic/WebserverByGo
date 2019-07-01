@@ -3,7 +3,7 @@ package setting
 import (
 	"gitlab.com/WeberverByGo/crontab"
 	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/ServerUtility/foundation"
 )
 
 // ServerTime ...

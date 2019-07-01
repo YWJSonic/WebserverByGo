@@ -1,21 +1,12 @@
 package log
 
 import (
-	"time"
-
+	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/WeberverByGo/db"
 )
 
-// New Default log
-func New(activityEvent int) LogInfo {
-	return LogInfo{
-		Time:          time.Now().Unix(),
-		ActivityEvent: activityEvent,
-	}
-}
-
 // SaveLog Save to db
-func SaveLog(log LogInfo) {
+func SaveLog(log loginfo.LogInfo) {
 	db.SetLog(
 		log.Account,
 		log.PlayerID,

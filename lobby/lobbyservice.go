@@ -4,12 +4,15 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/loginfo"
+	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/ServerUtility/playerinfo"
+	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/messagehandle/log"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/thirdparty/ulg"
@@ -43,7 +46,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 	result := make(map[string]interface{})
 	// loginfo := log.New(log.GetPlayer)
-	err := errorlog.New()
+	err := messagehandle.New()
 	postData := myhttp.PostData(r)
 	token := foundation.InterfaceToString(postData["token"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
@@ -70,12 +73,12 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var dbresult []map[string]interface{}
 	dbresult, err = db.GetPlayerInfoByGameAccount(GameAccount)
 	if err.ErrorCode != code.OK {
-		errorlog.ErrorLogPrintln("Lobby", err.Msg)
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
-	var playerInfo *player.PlayerInfo
+	var playerInfo *playerinfo.Info
 	if len(dbresult) <= 0 {
 		playerInfo, err = player.New(GameAccount)
 	} else {
@@ -83,7 +86,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	if playerInfo == nil {
-		errorlog.ErrorLogPrintln("Lobby", err.Msg)
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -109,7 +112,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	mu.Lock()
 	defer mu.Unlock()
-	err := errorlog.New()
+	err := messagehandle.New()
 	postData := myhttp.PostData(r)
 	//
 	// logintype := foundation.InterfaceToInt(postData["logintype"])
@@ -150,14 +153,14 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cointype := foundation.InterfaceToInt64(postData["cointype"])
 	coinamount := foundation.InterfaceToInt64(postData["coinamount"])
 
-	err := errorlog.New()
+	err := messagehandle.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
 	// get player
-	var playerInfo *player.PlayerInfo
+	var playerInfo *playerinfo.Info
 	playerInfo, err = player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
@@ -186,7 +189,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// exchange
-	errorlog.LogPrintln("AccountUserInfo.GameToken", ulguser.GameToken)
+	messagehandle.LogPrintln("AccountUserInfo.GameToken", ulguser.GameToken)
 	ulgResult, err := ulg.Exchange(ulguser.GameToken, gametypeid, accountToken, cointype, coinamount)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
@@ -205,7 +208,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	player.SavePlayerInfo(playerInfo)
 	db.SetExchange(playerInfo.GameAccount, playerInfo.GameToken, cointype, coinamount, playerInfo.Money, OldMoney, foundation.ServerNowTime())
 
-	loginfo := log.New(log.Exchange)
+	loginfo := loginfo.New(loginfo.Exchange)
 	loginfo.PlayerID = playerInfo.ID
 	loginfo.IValue1 = int64(cointype)
 	loginfo.IValue2 = int64(coinamount)
@@ -224,7 +227,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	// accountToken := foundation.InterfaceToString(postData["accounttoken"])
 
-	err := errorlog.New()
+	err := messagehandle.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
@@ -249,13 +252,13 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	var ulginfo *ulg.ULGInfo
-	ulginfo, err = ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
+	var ulgInfo *ulginfo.Info
+	ulgInfo, err = ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
-	if ulginfo.IsCheckOut {
+	if ulgInfo.IsCheckOut {
 		playerInfo.Money = 0
 		playerInfo.GameToken = ""
 		player.SavePlayerInfo(playerInfo)
@@ -263,14 +266,14 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	var ulgCheckOutResult ulg.UlgCheckOutResult
-	ulgCheckOutResult, err = ulg.Checkout(ulginfo, gametypeid)
+	var ulgCheckOutResult ulginfo.CheckOutResult
+	ulgCheckOutResult, err = ulg.Checkout(ulgInfo, gametypeid)
 	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
-	loginfo := log.New(log.CheckOut)
+	loginfo := loginfo.New(loginfo.CheckOut)
 	loginfo.PlayerID = playerInfo.ID
 	loginfo.IValue1 = playerInfo.Money
 	loginfo.SValue1 = playerInfo.GameToken

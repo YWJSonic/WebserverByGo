@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"time"
 
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/messagehandle"
+	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
 	"gitlab.com/WeberverByGo/mycache"
 )
 
+// CachePlayer memory cache player
+var CachePlayer map[int64]playerinfo.Info
+
 // GetAccountInfoByGameAccount Get accountinfo struct
-func GetAccountInfoByGameAccount(gameAccount string) (*AccountInfo, errorlog.ErrorMsg) {
+func GetAccountInfoByGameAccount(gameAccount string) (*playerinfo.AccountInfo, messagehandle.ErrorMsg) {
 	info, err := mycache.GetAccountInfo(gameAccount)
 	if info == nil {
 		err.ErrorCode = code.NoThisPlayer
@@ -20,9 +24,9 @@ func GetAccountInfoByGameAccount(gameAccount string) (*AccountInfo, errorlog.Err
 		return nil, err
 	}
 
-	var account AccountInfo
+	var account playerinfo.AccountInfo
 	if errMsg := json.Unmarshal(info.([]byte), &account); errMsg != nil {
-		errorlog.ErrorLogPrintln("Player", errMsg)
+		messagehandle.ErrorLogPrintln("Player", errMsg)
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "AccountFormatError"
 		return nil, err
@@ -32,13 +36,13 @@ func GetAccountInfoByGameAccount(gameAccount string) (*AccountInfo, errorlog.Err
 }
 
 // SaveAccountInfo ...
-func SaveAccountInfo(accInfo *AccountInfo) {
+func SaveAccountInfo(accInfo *playerinfo.AccountInfo) {
 	mycache.SetAccountInfo(accInfo.GameAccount, foundation.JSONToString(accInfo))
 	mycache.SetToken(accInfo.GameAccount, accInfo.Token)
 }
 
 // GetPlayerInfoByPlayerID ...
-func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
+func GetPlayerInfoByPlayerID(playerid int64) (*playerinfo.Info, messagehandle.ErrorMsg) {
 	info, err := mycache.GetPlayerInfo(playerid)
 	if info == nil {
 		err.ErrorCode = code.NoThisPlayer
@@ -46,9 +50,9 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 		return nil, err
 	}
 
-	var player PlayerInfo
+	var player playerinfo.Info
 	if errMsg := json.Unmarshal(info.([]byte), &player); errMsg != nil {
-		errorlog.ErrorLogPrintln("Player", errMsg)
+		messagehandle.ErrorLogPrintln("Player", errMsg)
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "PlayerFormatError"
 		return nil, err
@@ -58,7 +62,7 @@ func GetPlayerInfoByPlayerID(playerid int64) (*PlayerInfo, errorlog.ErrorMsg) {
 }
 
 // SavePlayerInfo ...
-func SavePlayerInfo(playerInfo *PlayerInfo) {
+func SavePlayerInfo(playerInfo *playerinfo.Info) {
 	playerInfo.LastCheckTime = time.Now().Unix()
 
 	mycache.SetPlayerInfo(playerInfo.ID, foundation.JSONToString(playerInfo))
@@ -67,14 +71,14 @@ func SavePlayerInfo(playerInfo *PlayerInfo) {
 }
 
 // New Create a new PlayerInfo
-func New(gameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
+func New(gameAccount string) (*playerinfo.Info, messagehandle.ErrorMsg) {
 	playerID, err := db.NewGameAccount(gameAccount, 0, "")
 
 	if err.ErrorCode != code.OK {
 		return nil, err
 	}
 
-	info := PlayerInfo{
+	info := playerinfo.Info{
 		GameAccount: gameAccount,
 		ID:          playerID,
 		Money:       0,
@@ -84,8 +88,8 @@ func New(gameAccount string) (*PlayerInfo, errorlog.ErrorMsg) {
 }
 
 // MakePlayer Get player form db
-func MakePlayer(row map[string]interface{}) *PlayerInfo {
-	return &PlayerInfo{
+func MakePlayer(row map[string]interface{}) *playerinfo.Info {
+	return &playerinfo.Info{
 		ID:          foundation.InterfaceToInt64(row["PlayerID"]),
 		Money:       foundation.InterfaceToInt64(row["GameMoney"]),
 		GameAccount: foundation.InterfaceToString(row["GameAccount"]),
