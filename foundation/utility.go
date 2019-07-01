@@ -27,6 +27,16 @@ func DeleteArrayElement(elementIndex interface{}, array []interface{}) []interfa
 	return array
 }
 
+// ToJSONStr Convert to json string
+func ToJSONStr(data interface{}) []byte {
+	jsonString, err := json.Marshal(data)
+	if err != nil {
+		return nil
+	}
+
+	return jsonString
+}
+
 // JSONToString conver JsonStruct to JsonString
 func JSONToString(v interface{}) string {
 	data, _ := json.MarshalIndent(v, "", " ")

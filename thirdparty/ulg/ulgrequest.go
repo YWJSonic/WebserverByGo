@@ -13,20 +13,6 @@ import (
 
 /////// API interface process
 
-// Login ...
-// func Login(username, password string) map[string]interface{} {
-// 	var info map[string]interface{}
-// 	postData := map[string][]string{
-// 		"username": {username},
-// 		"password": {password},
-// 	}
-// 	jsbyte := foundation.HTTPPostRequest(loginURL, postData)
-// 	if err := json.Unmarshal(jsbyte, &info); err != nil {
-// 		panic(err)
-// 	}
-// 	return info
-// }
-
 // NewULGInfo New ULGInfo
 func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken string) (*ULGInfo, errorlog.ErrorMsg) {
 	info := ULGInfo{
@@ -154,7 +140,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gameid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(GetuserURL, postData)
+	jsbyte := foundation.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
@@ -178,7 +164,7 @@ func Authorized(token, gametypeid string) (UlgResult, errorlog.ErrorMsg) {
 		"game_id": {gametypeid},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(AuthorizedURL, postData)
+	jsbyte := foundation.PostRawRequest(AuthorizedURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
@@ -205,7 +191,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 		"coin_amount": {fmt.Sprint(coinamount)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(ExchangeURL, postData)
+	jsbyte := foundation.PostRawRequest(ExchangeURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
@@ -233,7 +219,7 @@ func Checkout(ulgInfo *ULGInfo, gameid string) (UlgCheckOutResult, errorlog.Erro
 		"lost":       {fmt.Sprint(ulgInfo.TotalLost)},
 	}
 	errorlog.LogPrintln("Ulg", postData)
-	jsbyte := foundation.HTTPPostRequest(CheckoutURL, postData)
+	jsbyte := foundation.PostRawRequest(CheckoutURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"

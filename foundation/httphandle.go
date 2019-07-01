@@ -20,6 +20,28 @@ func init() {
 	ProxyData = make(map[string]RESTfulURL)
 }
 
+type httpClient struct {
+	Client *http.Client
+}
+
+var clientConnect *httpClient
+
+// HttpClient http get http request connect pool
+func connectPool() *http.Client {
+	if clientConnect == nil {
+		clientConnect = new(httpClient)
+		httptr := &http.Transport{
+
+			MaxIdleConns:        50,
+			MaxIdleConnsPerHost: 50,
+		}
+		clientConnect.Client = &http.Client{
+			Transport: httptr,
+		}
+	}
+	return clientConnect.Client
+}
+
 // HTTPGet ...
 func HTTPGet(ip string, values map[string][]string) []byte {
 	res, err := http.Get(ip)
@@ -51,12 +73,16 @@ func HTTPPostRequest(ip string, values map[string][]string) []byte {
 
 }
 
+// PostRawRequest connect pool
+func PostRawRequest(url string, value []byte) []byte {
+	return HTTPPostRawRequest(connectPool(), url, value)
+}
+
 // HTTPPostRawRequest Http Raw Request
-func HTTPPostRawRequest(url string, value []byte) []byte {
+func HTTPPostRawRequest(client *http.Client, url string, value []byte) []byte {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(value))
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error", err)
