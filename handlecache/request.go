@@ -7,7 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/messagehandle"
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/serversetting"
 )
 
 var CachePool *redis.Pool
@@ -27,7 +27,7 @@ func newCachePool() {
 		MaxActive:   50,
 		Wait:        true,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", data.RedisURL,
+			c, err := redis.Dial("tcp", serversetting.RedisURL,
 				redis.DialConnectTimeout(ConnectTimeout),
 				redis.DialReadTimeout(ReadTimeout),
 				redis.DialWriteTimeout(WriteTimeout))
@@ -87,7 +87,7 @@ func GetAccountInfo(gameAccount string) (interface{}, messagehandle.ErrorMsg) {
 
 // SetAccountInfo Set Account Struct
 func SetAccountInfo(gameAccount string, Value interface{}) {
-	runSet(fmt.Sprintf("ACC%s", gameAccount), Value, data.CacheDeleteTime)
+	runSet(fmt.Sprintf("ACC%s", gameAccount), Value, serversetting.CacheDeleteTime)
 }
 
 // GetPlayerInfo Get PlayerInfo Struct
@@ -107,7 +107,7 @@ func GetPlayerInfo(playerid int64) (interface{}, messagehandle.ErrorMsg) {
 
 // SetPlayerInfo Set PlayerInfo Struct
 func SetPlayerInfo(playerid int64, Value interface{}) {
-	runSet(fmt.Sprintf("ID%dJS", playerid), Value, data.CacheDeleteTime)
+	runSet(fmt.Sprintf("ID%dJS", playerid), Value, serversetting.CacheDeleteTime)
 }
 
 // ClearPlayerCache ...
@@ -127,7 +127,7 @@ func ClearAllCache() {
 // SetULGInfo Set ULG info
 func SetULGInfo(playerid int64, value interface{}) {
 	key := fmt.Sprintf("ULG%d", playerid)
-	runSet(key, value, data.CacheDeleteTime)
+	runSet(key, value, serversetting.CacheDeleteTime)
 }
 
 // GetULGInfoCache Get ULG info
@@ -151,7 +151,7 @@ func GetULGInfoCache(playerid int64) interface{} {
 // SetAttach ...
 func SetAttach(playerid int64, value interface{}) {
 	key := fmt.Sprintf("attach%d", playerid)
-	runSet(key, value, data.CacheDeleteTime)
+	runSet(key, value, serversetting.CacheDeleteTime)
 }
 
 // GetAttach game data request

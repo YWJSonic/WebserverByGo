@@ -7,12 +7,11 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/code"
-	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/dbinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
-	"gitlab.com/WeberverByGo/crontab"
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/serversetting"
+	crontab "gitlab.com/WeberverByGo/handlecrontab"
 )
 
 var gameBDSQL *dbinfo.SqlCLi
@@ -35,7 +34,7 @@ var UseChanQueue = false
 func connectGameDB() (db *sql.DB, err error) {
 	if gameBDSQL == nil {
 		gameBDSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "gamedb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "gamedb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -66,7 +65,7 @@ func connectGameDB() (db *sql.DB, err error) {
 func connectLogDB() (db *sql.DB, err error) {
 	if logDBSQL == nil {
 		logDBSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "logdb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "logdb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -96,7 +95,7 @@ func connectLogDB() (db *sql.DB, err error) {
 func connectPayDB() (db *sql.DB, err error) {
 	if payDBSQL == nil {
 		payDBSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", data.DBUser, data.DBPassword, data.DBIP, data.DBPORT, "paydb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "paydb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -136,10 +135,10 @@ func SetDBConn() {
 	NewLogTable(foundation.ServerNow().AddDate(0, 0, 1).Format("20060102"))
 
 	// set Schedule check next day log table.
-	crontab.NewCronBaseJob("0 35 15 * * *", &crontabinfo.LogCrontab{
-		Params: func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
-		FUN:    NewLogTable,
-	})
+	crontab.NewCronBaseJob("0 35 15 * * *",
+		crontab.NewLogCrontab(
+			func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
+			NewLogTable))
 }
 
 // SQLSelect channel loop

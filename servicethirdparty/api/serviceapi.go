@@ -9,11 +9,11 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/crontab"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/mycache"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
+	"gitlab.com/WeberverByGo/apithirdparty/ulg"
+	"gitlab.com/WeberverByGo/serversetting"
+	mycache "gitlab.com/WeberverByGo/handlecache"
+	crontab "gitlab.com/WeberverByGo/handlecrontab"
+	db "gitlab.com/WeberverByGo/handledb"
 	gameRules "gitlab.com/game7"
 
 	"github.com/julienschmidt/httprouter"
@@ -63,17 +63,17 @@ func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 // MaintainStart Maintain API
 func MaintainStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.EnableMaintain(true)
+	serversetting.EnableMaintain(true)
 }
 
 // MaintainEnd Maintain API
 func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data.EnableMaintain(false)
+	serversetting.EnableMaintain(false)
 }
 
 // MaintainCheckout auto checkout ulg
 func MaintainCheckout() {
-	if !data.IsMaintain() {
+	if !serversetting.IsMaintain() {
 		messagehandle.LogPrintln("API Warning: MaintainCheckout not in maintain")
 		return
 	}
@@ -82,7 +82,7 @@ func MaintainCheckout() {
 	fmt.Println(infos, err)
 
 	for _, ulginfo := range infos {
-		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+		_, err = ulg.Checkout(&ulginfo, serversetting.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
 			messagehandle.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}

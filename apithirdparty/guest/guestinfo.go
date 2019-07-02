@@ -16,8 +16,8 @@ func (g *GuestInfo) PartyAccount() string {
 }
 
 // GameAccount ...
-func (g *GuestInfo) GameAccount() string {
-	return foundation.NewGameAccount(string(g.Account))
+func (g *GuestInfo) GameAccount(encodeStr string) string {
+	return foundation.NewGameAccount(encodeStr, string(g.Account))
 }
 
 // AccountType ...

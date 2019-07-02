@@ -4,21 +4,21 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/WeberverByGo/serversetting"
+
 	"github.com/julienschmidt/httprouter"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
-	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
-	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/apithirdparty/guest"
+	"gitlab.com/WeberverByGo/apithirdparty/ulg"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/messagehandle/log"
+	db "gitlab.com/WeberverByGo/handledb"
+	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
-	"gitlab.com/WeberverByGo/setting"
-	"gitlab.com/WeberverByGo/thirdparty/guest"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
 )
 
 var isInit = false
@@ -46,7 +46,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
 	err := messagehandle.New()
-	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
+	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -86,22 +86,20 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var accountInfo playerinfo.AccountInfo
 	if len(Info) < 1 {
-		accountInfo = playerinfo.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(), foundation.NewToken(iPratyAccount.PartyAccount()), iPratyAccount.AccountType())
+		accountInfo = player.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(serversetting.AccountEncodeStr), foundation.NewToken(iPratyAccount.PartyAccount()), iPratyAccount.AccountType())
 		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.AccountType)
 
 	} else {
 		result := Info[0]
-		accountInfo = playerinfo.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), foundation.NewToken(result["Account"].(string)), result["AccountType"].(int64))
+		accountInfo = player.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), foundation.NewToken(result["Account"].(string)), result["AccountType"].(int64))
 		// db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
 	}
 
 	player.SaveAccountInfo(&accountInfo)
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
-	result["serversetting"] = setting.New()
+	result["serversetting"] = serversetting.New()
 
-	loginfo := loginfo.New(loginfo.Login)
-	loginfo.Account = accountInfo.GameAccount
-	log.SaveLog(loginfo)
+	log.AcouuntLogin(accountInfo.GameAccount)
 	myrestful.HTTPResponse(w, result, err)
 }

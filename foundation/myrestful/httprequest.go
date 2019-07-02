@@ -9,7 +9,7 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/serversetting"
 )
 
 var ProxyData map[string]myhttp.RESTfulURL
@@ -53,7 +53,7 @@ func ListenProxy(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	switch RESTfulInfo.ConnType {
 	case myhttp.Client:
-		if data.IsMaintain() {
+		if serversetting.IsMaintain() {
 			maintain(w, r, ps)
 		} else {
 			RESTfulInfo.Fun(w, r, ps)

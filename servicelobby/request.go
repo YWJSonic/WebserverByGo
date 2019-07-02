@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"sync"
 
+	attach "gitlab.com/WeberverByGo/handleattach"
+
+	"gitlab.com/WeberverByGo/serversetting"
+
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/loginfo"
@@ -11,11 +15,12 @@ import (
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGo/apithirdparty/ulg"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/messagehandle/log"
+	mycache "gitlab.com/WeberverByGo/handlecache"
+	db "gitlab.com/WeberverByGo/handledb"
+	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 	gameRule "gitlab.com/game7"
@@ -51,7 +56,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	token := foundation.InterfaceToString(postData["token"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
-	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
+	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -65,7 +70,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// check token
-	if err = foundation.CheckToken(GameAccount, token); err.ErrorCode != code.OK {
+	if err = foundation.CheckToken(mycache.GetToken(GameAccount), token); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -99,12 +104,11 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	result["thirdparty"] = thirdpartyresult
 
-	gameRule.InitAttach(playerInfo.ID)
 	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
-	// result["gameattach"] = game.GetAttach(playerInfo.ID)
+	result["attach"] = gameRule.GetAttach(attach.GetAttach(playerInfo.ID, gameRule.GameIndex))
 
 	myrestful.HTTPResponse(w, result, err)
 }
@@ -124,7 +128,7 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// }
 
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
-	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
+	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -154,7 +158,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	coinamount := foundation.InterfaceToInt64(postData["coinamount"])
 
 	err := messagehandle.New()
-	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
+	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -168,7 +172,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// check token
-	if err = foundation.CheckToken(playerInfo.GameAccount, token); err.ErrorCode != code.OK {
+	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -228,7 +232,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// accountToken := foundation.InterfaceToString(postData["accounttoken"])
 
 	err := messagehandle.New()
-	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
+	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -240,7 +244,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// check token
-	if err = foundation.CheckToken(playerInfo.GameAccount, token); err.ErrorCode != code.OK {
+	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}

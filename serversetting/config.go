@@ -1,7 +1,6 @@
-package data
+package serversetting
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -51,27 +50,3 @@ var maintain = false
 
 // Setting settint from db data
 var Setting map[string]interface{}
-
-func init() {
-	Setting = make(map[string]interface{})
-	mu = new(sync.RWMutex)
-}
-
-// ServerURL ...
-func ServerURL() string {
-	return fmt.Sprintf("%s:%s", IP, PORT)
-}
-
-// IsMaintain ...
-func IsMaintain() bool {
-	mu.RLock()
-	defer mu.RUnlock()
-	return maintain
-}
-
-// EnableMaintain ...
-func EnableMaintain(enable bool) {
-	mu.Lock()
-	defer mu.Unlock()
-	maintain = enable
-}

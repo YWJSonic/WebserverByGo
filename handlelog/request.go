@@ -2,8 +2,17 @@ package log
 
 import (
 	"gitlab.com/ServerUtility/loginfo"
-	"gitlab.com/WeberverByGo/db"
+	db "gitlab.com/WeberverByGo/handledb"
 )
+
+// AcouuntLogin log account
+func AcouuntLogin(GameAccount string) {
+
+	loginfo := loginfo.New(loginfo.Login)
+	loginfo.Account = GameAccount
+	SaveLog(loginfo)
+
+}
 
 // SaveLog Save to db
 func SaveLog(log loginfo.LogInfo) {

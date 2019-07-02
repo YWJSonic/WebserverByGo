@@ -6,7 +6,7 @@ import (
 	"github.com/robfig/cron"
 	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/foundation"
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGo/serversetting"
 )
 
 var c *cron.Cron
@@ -43,6 +43,14 @@ func NewCronJob(spec string, job *crontabinfo.ParamsJob) {
 
 // SpecToTime  conver spec string to time
 func SpecToTime(spec string) time.Time {
-	target, _ := cron.Parse(data.MaintainStartTime)
+	target, _ := cron.Parse(serversetting.MaintainStartTime)
 	return target.Next(foundation.ServerNow())
+}
+
+// NewLogCrontab new LogCrontab struct
+func NewLogCrontab(Params func() string, FUN func(string)) *crontabinfo.LogCrontab {
+	return &crontabinfo.LogCrontab{
+		Params: func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
+		FUN:    FUN,
+	}
 }

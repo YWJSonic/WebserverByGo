@@ -8,8 +8,8 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/playerinfo"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/mycache"
+	mycache "gitlab.com/WeberverByGo/handlecache"
+	db "gitlab.com/WeberverByGo/handledb"
 )
 
 // CachePlayer memory cache player
@@ -94,5 +94,16 @@ func MakePlayer(row map[string]interface{}) *playerinfo.Info {
 		Money:       foundation.InterfaceToInt64(row["GameMoney"]),
 		GameAccount: foundation.InterfaceToString(row["GameAccount"]),
 		GameToken:   foundation.InterfaceToString(row["GameToken"]),
+	}
+}
+
+// NewAccountInfo ...
+func NewAccountInfo(account, gameAccount, token string, accountType int64) playerinfo.AccountInfo {
+	return playerinfo.AccountInfo{
+		Account:     account,
+		GameAccount: gameAccount,
+		Token:       token,
+		LoginTime:   time.Now().Unix(),
+		AccountType: accountType,
 	}
 }

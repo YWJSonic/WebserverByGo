@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"gitlab.com/ServerUtility/eventinfo"
-	"gitlab.com/WeberverByGo/db"
+	db "gitlab.com/WeberverByGo/handledb"
 )
 
 var eventList []eventinfo.Info
