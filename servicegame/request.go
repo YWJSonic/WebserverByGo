@@ -5,25 +5,23 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"time"
 
 	"gitlab.com/WeberverByGo/apithirdparty/ulg"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	attach "gitlab.com/WeberverByGo/handleattach"
-	db "gitlab.com/WeberverByGo/handledb"
-	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/serversetting"
 
+	attach "gitlab.com/WeberverByGo/handleattach"
 	mycache "gitlab.com/WeberverByGo/handlecache"
+	log "gitlab.com/WeberverByGo/handlelog"
 	gameRule "gitlab.com/game7"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -85,38 +83,39 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// get thirdparty info data
-	var ulginfo *ulginfo.Info
-	ulginfo, err = ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
+	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		fmt.Println(ulginfo)
 		return
 	}
 
-	st := time.Now()
-
 	var att []map[string]interface{}
-	att, err = db.GetAttachKind(playerInfo.ID, gameRule.GameIndex)
-	result, newatt, otherdata := gameRule.GameRequest(playerID, betIndex, att)
-	totalwinscore := otherdata["totalwinscore"]
-	playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
-	result["playermoney"] = playerInfo.Money
-	result["attach"] = gameRule.GetAttach(newatt)
+	var totalwinscore int64
+	var result map[string]interface{}
+	var newatt []map[string]interface{}
+	var otherdata map[string]int64
+	att = attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB)
 
-	fmt.Println(time.Since(st))
-	st = time.Now()
-	attach.SaveAttach(playerInfo.ID, gameRule.GameIndex, newatt, false)
+	for index, max := 0, 2; index < max; index++ {
+		result, newatt, otherdata = gameRule.GameRequest(playerID, betIndex, att)
+		totalwinscore = otherdata["totalwinscore"]
+		playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
+		result["playermoney"] = playerInfo.Money
+		result["attach"] = gameRule.ConvertToGameAttach(newatt)
 
-	fmt.Println(time.Since(st))
-	st = time.Now()
+		if !(gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, totalwinscore) || gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, totalwinscore)) {
+			break
+		}
+
+	}
+
+	attach.SaveAttach(playerInfo.ID, gameRule.GameIndex, newatt, gameRule.IsAttachSaveToDB)
 
 	ulginfo.TotalBet += betMoney
 	ulginfo.TotalWin += totalwinscore
 	player.SavePlayerInfo(playerInfo)
 	ulg.SaveULGInfo(ulginfo)
-
-	fmt.Println(time.Since(st))
-	st = time.Now()
 
 	msg := foundation.JSONToString(result)
 	msg = strings.ReplaceAll(msg, "\"", "\\\"")
@@ -127,11 +126,6 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 
-	fmt.Println(time.Since(st))
-	st = time.Now()
 	myrestful.HTTPResponse(w, result, err)
-
-	fmt.Println(time.Since(st))
-	st = time.Now()
 
 }

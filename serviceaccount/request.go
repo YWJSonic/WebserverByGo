@@ -12,13 +12,9 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/ServerUtility/playerinfo"
-	"gitlab.com/WeberverByGo/apithirdparty/guest"
-	"gitlab.com/WeberverByGo/apithirdparty/ulg"
+	"gitlab.com/WeberverByGo/apithirdparty"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
-	db "gitlab.com/WeberverByGo/handledb"
 	log "gitlab.com/WeberverByGo/handlelog"
-	"gitlab.com/WeberverByGo/player"
 )
 
 var isInit = false
@@ -51,51 +47,12 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	// mutility party switch
-	var iPratyAccount playerinfo.IPratyAccount
-	switch logintype {
-	case playerinfo.Guest:
-		account := foundation.InterfaceToString(postData["account"])
-		guestinfo := guest.GuestInfo{
-			Account: account,
-		}
-
-		iPratyAccount = &guestinfo
-	case playerinfo.Self:
-	case playerinfo.Ulg:
-		accounttoken := foundation.InterfaceToString(postData["accounttoken"])
-		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
-		if err.ErrorCode != code.OK {
-			err.ErrorCode = code.FailedPrecondition
-			myrestful.HTTPResponse(w, "", err)
-			return
-		}
-
-		iPratyAccount = &UserInfo
-		result["userCoinQuota"] = UserInfo.UserCoinQuota
-		result["gameInfo"] = UserInfo.GameInfo
-	default:
-		messagehandle.ErrorLogPrintln("logintype Error", logintype, gametypeid, postData)
-	}
-
-	Info, err := db.GetAccountInfo(iPratyAccount.PartyAccount())
+	result, accountInfo, err := apithirdparty.GetAccount(logintype, foundation.InterfaceToString(postData["accounttoken"]), gametypeid)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "LoginType", err)
+		myrestful.HTTPResponse(w, "account login", err)
 		return
 	}
 
-	var accountInfo playerinfo.AccountInfo
-	if len(Info) < 1 {
-		accountInfo = player.NewAccountInfo(iPratyAccount.PartyAccount(), iPratyAccount.GameAccount(serversetting.AccountEncodeStr), foundation.NewToken(iPratyAccount.PartyAccount()), iPratyAccount.AccountType())
-		db.NewAccount(accountInfo.Account, accountInfo.GameAccount, accountInfo.AccountType)
-
-	} else {
-		result := Info[0]
-		accountInfo = player.NewAccountInfo(result["Account"].(string), result["GameAccount"].(string), foundation.NewToken(result["Account"].(string)), result["AccountType"].(int64))
-		// db.UpdateAccount(accountInfo.Account, accountInfo.LoginTime)
-	}
-
-	player.SaveAccountInfo(&accountInfo)
 	result["gameaccount"] = accountInfo.GameAccount
 	result["token"] = accountInfo.Token
 	result["serversetting"] = serversetting.New()

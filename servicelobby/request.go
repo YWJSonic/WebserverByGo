@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/WeberverByGo/apithirdparty"
 	attach "gitlab.com/WeberverByGo/handleattach"
 
 	"gitlab.com/WeberverByGo/serversetting"
@@ -13,12 +14,8 @@ import (
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/ServerUtility/playerinfo"
-	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGo/apithirdparty/ulg"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
 	mycache "gitlab.com/WeberverByGo/handlecache"
-	db "gitlab.com/WeberverByGo/handledb"
 	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
 
@@ -75,25 +72,9 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	var dbresult []map[string]interface{}
-	dbresult, err = db.GetPlayerInfoByGameAccount(GameAccount)
+	playerInfo, err := player.GetPlayerInfoByGameAccount(GameAccount)
 	if err.ErrorCode != code.OK {
-		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
-		myrestful.HTTPResponse(w, "", err)
-		return
-	}
-
-	var playerInfo *playerinfo.Info
-	if len(dbresult) <= 0 {
-		playerInfo, err = player.New(GameAccount)
-	} else {
-		playerInfo = player.MakePlayer(dbresult[0])
-	}
-
-	if playerInfo == nil {
-		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
-		myrestful.HTTPResponse(w, "", err)
-		return
+		myrestful.HTTPResponse(w, "Lobby", err)
 	}
 
 	// ulg result info
@@ -104,11 +85,10 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	result["thirdparty"] = thirdpartyresult
 
-	player.SavePlayerInfo(playerInfo)
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
-	result["attach"] = gameRule.GetAttach(attach.GetAttach(playerInfo.ID, gameRule.GameIndex))
+	result["attach"] = gameRule.ConvertToGameAttach(attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
 
 	myrestful.HTTPResponse(w, result, err)
 }
@@ -118,14 +98,6 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	defer mu.Unlock()
 	err := messagehandle.New()
 	postData := myhttp.PostData(r)
-	//
-	// logintype := foundation.InterfaceToInt(postData["logintype"])
-	// if logintype != account.Ulg {
-	// 	err.ErrorCode = code.AccountTypeError
-	// 	err.Msg = "AccountTypeError"
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	return
-	// }
 
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
@@ -134,14 +106,14 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
-	UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
+	userCoinQuota, err := apithirdparty.Refresh(accounttoken, gametypeid)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
 
 	result := make(map[string]interface{})
-	result["userCoinQuota"] = UserInfo.UserCoinQuota
+	result["userCoinQuota"] = userCoinQuota
 
 	myrestful.HTTPResponse(w, result, err)
 }
@@ -164,8 +136,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	// get player
-	var playerInfo *playerinfo.Info
-	playerInfo, err = player.GetPlayerInfoByPlayerID(playerID)
+	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
@@ -177,40 +148,12 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	// if playerInfo.GameToken != "" {
-	// 	err.ErrorCode = code.NoCheckoutError
-	// 	err.Msg = "NoCheckoutError"
-	// 	foundation.HTTPResponse(w, "", err)
-	// 	return
-	// }
-
-	// new thirdparty token
-	ulguser, err := ulg.Authorized(accountToken, gametypeid)
-	if err.ErrorCode != code.OK {
-		err.ErrorCode = code.FailedPrecondition
-		myrestful.HTTPResponse(w, "", err)
-		return
-	}
-
-	// exchange
-	messagehandle.LogPrintln("AccountUserInfo.GameToken", ulguser.GameToken)
-	ulgResult, err := ulg.Exchange(ulguser.GameToken, gametypeid, accountToken, cointype, coinamount)
+	ulgResult, err := apithirdparty.Excahnge(playerInfo, accountToken, gametypeid, cointype, coinamount)
 	if err.ErrorCode != code.OK {
 		myrestful.HTTPResponse(w, "", err)
 		return
-	}
 
-	_, err = ulg.NewULGInfo(playerInfo.ID, cointype, coinamount, ulguser.GameToken, accountToken)
-	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
-		return
 	}
-
-	OldMoney := playerInfo.Money
-	playerInfo.Money = ulgResult.GameCoin
-	playerInfo.GameToken = ulguser.GameToken
-	player.SavePlayerInfo(playerInfo)
-	db.SetExchange(playerInfo.GameAccount, playerInfo.GameToken, cointype, coinamount, playerInfo.Money, OldMoney, foundation.ServerNowTime())
 
 	loginfo := loginfo.New(loginfo.Exchange)
 	loginfo.PlayerID = playerInfo.ID
@@ -256,23 +199,8 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	var ulgInfo *ulginfo.Info
-	ulgInfo, err = ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
+	ulgCheckOutResult, err := apithirdparty.CheckOut(playerInfo, serversetting.GameTypeID)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
-		return
-	}
-	if ulgInfo.IsCheckOut {
-		playerInfo.Money = 0
-		playerInfo.GameToken = ""
-		player.SavePlayerInfo(playerInfo)
-		myrestful.HTTPResponse(w, "", err)
-		return
-	}
-
-	var ulgCheckOutResult ulginfo.CheckOutResult
-	ulgCheckOutResult, err = ulg.Checkout(ulgInfo, gametypeid)
-	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
 		myrestful.HTTPResponse(w, "", err)
 		return
 	}
@@ -283,14 +211,12 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.SValue1 = playerInfo.GameToken
 	log.SaveLog(loginfo)
 
-	ulg.UpdateUlgInfoCheckOut(playerInfo.GameToken)
-
 	playerInfo.Money = 0
 	playerInfo.GameToken = ""
 	player.SavePlayerInfo(playerInfo)
 
 	result := make(map[string]interface{})
-	result["userCoinQuota"] = ulgCheckOutResult.UserCoinQuota
+	result["userCoinQuota"] = ulgCheckOutResult
 
 	myrestful.HTTPResponse(w, result, err)
 }

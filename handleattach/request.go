@@ -3,6 +3,8 @@ package attach
 import (
 	"encoding/json"
 
+	"gitlab.com/ServerUtility/code"
+
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	mycache "gitlab.com/WeberverByGo/handlecache"
@@ -10,11 +12,18 @@ import (
 )
 
 // GetAttach 0:free game count
-func GetAttach(playerID int64, gameIndex int) []map[string]interface{} {
+func GetAttach(playerID int64, gameIndex int64, isSaveToDB bool) []map[string]interface{} {
 	var info []map[string]interface{}
 	attach := mycache.GetAttach(playerID)
 	if attach == nil {
-		info = newAttach()
+		if isSaveToDB {
+			info = loadAttachFromDB(playerID, gameIndex)
+		}
+
+		if info == nil {
+			info = newAttach()
+		}
+
 	} else {
 		// cache data
 		if errMsg := json.Unmarshal(attach.([]byte), &info); errMsg != nil {
@@ -34,6 +43,14 @@ func SaveAttach(playerid int64, gameIndex int, info []map[string]interface{}, is
 			saveAttachToDB(playerid, gameIndex, foundation.InterfaceToInt64(value["Type"]), foundation.InterfaceToInt64(value["IValue"]))
 		}
 	}
+}
+
+func loadAttachFromDB(playerid, gameIndex int64) []map[string]interface{} {
+	row, err := db.GetAttachKind(playerid, gameIndex)
+	if err.ErrorCode != code.OK {
+		return nil
+	}
+	return row
 }
 
 func saveToCache(playerid int64, gameIndex int, info []map[string]interface{}) {

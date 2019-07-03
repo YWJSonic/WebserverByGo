@@ -16,22 +16,33 @@ import (
 var CachePlayer map[int64]playerinfo.Info
 
 // GetAccountInfoByGameAccount Get accountinfo struct
-func GetAccountInfoByGameAccount(gameAccount string) (*playerinfo.AccountInfo, messagehandle.ErrorMsg) {
-	info, err := mycache.GetAccountInfo(gameAccount)
-	if info == nil {
-		err.ErrorCode = code.NoThisPlayer
-		err.Msg = "NoThisGameAccount"
+func GetAccountInfoByGameAccount(gameAccount, token string) (*playerinfo.Info, messagehandle.ErrorMsg) {
+
+	// check token
+	if err := foundation.CheckToken(mycache.GetToken(gameAccount), token); err.ErrorCode != code.OK {
 		return nil, err
 	}
 
-	var account playerinfo.AccountInfo
-	if errMsg := json.Unmarshal(info.([]byte), &account); errMsg != nil {
-		messagehandle.ErrorLogPrintln("Player", errMsg)
-		err.ErrorCode = code.NoThisPlayer
-		err.Msg = "AccountFormatError"
+	var dbresult []map[string]interface{}
+	dbresult, err := db.GetPlayerInfoByGameAccount(gameAccount)
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
 		return nil, err
 	}
-	return &account, err
+
+	var playerInfo *playerinfo.Info
+	if len(dbresult) <= 0 {
+		playerInfo, err = New(gameAccount)
+	} else {
+		playerInfo = MakePlayer(dbresult[0])
+	}
+
+	if playerInfo == nil {
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
+		return nil, err
+	}
+	SavePlayerInfo(playerInfo)
+	return playerInfo, err
 
 }
 
@@ -39,6 +50,30 @@ func GetAccountInfoByGameAccount(gameAccount string) (*playerinfo.AccountInfo, m
 func SaveAccountInfo(accInfo *playerinfo.AccountInfo) {
 	mycache.SetAccountInfo(accInfo.GameAccount, foundation.JSONToString(accInfo))
 	mycache.SetToken(accInfo.GameAccount, accInfo.Token)
+}
+
+// GetPlayerInfoByGameAccount Get PlayerInfo by gameAccount with new token
+func GetPlayerInfoByGameAccount(gameAccount string) (*playerinfo.Info, messagehandle.ErrorMsg) {
+	dbresult, err := db.GetPlayerInfoByGameAccount(gameAccount)
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
+		return nil, err
+	}
+
+	var playerInfo *playerinfo.Info
+	if len(dbresult) <= 0 {
+		playerInfo, err = New(gameAccount)
+	} else {
+		playerInfo = MakePlayer(dbresult[0])
+	}
+
+	if playerInfo == nil {
+		messagehandle.ErrorLogPrintln("Lobby", err.Msg)
+		return nil, err
+	}
+
+	SavePlayerInfo(playerInfo)
+	return playerInfo, messagehandle.New()
 }
 
 // GetPlayerInfoByPlayerID ...
