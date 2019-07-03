@@ -10,8 +10,8 @@ import (
 	"gitlab.com/ServerUtility/dbinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
-	"gitlab.com/WeberverByGo/serversetting"
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
+	"gitlab.com/WeberverByGo/serversetting"
 )
 
 var gameBDSQL *dbinfo.SqlCLi
@@ -207,7 +207,7 @@ func NewAttach(args ...interface{}) {
 
 // UpdateAttach ...
 func UpdateAttach(args ...interface{}) messagehandle.ErrorMsg {
-	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("AttachGame5Set_Update", len(args)), args...)
+	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("AttachSet_Write", len(args)), args...)
 	return err
 }
 

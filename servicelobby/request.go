@@ -83,8 +83,8 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if playerInfo.GameToken != "" {
 		thirdpartyresult["isexchange"] = 1
 	}
-	result["thirdparty"] = thirdpartyresult
 
+	result["thirdparty"] = thirdpartyresult
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
