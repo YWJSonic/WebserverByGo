@@ -102,7 +102,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		totalwinscore = otherdata["totalwinscore"]
 		playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
 		result["playermoney"] = playerInfo.Money
-		result["attach"] = gameRule.ConvertToGameAttach(newatt)
+		result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, newatt)
 
 		if !(gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, totalwinscore) || gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, totalwinscore)) {
 			break

@@ -88,7 +88,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
-	result["attach"] = gameRule.ConvertToGameAttach(attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
+	result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
 
 	myrestful.HTTPResponse(w, result, err)
 }
