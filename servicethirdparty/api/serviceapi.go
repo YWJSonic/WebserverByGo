@@ -10,10 +10,10 @@ import (
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/apithirdparty/ulg"
-	"gitlab.com/WeberverByGo/serversetting"
 	mycache "gitlab.com/WeberverByGo/handlecache"
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
 	db "gitlab.com/WeberverByGo/handledb"
+	"gitlab.com/WeberverByGo/serversetting"
 	gameRules "gitlab.com/game7"
 
 	"github.com/julienschmidt/httprouter"

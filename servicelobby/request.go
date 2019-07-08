@@ -14,7 +14,6 @@ import (
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
 	mycache "gitlab.com/WeberverByGo/handlecache"
 	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
@@ -54,7 +53,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -62,19 +61,19 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if GameAccount == "" {
 		err.ErrorCode = code.Unauthenticated
 		err.Msg = "GameAccountError"
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(GameAccount), token); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	playerInfo, err := player.GetPlayerInfoByGameAccount(GameAccount)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "Lobby", err)
+		myhttp.HTTPResponse(w, "Lobby", err)
 	}
 
 	// ulg result info
@@ -90,7 +89,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["betrate"] = gameRule.GetInitBetRate()
 	result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
 
-	myrestful.HTTPResponse(w, result, err)
+	myhttp.HTTPResponse(w, result, err)
 }
 
 func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -101,21 +100,21 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 	userCoinQuota, err := apithirdparty.Refresh(accounttoken, gametypeid)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	result := make(map[string]interface{})
 	result["userCoinQuota"] = userCoinQuota
 
-	myrestful.HTTPResponse(w, result, err)
+	myhttp.HTTPResponse(w, result, err)
 }
 
 func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -131,26 +130,26 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	err := messagehandle.New()
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// get player
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	ulgResult, err := apithirdparty.Excahnge(playerInfo, accountToken, gametypeid, cointype, coinamount)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 
 	}
@@ -162,7 +161,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.IValue3 = ulgResult.GameCoin
 	log.SaveLog(loginfo)
 
-	myrestful.HTTPResponse(w, ulgResult, err)
+	myhttp.HTTPResponse(w, ulgResult, err)
 }
 
 func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -176,32 +175,32 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	err := messagehandle.New()
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	if playerInfo.GameToken == "" {
 		err.ErrorCode = code.NoExchange
 		err.Msg = "NoExchange"
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	ulgCheckOutResult, err := apithirdparty.CheckOut(playerInfo, serversetting.GameTypeID)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -218,5 +217,5 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result := make(map[string]interface{})
 	result["userCoinQuota"] = ulgCheckOutResult
 
-	myrestful.HTTPResponse(w, result, err)
+	myhttp.HTTPResponse(w, result, err)
 }

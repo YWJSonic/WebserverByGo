@@ -43,13 +43,13 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	err := messagehandle.New()
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	result, accountInfo, err := apithirdparty.GetAccount(logintype, foundation.InterfaceToString(postData["accounttoken"]), gametypeid)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "account login", err)
+		myhttp.HTTPResponse(w, "account login", err)
 		return
 	}
 
@@ -58,5 +58,5 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["serversetting"] = serversetting.New()
 
 	log.AcouuntLogin(accountInfo.GameAccount)
-	myrestful.HTTPResponse(w, result, err)
+	myhttp.HTTPResponse(w, result, err)
 }

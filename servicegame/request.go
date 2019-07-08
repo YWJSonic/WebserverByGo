@@ -14,7 +14,7 @@ import (
 	attach "gitlab.com/WeberverByGo/handleattach"
 	mycache "gitlab.com/WeberverByGo/handlecache"
 	log "gitlab.com/WeberverByGo/handlelog"
-	gameRule "gitlab.com/game7"
+	gameRule "gitlab.com/gamerule"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
@@ -56,7 +56,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if gametypeid != serversetting.GameTypeID {
 		err.ErrorCode = code.GameTypeError
 		err.Msg = "GameTypeError"
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -64,13 +64,13 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
@@ -78,14 +78,14 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if playerInfo.Money < betMoney {
 		err.ErrorCode = code.NoMoneyToBet
 		err.Msg = "NoMoneyToBet"
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// get thirdparty info data
 	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
-		myrestful.HTTPResponse(w, "", err)
+		myhttp.HTTPResponse(w, "", err)
 		fmt.Println(ulginfo)
 		return
 	}
@@ -126,6 +126,6 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 
-	myrestful.HTTPResponse(w, result, err)
+	myhttp.HTTPResponse(w, result, err)
 
 }
