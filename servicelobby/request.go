@@ -19,7 +19,7 @@ import (
 	"gitlab.com/WeberverByGo/player"
 
 	"github.com/julienschmidt/httprouter"
-	gameRule "gitlab.com/game7"
+	gameRule "gitlab.com/gamerule"
 )
 
 var isInit = false

@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGo/apithirdparty"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
 	log "gitlab.com/WeberverByGo/handlelog"
 )
 

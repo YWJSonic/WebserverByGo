@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"gitlab.com/WeberverByGo/apithirdparty/ulg"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/serversetting"
 
