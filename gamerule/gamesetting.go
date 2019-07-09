@@ -15,10 +15,10 @@ var isSingleLine = true
 var IsAttachSaveToDB = true
 
 // WinScoreLimit game round win money limit
-var WinScoreLimit int64 = 0
+var WinScoreLimit int64
 
 // WinBetRateLimit game round win rate limit
-var WinBetRateLimit int64 = 0
+var WinBetRateLimit int64
 
 // BetRate ...
 var betRate = []int64{1000, 5000, 10000, 20000, 30000}
