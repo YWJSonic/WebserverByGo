@@ -1,12 +1,12 @@
 package gamerule
 
-// 磁力外星人
+//
 
 // Version ...
 const Version = "0.0.1"
 
 // GameIndex game sort id
-const GameIndex = 6
+const GameIndex = 8
 
 // IsSingleLine game result only output one result
 var isSingleLine = true
