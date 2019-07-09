@@ -14,7 +14,7 @@ import (
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
 	db "gitlab.com/WeberverByGo/handledb"
 	"gitlab.com/WeberverByGo/serversetting"
-	gameRules "gitlab.com/gamerule"
+	gameRules "gitlab.com/WeberverByGo/gamerule"
 
 	"github.com/julienschmidt/httprouter"
 )

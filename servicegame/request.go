@@ -10,10 +10,10 @@ import (
 	"gitlab.com/WeberverByGo/player"
 	"gitlab.com/WeberverByGo/serversetting"
 
+	gameRule "gitlab.com/WeberverByGo/gamerule"
 	attach "gitlab.com/WeberverByGo/handleattach"
 	mycache "gitlab.com/WeberverByGo/handlecache"
 	log "gitlab.com/WeberverByGo/handlelog"
-	gameRule "gitlab.com/gamerule"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
@@ -99,17 +99,21 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	for index, max := 0, 2; index < max; index++ {
 		result, newatt, otherdata = gameRule.GameRequest(playerID, betIndex, att)
 		totalwinscore = otherdata["totalwinscore"]
-		playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
-		result["playermoney"] = playerInfo.Money
-		result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, newatt)
+		JackPartBonusx2 := otherdata["JackPartBonusx2"]
+		JackPartBonusx3 := otherdata["JackPartBonusx3"]
+		JackPartBonusx5 := otherdata["JackPartBonusx5"]
+		noJpWin := totalwinscore - JackPartBonusx2 - JackPartBonusx3 - JackPartBonusx5
 
-		if !(gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, totalwinscore) || gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, totalwinscore)) {
+		if gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, noJpWin) && gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, noJpWin) {
 			break
 		}
 
 	}
 
+	playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
 	attach.SaveAttach(playerInfo.ID, gameRule.GameIndex, newatt, gameRule.IsAttachSaveToDB)
+	result["playermoney"] = playerInfo.Money
+	result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, newatt)
 
 	ulginfo.TotalBet += betMoney
 	ulginfo.TotalWin += totalwinscore
