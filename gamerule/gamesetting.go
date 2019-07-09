@@ -6,7 +6,7 @@ package gamerule
 const Version = "0.0.1"
 
 // GameIndex game sort id
-const GameIndex = 7
+const GameIndex = 6
 
 // IsSingleLine game result only output one result
 var isSingleLine = true
