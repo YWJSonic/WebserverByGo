@@ -106,7 +106,7 @@ func TestNormalResultArray(test *testing.T) {
 	for _, scroll1 := range scroll[0] {
 		for _, scroll2 := range scroll[1] {
 			for _, scroll3 := range scroll[2] {
-				result = normalResultArray([]int{scroll1, scroll2, scroll3})
+				result = normalResultArray(scroll)
 				if len(result) > 0 {
 					fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
 				}
