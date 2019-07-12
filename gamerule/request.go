@@ -29,7 +29,7 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 func GetInitScroll() interface{} {
 	scrollmap := map[string][][]int{
 		"normalreel": normalScroll,
-		"respinreel": {respinScroll1},
+		"respinreel": {GetRespinScroll(RespinSetting)},
 	}
 	return scrollmap
 }
@@ -75,4 +75,13 @@ func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map
 	otherdata["JackPartBonusx5"] = JackPartBonusPoolx5 - attinfo.JackPartBonusPoolx5
 
 	return result, attachInfoToAttachData(attinfo), otherdata
+}
+
+// GetRespinScroll return respin scroll
+func GetRespinScroll(ScrollIndex int) []int {
+	if ScrollIndex == 2 {
+		return respinScroll2
+	}
+	return respinScroll1
+
 }

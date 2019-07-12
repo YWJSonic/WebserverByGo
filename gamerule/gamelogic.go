@@ -86,12 +86,13 @@ func outRespin(betMoney int64, attinfo *AttachInfo) ([]interface{}, int64) {
 	var WinRateIndex int
 	var ScrollIndex, plate []int
 	var result []interface{}
+	respintScrollData := GetRespinScroll(RespinSetting)
 	islink := false
 
 	for index, max := 0, 200; index < max; index++ {
 		islink = false
 		respinScores = 0
-		ScrollIndex, plate = gameplate.NewPlate([]int{1, 1, 1}, [][]int{{0}, respinScroll1, {0}})
+		ScrollIndex, plate = gameplate.NewPlate([]int{1, 1, 1}, [][]int{{0}, respintScrollData, {0}})
 		gameresult := respinResultArray(plate)
 
 		if len(gameresult) > 0 {
