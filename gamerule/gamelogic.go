@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"gitlab.com/ServerUtility/foundation"
-	"gitlab.com/ServerUtility/gamelimit"
+	"gitlab.com/ServerUtility/gameplate"
 )
 
 // Result att 0: freecount
@@ -36,7 +36,7 @@ func outputGame(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, ma
 	otherdata := make(map[string]interface{})
 	islink := false
 
-	ScrollIndex, plate := gamelimit.NewPlate(scrollSize, normalScroll)
+	ScrollIndex, plate := gameplate.NewPlate(scrollSize, normalScroll)
 	gameresult := normalResultArray(plate)
 
 	otherdata["isrespin"] = 0
@@ -76,7 +76,7 @@ func outputGame(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, ma
 	if totalScores < 0 {
 		fmt.Println(totalScores)
 	}
-	result = gamelimit.ResultMap(ScrollIndex, plate, totalScores, islink)
+	result = gameplate.ResultMap(ScrollIndex, plate, totalScores, islink)
 	return result, otherdata, totalScores
 }
 
@@ -91,7 +91,7 @@ func outRespin(betMoney int64, attinfo *AttachInfo) ([]interface{}, int64) {
 	for index, max := 0, 200; index < max; index++ {
 		islink = false
 		respinScores = 0
-		ScrollIndex, plate = gamelimit.NewPlate([]int{1, 1, 1}, [][]int{{0}, respinScroll1, {0}})
+		ScrollIndex, plate = gameplate.NewPlate([]int{1, 1, 1}, [][]int{{0}, respinScroll1, {0}})
 		gameresult := respinResultArray(plate)
 
 		if len(gameresult) > 0 {
@@ -115,7 +115,7 @@ func outRespin(betMoney int64, attinfo *AttachInfo) ([]interface{}, int64) {
 		}
 
 		totalScores += respinScores
-		freeresult := gamelimit.ResultMap(ScrollIndex, plate, respinScores, islink)
+		freeresult := gameplate.ResultMap(ScrollIndex, plate, respinScores, islink)
 		result = append(result, freeresult)
 
 		if len(gameresult) <= 0 {
@@ -180,7 +180,7 @@ func respinResultArray(plate []int) [][]int {
 
 // EmptyResult return a not win result
 func emptyResult() map[string]interface{} {
-	return gamelimit.ResultMap([]int{0, 0, 0}, []int{0, space, 0}, 0, false)
+	return gameplate.ResultMap([]int{0, 0, 0}, []int{0, space, 0}, 0, false)
 }
 
 // dynamicScore convert results list dynamic score
