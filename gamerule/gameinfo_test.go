@@ -83,55 +83,55 @@ func TestNormalGameRTP(test *testing.T) {
 }
 
 func TestRespinGameRTP(test *testing.T) {
-	var BetIndex int64
-	var totalwinscore, totalbetscore int64
-	betMoney := GetBetMoney(BetIndex)
-	attinfo := AttachInfo{PlayerID: 4, Kind: 7, JackPartBonusPoolx2: 0, JackPartBonusPoolx3: 0, JackPartBonusPoolx5: 0}
+	// var BetIndex int64
+	// var totalwinscore, totalbetscore int64
+	// betMoney := GetBetMoney(BetIndex)
+	// attinfo := AttachInfo{PlayerID: 4, Kind: 7, JackPartBonusPoolx2: 0, JackPartBonusPoolx3: 0, JackPartBonusPoolx5: 0}
 
-	for index, max := 0, 100000000; index < max; index++ {
-		totalbetscore += betMoney
+	// for index, max := 0, 100000000; index < max; index++ {
+	// 	totalbetscore += betMoney
 
-		_, respintotalwin := outRespin(betMoney, &attinfo)
-		totalwinscore += respintotalwin
-		fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
-	}
+	// 	_, respintotalwin := outRespin(betMoney, &attinfo)
+	// 	totalwinscore += respintotalwin
+	// 	fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
+	// }
 }
 func TestNormalResultArray(test *testing.T) {
-	var result [][]int
-	scroll := [][]int{
-		{0, 4, 5, 6, 7, 8},
-		{1, 2, 3, 4, 5, 6, 7, 8},
-		{0, 4, 5, 6, 7, 8},
-	}
-	for _, scroll1 := range scroll[0] {
-		for _, scroll2 := range scroll[1] {
-			for _, scroll3 := range scroll[2] {
-				result = normalResultArray(scroll)
-				if len(result) > 0 {
-					fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
-				}
-			}
-		}
-	}
+	// var result [][]int
+	// scroll := [][]int{
+	// 	{0, 4, 5, 6, 7, 8},
+	// 	{1, 2, 3, 4, 5, 6, 7, 8},
+	// 	{0, 4, 5, 6, 7, 8},
+	// }
+	// for _, scroll1 := range scroll[0] {
+	// 	for _, scroll2 := range scroll[1] {
+	// 		for _, scroll3 := range scroll[2] {
+	// 			result = normalResultArray(scroll)
+	// 			if len(result) > 0 {
+	// 				fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
 func TestRespinResultArray(test *testing.T) {
-	var result [][]int
-	scroll := [][]int{
-		{0},
-		{1, 2, 3, 4, 5, 6, 7, 8},
-		{0},
-	}
-	for _, scroll1 := range scroll[0] {
-		for _, scroll2 := range scroll[1] {
-			for _, scroll3 := range scroll[2] {
-				result = respinResultArray([]int{scroll1, scroll2, scroll3})
-				if len(result) > 0 {
-					fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
-				}
-			}
-		}
-	}
+	// var result [][]int
+	// scroll := [][]int{
+	// 	{0},
+	// 	{1, 2, 3, 4, 5, 6, 7, 8},
+	// 	{0},
+	// }
+	// for _, scroll1 := range scroll[0] {
+	// 	for _, scroll2 := range scroll[1] {
+	// 		for _, scroll3 := range scroll[2] {
+	// 			result = respinResultArray([]int{scroll1, scroll2, scroll3})
+	// 			if len(result) > 0 {
+	// 				fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
 func RTP(totalwin, TotalBet int64) float64 {
