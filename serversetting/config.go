@@ -16,9 +16,9 @@ const ConnectTimeOut int64 = 15e9
 // platform api url
 var (
 	// MaintainStartTime cron maintain schedule
-	MaintainStartTime = "0 0 15 * * *"
+	MaintainStartTime = "0 15 * * *"
 	// MaintainFinishTime cron maintain schedule
-	MaintainFinishTime = "0 0 16 * * *"
+	MaintainFinishTime = "0 16 * * *"
 	// GameTypeID this server game id
 	GameTypeID = "A173D52E01A6EB65A5D6EDFB71A8C39C"
 	// IP Server Listen address
