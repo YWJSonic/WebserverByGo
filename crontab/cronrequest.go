@@ -40,6 +40,6 @@ func NewCronJob(spec string, job *ParamsJob) {
 
 // SpecToTime  conver spec string to time
 func SpecToTime(spec string) time.Time {
-	target, _ := cron.Parse(data.MaintainStartTime)
+	target, _ := cron.ParseStandard(data.MaintainStartTime)
 	return target.Next(foundation.ServerNow())
 }
