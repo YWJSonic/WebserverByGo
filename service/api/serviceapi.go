@@ -32,13 +32,13 @@ func ServiceStart() []foundation.RESTfulURL {
 	mu = new(sync.RWMutex)
 	isInit = true
 
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
-	HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstart", Fun: CronStart, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronstop", Fun: CronStop, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/cronadd", Fun: CronAdd, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainstart", Fun: MaintainStart, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/maintainend", Fun: MaintainEnd, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/clearcache", Fun: ClearAllCache, ConnType: foundation.Backend})
+	// HandleURL = append(HandleURL, foundation.RESTfulURL{RequestType: "POST", URL: "api/gamerulesset", Fun: GameRulesSet, ConnType: foundation.Backend})
 
 	return HandleURL
 }
@@ -97,6 +97,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet ...
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := foundation.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
