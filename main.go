@@ -9,6 +9,7 @@ import (
 	"gitlab.com/WeberverByGo/foundation"
 	"gitlab.com/WeberverByGo/foundation/fileload"
 	"gitlab.com/WeberverByGo/game"
+	gameRules "gitlab.com/WeberverByGo/game/game5"
 	"gitlab.com/WeberverByGo/lobby"
 	"gitlab.com/WeberverByGo/login"
 	"gitlab.com/WeberverByGo/messagehandle/errorlog"
@@ -34,6 +35,7 @@ func main() {
 	data.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
 	errorlog.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
 
+	gameRules.SetInfo(gameRules.GameIndex, config)
 	data.EnableMaintain(foundation.InterfaceToBool(config["Maintain"]))
 
 	ulg.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])

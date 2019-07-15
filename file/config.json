@@ -16,6 +16,7 @@
 "MaintainStartTime":"0 55 14 * * *",
 "MaintainFinishTime": "0 10 15 * * *",
 "ULGMaintainCheckoutTime":"0 5 15 * * *",
+"RespinSetting":1,
 "Maintain":false,
 "DebugLog":true
 }

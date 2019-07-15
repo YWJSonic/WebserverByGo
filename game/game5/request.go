@@ -69,6 +69,9 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 	}
 
 	RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
+	if RespinSetting != 1 && RespinSetting != 2 && RespinSetting != 3 {
+		RespinSetting = 1
+	}
 }
 
 // TestPlate ...
