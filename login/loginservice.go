@@ -40,6 +40,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := foundation.PostData(r)
 	logintype := foundation.InterfaceToInt(postData["logintype"])
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
+	errorlog.LogPrintln("Login postData:", postData)
 
 	err := errorlog.New()
 	if err = foundation.CheckGameType(gametypeid); err.ErrorCode != code.OK {
@@ -60,6 +61,7 @@ func login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	case player.Self:
 	case player.Ulg:
 		accounttoken := foundation.InterfaceToString(postData["accounttoken"])
+		errorlog.LogPrintln("ULG GetUser:", accounttoken, gametypeid)
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
 			err.ErrorCode = code.FailedPrecondition

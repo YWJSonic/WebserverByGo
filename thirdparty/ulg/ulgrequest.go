@@ -139,7 +139,7 @@ func GetUser(token, gameid string) (UlgResult, errorlog.ErrorMsg) {
 		"token":   token,
 		"game_id": gameid,
 	}
-	errorlog.LogPrintln("Ulg", postData)
+	errorlog.LogPrintln("Ulg", GetuserURL, postData)
 	jsbyte := foundation.PostRawRequest(GetuserURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
