@@ -135,7 +135,7 @@ func SetDBConn() {
 	NewLogTable(foundation.ServerNow().AddDate(0, 0, 1).Format("20060102"))
 
 	// set Schedule check next day log table.
-	crontab.NewCronBaseJob("0 35 15 * * *",
+	crontab.NewCronBaseJob("35 15 * * *",
 		crontab.NewLogCrontab(
 			func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
 			NewLogTable))
