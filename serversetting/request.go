@@ -39,7 +39,7 @@ func serverTime() int64 {
 
 // MaintainTime ...
 func maintainTime() int64 {
-	target, _ := cron.Parse(MaintainStartTime)
+	target, _ := cron.ParseStandard(MaintainStartTime)
 	return target.Next(foundation.ServerNow()).Unix()
 }
 
