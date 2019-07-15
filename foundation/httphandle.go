@@ -98,6 +98,7 @@ func HTTPResponse(httpconn http.ResponseWriter, data interface{}, err errorlog.E
 	result := make(map[string]interface{})
 	result["data"] = data
 	result["error"] = err
+	fmt.Println(JSONToString(result))
 	fmt.Fprint(httpconn, JSONToString(result))
 }
 
