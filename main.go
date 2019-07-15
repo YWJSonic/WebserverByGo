@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
+	"gitlab.com/WeberverByGo/gamerule"
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
 	db "gitlab.com/WeberverByGo/handledb"
 	event "gitlab.com/WeberverByGo/handleevent"
@@ -36,6 +37,7 @@ func main() {
 	serversetting.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
 	messagehandle.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
 	serversetting.EnableMaintain(foundation.InterfaceToBool(config["Maintain"]))
+	gamerule.SetInfo(gamerule.GameIndex, config)
 
 	ulginfo.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
 	ulginfo.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
