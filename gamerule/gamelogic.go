@@ -1,8 +1,6 @@
 package gamerule
 
 import (
-	"fmt"
-
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gameplate"
 )
@@ -43,25 +41,29 @@ func outputGame(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, ma
 	plateLineMap := gameplate.PlateToLinePlate(plate, lineMap)
 
 	for lineIndex, plateLine := range plateLineMap {
-		newLine := gameplate.CutSymbolLink(plateLine, option)
-		for _, payLine := range itemResults[len(newLine)] {
-			if isWin(newLine, payLine, option) {
-				totalScores += betMoney * int64(payLine[len(payLine)-1])
-				fmt.Println("Win", newLine, payLine, lineMap[lineIndex], totalScores)
+		newLine := gameplate.CutSymbolLink(plateLine, option) // cut line to win line point
+		for _, payLine := range itemResults[len(newLine)] {   // win line result group
+			if isWin(newLine, payLine, option) { // win result check
+				lineInfo := infoLineAddNewPoint(newLine, lineMap[lineIndex], payLine, option) // set win line to result line info
+				lineInfo.WinRate = payLine[len(payLine)-1]
+				processInfoLine(betMoney, &lineInfo, option)
+				totalScores += lineInfo.Score
+				winLineInfo = append(winLineInfo, lineInfo)
+				// fmt.Println("Win", newLine, payLine, lineMap[lineIndex], totalScores)
 			}
 		}
 	}
-	// infoLineAddNewPoint(plateLine, lineMap[lineIndex], payLine, option)
+
 	result["scores"] = totalScores
 	result["gameresult"] = winLineInfo
 	return result, otherdata, totalScores
 }
 
-func infoLineAddNewPoint(symbol []int, linePoint []int, lineWinResult []int, option gameplate.PlateOption) gameplate.InfoLine {
-	infoLine := gameplate.NewLineInfo()
+func infoLineAddNewPoint(lineSymbol []int, linePoint []int, lineWinResult []int, option gameplate.PlateOption) gameplate.InfoLine {
+	infoLine := gameplate.NewInfoLine()
 
 	for i, max := 0, len(lineWinResult)-1; i < max; i++ {
-		infoLine.AddNewPoint(symbol[i], linePoint[i], option)
+		infoLine.AddNewPoint(lineSymbol[i], linePoint[i], option)
 	}
 
 	return infoLine
@@ -98,3 +100,32 @@ func isWin(lineSymbol []int, payLineSymbol []int, option gameplate.PlateOption) 
 	}
 	return isWin
 }
+
+// func wildCount()int,[][]int{
+// }
+
+func processInfoLine(betMoney int64, winLineInfo *gameplate.InfoLine, option gameplate.PlateOption) {
+
+	if winLineInfo.WinRate > 0 {
+		winLineInfo.Score = int64(winLineInfo.WinRate) * betMoney
+	} else {
+		switch winLineInfo.WinRate {
+		case -100:
+			for _, payLine := range itemResults[len(winLineInfo.LineSymbolNum)] {
+				if isWin(payLine, []int{winLineInfo.LineSymbolNum[0][0], winLineInfo.LineSymbolNum[0][0], winLineInfo.LineSymbolNum[0][0]}, option) {
+					winLineInfo.WinRate = payLine[len(payLine)-1]
+				}
+			}
+		case -101:
+			winLineInfo.WinRate = 30
+		case -102:
+			winLineInfo.WinRate = 45
+		case -103:
+			winLineInfo.WinRate = 75
+		}
+		winLineInfo.Score = int64(winLineInfo.WinRate) * betMoney
+	}
+}
+
+// func winLineInfoAnalysis(winLineInfo []int) {
+// }
