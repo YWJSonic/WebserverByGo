@@ -92,7 +92,12 @@ func HTTPPostRawRequest(client *http.Client, url string, value []byte) []byte {
 	}
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errorlog.ErrorLogPrintln("HTTPPostRawRequest", err)
+	}
+
+	errorlog.LogPrintln("HTTPPostRawRequest", string(body))
 	return body
 }
 
