@@ -18,7 +18,7 @@ import (
 	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
 
-	"github.com/julienschmidt/httprouter"
+	"gitlab.com/ServerUtility/httprouter"
 	gameRule "gitlab.com/WeberverByGo/gamerule"
 )
 

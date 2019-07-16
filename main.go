@@ -1,11 +1,11 @@
 package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/fileload"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
+	_ "gitlab.com/ServerUtility/mysql"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
 	"gitlab.com/WeberverByGo/foundation/myrestful"
 	"gitlab.com/WeberverByGo/gamerule"

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/dbinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
+	"gitlab.com/ServerUtility/mysql"
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
 	"gitlab.com/WeberverByGo/serversetting"
 )
