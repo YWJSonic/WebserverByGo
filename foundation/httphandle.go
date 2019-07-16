@@ -83,9 +83,12 @@ func HTTPPostRawRequest(client *http.Client, url string, value []byte) []byte {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(value))
 	req.Header.Set("Content-Type", "application/json")
 
+	errorlog.LogPrintln("HTTPPostRawRequest", client)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error", err)
+		errorlog.ErrorLogPrintln("Error", err)
+	} else {
+		errorlog.LogPrintln("HTTPPostRawRequest", resp)
 	}
 	defer resp.Body.Close()
 
@@ -98,7 +101,7 @@ func HTTPResponse(httpconn http.ResponseWriter, data interface{}, err errorlog.E
 	result := make(map[string]interface{})
 	result["data"] = data
 	result["error"] = err
-	fmt.Println(JSONToString(result))
+	fmt.Println("HTTPResponse", result)
 	fmt.Fprint(httpconn, JSONToString(result))
 }
 
