@@ -17,7 +17,7 @@ var WinBetRateLimit int64 = 80
 // BetRate ...
 var betRate = []int64{1, 10, 100, 500, 1000, 2000, 5000, 10000, 20000}
 var betRateLinkIndex = []int64{1, 2, 3, 4, 6}
-var betRateDefaultIndex int64 = 1
+var betRateDefaultIndex int64 = 2
 
 // ScrollSize ...
 var scrollSize = []int{1, 1, 1}
