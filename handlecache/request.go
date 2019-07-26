@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"gitlab.com/ServerUtility/redigo/redis"
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/messagehandle"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame6/serversetting"
 )
 
 var CachePool *redis.Pool

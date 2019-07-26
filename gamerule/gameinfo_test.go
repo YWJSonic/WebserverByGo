@@ -4,134 +4,105 @@ import (
 	"fmt"
 	"testing"
 
+	"gitlab.com/ServerUtility/gameplate"
+
 	"gitlab.com/ServerUtility/foundation"
-	moneypool "gitlab.com/WeberverByGo/servercontrol"
 )
 
-// TestGameRequest ...
-func TestGameRequest(test *testing.T) {
+func TestTime(test *testing.T) {
+	fmt.Println(int(foundation.ServerNow().Weekday()))
+}
+
+func TestGetInitScroll(test *testing.T) {
+	fmt.Println(foundation.JSONToString(GetInitBetRate()))
+}
+func Test243GameRequest(test *testing.T) {
 	var att []map[string]interface{}
-	var newatt []map[string]interface{}
+	// var newatt []map[string]interface{}
 	var result map[string]interface{}
-	var otherdata map[string]int64
+	var otherdata map[string]interface{}
 	var totalwinscore, totalbetscore, betindex int64
-	var inRespintCount int64
-	var logplate string
-	respinCountMap := make(map[int]int64)
-	normalPlayteCount := make(map[string]int64)
-	respinPlayteCount := make(map[string]int64)
-	normalPlayteWin := make(map[string]int64)
-	respinPlayteWin := make(map[string]int64)
+	var tmpLine [][]int
+	var roundWinScore int64
+	var ScotterGameCount int64
+	normalSpWinCount := make(map[int64]int64)
+	normalPlateCount := make([]map[string]int64, len(scrollSize))
+	for i := range normalPlateCount {
+		normalPlateCount[i] = make(map[string]int64)
+	}
+	// respinPlateCount := make(map[string]int64)
+	normalPlateScore := make(map[string]int64)
+	// respinPlateScore := make(map[string]int64)
+
+	var playerid int64 = 24
 	betmoney := GetBetMoney(betindex)
-	attinfo := AttachInfo{PlayerID: 4, Kind: 7, JackPartBonusPoolx2: 0, JackPartBonusPoolx3: 0, JackPartBonusPoolx5: 0}
+	attinfo := AttachInfo{PlayerID: playerid, Kind: GameIndex}
 	att = attachInfoToAttachData(attinfo)
 
 	for index, max := 0, 100000000; index < max; index++ {
 		totalbetscore += betmoney
+		roundWinScore = 0
 
-		result, newatt, otherdata = GameRequest(4, 0, att)
-		att = newatt
+		result, _, otherdata = GameRequest(playerid, 0, att)
+		// fmt.Println(foundation.JSONToString(result))
+		// att = newatt
 		if normalresult, ok := result["normalresult"]; ok {
-			logplate = fmt.Sprintf("%v", (normalresult).(map[string]interface{})["plate"])
-			normalPlayteCount[logplate]++
-			if _, ok := normalPlayteWin[logplate]; !ok {
-				normalPlayteWin[logplate] = (normalresult.(map[string]interface{})["scores"]).(int64)
+			gameresult := ((normalresult).(map[string]interface{})["gameresult"]).([]interface{})
+			plate := ((normalresult).(map[string]interface{})["plate"]).([][]int)
+			scores := ((normalresult).(map[string]interface{})["scores"]).(int64)
+			for i, rowSymbolarray := range plate {
+				logplate := fmt.Sprintf("%v", rowSymbolarray)
+				normalPlateCount[i][logplate]++
+
 			}
-		}
 
-		if respinsresult, ok := result["respin"]; ok {
-			inRespintCount++
-			respinCountMap[len(respinsresult.([]interface{}))]++
-			for _, respinresult := range respinsresult.([]interface{}) {
-				logplate = fmt.Sprintf("%v", (respinresult).(map[string]interface{})["plate"])
-				respinPlayteCount[logplate]++
+			if len(gameresult) > 0 {
+				for _, gameWinLineInfo := range gameresult {
+					WinLineInfo := (gameWinLineInfo).(gameplate.InfoLine243)
+					roundWinScore += WinLineInfo.Score
+					lineCount := 1
+					for _, winSymbol := range WinLineInfo.LineSymbolNum {
+						lineCount *= len(winSymbol)
+					}
 
-				if _, ok := respinPlayteWin[logplate]; !ok {
-					respinPlayteWin[logplate] = (respinresult.(map[string]interface{})["scores"]).(int64)
+					tmpLine = make([][]int, lineCount)
+					for i, imax := 0, len(WinLineInfo.LineSymbolNum); i < imax; i++ {
+						for j, jmax := 0, lineCount; j < jmax; j++ {
+							rowLimit := len(WinLineInfo.LineSymbolNum[i])
+							tmpLine[j] = append(tmpLine[j], WinLineInfo.LineSymbolNum[i][j%rowLimit])
+						}
+					}
+					for _, winline := range tmpLine {
+						normalPlateScore[fmt.Sprintf("%v", winline)] = int64(WinLineInfo.LineWinRate / lineCount)
+					}
+				}
+				if scores != roundWinScore {
+					normalSpWinCount[(scores-roundWinScore)/betmoney]++
 				}
 			}
 		}
+		if otherdata["isscotter"].(int) == 1 {
+			ScotterGameCount++
+		}
 
-		moneypool.RTPControl(betmoney, otherdata["totalwinscore"])
-		totalwinscore += otherdata["totalwinscore"]
-		if otherdata["totalwinscore"] > 0 {
+		// moneypool.RTPControl(betmoney, otherdata["totalwinscore"])
+		totalwinscore += otherdata["totalwinscore"].(int64)
+		if otherdata["totalwinscore"].(int64) > 0 {
 			// fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
 		}
 	}
 
-	fmt.Println("NormalPlayteCount:", foundation.JSONToString(normalPlayteCount))
-	fmt.Println("RespinPlayteCount:", foundation.JSONToString(respinPlayteCount))
+	fmt.Println("ScotterGameCount", ScotterGameCount)
+	fmt.Println("NormalPlateCount:", foundation.JSONToString(normalPlateCount))
+	fmt.Println("normalSpWinCount:", foundation.JSONToString(normalSpWinCount))
+	fmt.Println("normalPlateScore:", foundation.JSONToString(normalPlateScore))
 	fmt.Println("RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
-	fmt.Println("InRespintCount:", inRespintCount, "RespinCountMap:", foundation.JSONToString(respinCountMap))
-	// fmt.Println(foundation.JSONToString(normalPlayteWin))
-	// fmt.Println(foundation.JSONToString(respinPlayteWin))
+	// fmt.Println("InRespintCount:", inRespintCount, "RespinCountMap:", foundation.JSONToString(respinCountMap))
+
 }
 
-func TestNormalGameRTP(test *testing.T) {
-	var BetIndex int64
-	var totalwinscore, totalbetscore int64
-	betMoney := GetBetMoney(BetIndex)
-	attinfo := AttachInfo{PlayerID: 4, Kind: 7, JackPartBonusPoolx2: 0, JackPartBonusPoolx3: 0, JackPartBonusPoolx5: 0}
+func Test243ScotterGameRequest(test *testing.T) {
 
-	for index, max := 0, 10000000; index < max; index++ {
-		totalbetscore += betMoney
-
-		_, _, normaltotalwin := outputGame(betMoney, &attinfo)
-		totalwinscore += normaltotalwin
-		fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
-	}
-}
-
-func TestRespinGameRTP(test *testing.T) {
-	// var BetIndex int64
-	// var totalwinscore, totalbetscore int64
-	// betMoney := GetBetMoney(BetIndex)
-	// attinfo := AttachInfo{PlayerID: 4, Kind: 7, JackPartBonusPoolx2: 0, JackPartBonusPoolx3: 0, JackPartBonusPoolx5: 0}
-
-	// for index, max := 0, 100000000; index < max; index++ {
-	// 	totalbetscore += betMoney
-
-	// 	_, respintotalwin := outRespin(betMoney, &attinfo)
-	// 	totalwinscore += respintotalwin
-	// 	fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
-	// }
-}
-func TestNormalResultArray(test *testing.T) {
-	// var result [][]int
-	// scroll := [][]int{
-	// 	{0, 4, 5, 6, 7, 8},
-	// 	{1, 2, 3, 4, 5, 6, 7, 8},
-	// 	{0, 4, 5, 6, 7, 8},
-	// }
-	// for _, scroll1 := range scroll[0] {
-	// 	for _, scroll2 := range scroll[1] {
-	// 		for _, scroll3 := range scroll[2] {
-	// 			result = normalResultArray(scroll)
-	// 			if len(result) > 0 {
-	// 				fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
-	// 			}
-	// 		}
-	// 	}
-	// }
-}
-
-func TestRespinResultArray(test *testing.T) {
-	// var result [][]int
-	// scroll := [][]int{
-	// 	{0},
-	// 	{1, 2, 3, 4, 5, 6, 7, 8},
-	// 	{0},
-	// }
-	// for _, scroll1 := range scroll[0] {
-	// 	for _, scroll2 := range scroll[1] {
-	// 		for _, scroll3 := range scroll[2] {
-	// 			result = respinResultArray([]int{scroll1, scroll2, scroll3})
-	// 			if len(result) > 0 {
-	// 				fmt.Println("plate1:", scroll1, "plate2:", scroll2, "plate3:", scroll3, "Result:", result)
-	// 			}
-	// 		}
-	// 	}
-	// }
 }
 
 func RTP(totalwin, TotalBet int64) float64 {

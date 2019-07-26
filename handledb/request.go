@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/dbinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
-	crontab "gitlab.com/WeberverByGo/handlecrontab"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/ServerUtility/mysql"
+	crontab "gitlab.com/WeberverByGoGame6/handlecrontab"
+	"gitlab.com/WeberverByGoGame6/serversetting"
 )
 
 var gameBDSQL *dbinfo.SqlCLi
@@ -183,6 +183,18 @@ func NewSetting(args ...interface{}) {
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
 	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettomgSet_Update", len(args)), args...)
 	return err
+}
+
+// GetAttachTypeRange ...
+func GetAttachTypeRange(playerid, kind, miniAttType, maxAttType int64) ([]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "AttachTypeRangeGet_Read", playerid, kind, miniAttType, maxAttType)
+	return result, err
+}
+
+// GetAttachType ...
+func GetAttachType(playerid int64, kind int64, attType int64) ([]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "AttachTypeGet_Read", playerid, kind, attType)
+	return result, err
 }
 
 // GetAttachKind get db attach kind

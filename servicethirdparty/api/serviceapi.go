@@ -9,14 +9,14 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGo/gamerule"
-	mycache "gitlab.com/WeberverByGo/handlecache"
-	crontab "gitlab.com/WeberverByGo/handlecrontab"
-	db "gitlab.com/WeberverByGo/handledb"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
+	gameRules "gitlab.com/WeberverByGoGame6/gamerule"
+	mycache "gitlab.com/WeberverByGoGame6/handlecache"
+	crontab "gitlab.com/WeberverByGoGame6/handlecrontab"
+	db "gitlab.com/WeberverByGoGame6/handledb"
+	"gitlab.com/WeberverByGoGame6/serversetting"
 
-	"github.com/julienschmidt/httprouter"
+	"gitlab.com/ServerUtility/httprouter"
 )
 
 var isInit bool

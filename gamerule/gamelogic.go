@@ -5,8 +5,8 @@ import (
 	"gitlab.com/ServerUtility/gameplate"
 )
 
-// Result att 0: freecount
-func logicResult(betMoney int64, attinfo *AttachInfo) map[string]interface{} {
+// Result ...
+func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, map[string]interface{}) {
 	var result = make(map[string]interface{})
 	var totalWin int64
 
@@ -15,53 +15,163 @@ func logicResult(betMoney int64, attinfo *AttachInfo) map[string]interface{} {
 	result["normalresult"] = normalresult
 	totalWin += normaltotalwin
 
-	// if otherdata["isrespin"].(int) == 1 {
-	// 	respinresult, respintotalwin := outRespin(betMoney, attinfo)
-	// 	totalWin += respintotalwin
-	// 	result["respin"] = respinresult
-	// 	result["isrespin"] = 1
-	// }
+	result["totalwinscore"] = totalWin
+	return result, otherdata
+}
+func logicScotterGameResult(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex int, attinfo *AttachInfo) (map[string]interface{}, map[string]interface{}) {
+	var result = make(map[string]interface{})
+	var totalWin int64
+
+	scotterresult, otherdata, scottertotalwin := outputFreeGame(betMoney, scotterWinRateIndex, scotterSpinTimeIndex, attinfo)
+	result = foundation.AppendMap(result, otherdata)
+	result["scotterresult"] = scotterresult
+	totalWin += scottertotalwin
 
 	result["totalwinscore"] = totalWin
-	return result
+	return result, otherdata
 }
 
 // outputGame out put normal game result, mini game status, totalwin
 func outputGame(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
+	var lineInfo gameplate.InfoLine243
 	var winLineInfo []interface{}
+	IsSpecialWin := false
 	result := make(map[string]interface{})
 	otherdata := make(map[string]interface{})
+	otherdata["isscotter"] = 0
 	option := gameplate.PlateOption{
-		Wild:          []int{wild1},
-		LineMiniCount: 3,
+		Scotter: []int{scotter},
+		Wild:    []int{wild1},
 	}
-	_, plate := gameplate.NewPlate2D(scrollSize, normalScroll)
-
-	// var symBolCollation [][]int
+	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, normalScroll)
 
 	for _, ItemNum := range items {
-		symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plate, option)
+		mainSymbol, symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
 
 		for _, payLine := range itemResults[len(symbolNumCollation)] {
-			if isWin(symbolNumCollation, payLine, option) {
-				for plateIndex := range symbolNumCollation {
-					infoLineAddNewPoint(symbolNumCollation[plateIndex], symBolPointCollation[plateIndex], payLine, option)
+			if mainSymbol == payLine[0] {
+				lineInfo = newBaseInfoLine(symbolNumCollation, symBolPointCollation, payLine, betMoney, option)
+				totalScores += lineInfo.Score
+				winLineInfo = append(winLineInfo, lineInfo)
+
+				if lineInfo.WildCount() > 0 {
+					IsSpecialWin = true
 				}
 			}
 		}
-
 	}
-
-	result["scores"] = totalScores
-	result["gameresult"] = winLineInfo
+	if scotterCount(plateSymbol, option) >= scotterGameLimit {
+		otherdata["isscotter"] = 1
+	}
+	if IsSpecialWin {
+		var H5RandWinRate int
+		H5RandWinRate = normalWildWinRate[foundation.RangeRandom(normalWildWinRateWeightings)]
+		totalScores += int64(H5RandWinRate) * betMoney
+	}
+	result = gameplate.ResultMap243(plateIndex, plateSymbol, winLineInfo)
 	return result, otherdata, totalScores
 }
 
-func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption) ([][]int, [][]int) {
+func outputFreeGame(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex int, attinfo *AttachInfo) (interface{}, map[string]interface{}, int64) {
+	var totalScores int64
+	var weekDay int64
+	var lineInfo gameplate.InfoLine243
+	var winLineInfo []interface{}
+	var scotterResult []interface{}
+	otherdata := make(map[string]interface{})
+	otherdata["isscotter"] = 0
+	otherdata["scottercount"] = 0
+	IsSpecialWin := false
+	WinRate := scotterGameWildWinRate[scotterWinRateIndex]
+	WinRateWeightings := scotterGameWildWinRateWeightings[scotterWinRateIndex]
+	SpinTime := scotterGameSpinTime[scotterWinRateIndex]
+	option := gameplate.PlateOption{
+		Scotter: []int{scotter},
+		Wild:    []int{wild1},
+	}
+
+	for i, imax := 0, SpinTime; i < imax; i++ {
+		IsSpecialWin = false
+
+		plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, normalScroll)
+		for _, ItemNum := range items {
+			mainSymbol, symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
+
+			for _, payLine := range itemResults[len(symbolNumCollation)] {
+				if mainSymbol == payLine[0] {
+					lineInfo = newBaseInfoLine(symbolNumCollation, symBolPointCollation, payLine, betMoney, option)
+					totalScores += lineInfo.Score
+					winLineInfo = append(winLineInfo, lineInfo)
+
+					if lineInfo.WildCount() > 0 {
+						IsSpecialWin = true
+					}
+				}
+			}
+		}
+		if scotterCount(plateSymbol, option) >= scotterGameLimit {
+
+			weekDay = int64(foundation.ServerNow().Weekday())
+			attinfo.DayScotterGameCount++
+			ref := attinfo.DayScotterGameCount*100 + weekDay
+			attinfo.DayScotterGameInfo[ref+10] = 0
+			attinfo.FreeGameBetLockIndex[ref+20] = betMoney
+		}
+		if IsSpecialWin {
+			totalScores += WinRate[foundation.RangeRandom(WinRateWeightings)] * betMoney
+		}
+
+		otherdata["scottercount"] = 0
+		scotterResult = append(scotterResult, gameplate.ResultMap243(plateIndex, plateSymbol, winLineInfo))
+	}
+	return scotterResult, otherdata, totalScores
+}
+
+func aRound(betMoney int64) (map[string]interface{}, map[string]interface{}, int64) {
+
+	var winLineInfo []interface{}
+	var IsSpecialWin bool
+	var totalScores int64
+	var lineInfo gameplate.InfoLine243
+	otherdata := make(map[string]interface{})
+	result := make(map[string]interface{})
+
+	option := gameplate.PlateOption{
+		Scotter: []int{scotter},
+		Wild:    []int{wild1},
+	}
+	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, normalScroll)
+
+	for _, ItemNum := range items {
+		mainSymbol, symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
+
+		for _, payLine := range itemResults[len(symbolNumCollation)] {
+			if mainSymbol == payLine[0] {
+				lineInfo = newBaseInfoLine(symbolNumCollation, symBolPointCollation, payLine, betMoney, option)
+				totalScores += lineInfo.Score
+				winLineInfo = append(winLineInfo, lineInfo)
+
+				if lineInfo.WildCount() > 0 {
+					IsSpecialWin = true
+				}
+			}
+		}
+	}
+	if scotterCount(plateSymbol, option) >= scotterGameLimit {
+		otherdata["isscotter"] = 1
+	}
+	if IsSpecialWin {
+		otherdata["isspecialwin"] = 1
+	}
+	result = gameplate.ResultMap243(plateIndex, plateSymbol, winLineInfo)
+	return result, otherdata, totalScores
+}
+
+func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption) (int, [][]int, [][]int) {
 	var symBolPointCollation [][]int
 	var symbolNumCollation [][]int
-	var MainSymbol = option.EmptyNum()
+	var mainSymbol = option.EmptyNum()
 
 	for _, colArray := range plate {
 		var rowPointArray []int
@@ -72,7 +182,7 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 				rowPointArray = append(rowPointArray, rowIndex)
 
 				if isWild, _ := option.IsWild(symbolNum); isWild {
-					MainSymbol = rowSymbol
+					mainSymbol = rowSymbol
 				}
 
 			} else if IsScotter, _ := option.IsScotter(rowSymbol); IsScotter {
@@ -80,7 +190,7 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 			} else if symbolNum == rowSymbol {
 				rowSymbolArray = append(rowSymbolArray, rowSymbol)
 				rowPointArray = append(rowPointArray, rowIndex)
-				MainSymbol = rowSymbol
+				mainSymbol = rowSymbol
 			}
 		}
 
@@ -91,79 +201,39 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 		symBolPointCollation = append(symBolPointCollation, rowPointArray)
 	}
 
-	if MainSymbol != symbolNum {
-		return make([][]int, 0), make([][]int, 0)
+	if mainSymbol != symbolNum {
+		return mainSymbol, make([][]int, 0), make([][]int, 0)
 	}
-	return symbolNumCollation, symBolPointCollation
+	return mainSymbol, symbolNumCollation, symBolPointCollation
 }
 
-// isWin symbol line compar parline is win
-func isWin(lineSymbol [][]int, payLineSymbol []int, option gameplate.PlateOption) bool {
-	// targetSymbol := 0
-	isWin := true
+func newBaseInfoLine(lineSymbol [][]int, linePoint [][]int, payLine []int, betMoney int64, option gameplate.PlateOption) gameplate.InfoLine243 {
+	infoLine := gameplate.NewInfoLine243()
 
-	// for lineIndex, max := 0, len(payLineSymbol)-1; lineIndex < max; lineIndex++ {
-	// 	targetSymbol = lineSymbol[lineIndex]
-
-	// 	if isWild, _ := option.IsWild(targetSymbol); isWild {
-	// 		continue
-	// 	}
-
-	// 	switch payLineSymbol[lineIndex] {
-	// 	case targetSymbol:
-	// 	case -1000:
-	// 		if !foundation.IsInclude(targetSymbol, symbolGroup[-1000]) {
-	// 			isWin = false
-	// 			return isWin
-	// 		}
-	// 	case -1001:
-	// 		if !foundation.IsInclude(targetSymbol, symbolGroup[-1001]) {
-	// 			isWin = false
-	// 			return isWin
-	// 		}
-	// 	default:
-	// 		isWin = false
-	// 		return isWin
-	// 	}
-	// }
-	return isWin
-}
-
-func infoLineAddNewPoint(lineSymbol []int, linePoint []int, lineWinResult []int, option gameplate.PlateOption) gameplate.InfoLine {
-	infoLine := gameplate.NewInfoLine()
-
-	for i, max := 0, len(lineWinResult)-1; i < max; i++ {
-		infoLine.AddNewPoint(lineSymbol[i], linePoint[i], option)
+	for i := range lineSymbol {
+		infoLine.AddNewLine(lineSymbol[i], linePoint[i], option)
 	}
 
+	infoLine.LineWinRate = payLine[len(payLine)-1]
+	infoLine.Score = int64(infoLine.LineWinRate) * betMoney
+	infoLine.IsLink = 1
 	return infoLine
 }
 
-// func wildCount()int,[][]int{
-// }
-
-func processInfoLine(betMoney int64, winLineInfo *gameplate.InfoLine, option gameplate.PlateOption) {
-
-	// if winLineInfo.WinRate > 0 {
-	// 	winLineInfo.Score = int64(winLineInfo.WinRate) * betMoney
-	// } else {
-	// 	switch winLineInfo.WinRate {
-	// 	case -100:
-	// 		for _, payLine := range itemResults[len(winLineInfo.LineSymbolNum)] {
-	// 			if isWin(payLine, []int{winLineInfo.LineSymbolNum[0][0], winLineInfo.LineSymbolNum[0][0], winLineInfo.LineSymbolNum[0][0]}, option) {
-	// 				winLineInfo.WinRate = payLine[len(payLine)-1]
-	// 			}
-	// 		}
-	// 	case -101:
-	// 		winLineInfo.WinRate = 30
-	// 	case -102:
-	// 		winLineInfo.WinRate = 45
-	// 	case -103:
-	// 		winLineInfo.WinRate = 75
-	// 	}
-	// 	winLineInfo.Score = int64(winLineInfo.WinRate) * betMoney
-	// }
+func mysteryCombination() []int {
+	mysteryIndex := foundation.RangeRandom(scotterGameMysteryWeightings)
+	mysteryIndexCombination := scotterGameMysteryIndexCombination[mysteryIndex]
+	return mysteryIndexCombination
 }
 
-// func winLineInfoAnalysis(winLineInfo []int) {
-// }
+func scotterCount(plate [][]int, option gameplate.PlateOption) int {
+	var scotterCount int
+	for _, col := range plate {
+		for _, row := range col {
+			if isScotter, _ := option.IsScotter(row); isScotter {
+				scotterCount++
+			}
+		}
+	}
+	return scotterCount
+}
