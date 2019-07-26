@@ -83,21 +83,28 @@ func HTTPPostRawRequest(client *http.Client, url string, value []byte) []byte {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(value))
 	req.Header.Set("Content-Type", "application/json")
 
-	errorlog.LogPrintln("HTTPPostRawRequest", client)
+	errorlog.LogPrintln("HTTPPostRawRequest Client:", client)
 	resp, err := client.Do(req)
 	if err != nil {
-		errorlog.ErrorLogPrintln("Error", err)
-	} else {
-		errorlog.LogPrintln("HTTPPostRawRequest", resp)
+		errorlog.ErrorLogPrintln("Error Client Do Error:", err)
+	}
+	if resp.TLS != nil {
+		certificates := resp.TLS.PeerCertificates
+		if len(certificates) > 0 {
+			fmt.Println("HTTPPostRawRequest TLS Certificates:", certificates)
+		} else {
+			fmt.Println("HTTPPostRawRequest TLS Err:", resp.TLS)
+
+		}
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		errorlog.ErrorLogPrintln("HTTPPostRawRequest", err)
+		errorlog.ErrorLogPrintln("HTTPPostRawRequest Body Error:", err)
 	}
 
-	errorlog.LogPrintln("HTTPPostRawRequest", string(body))
+	errorlog.LogPrintln("HTTPPostRawRequest Body:", string(body))
 	return body
 }
 
