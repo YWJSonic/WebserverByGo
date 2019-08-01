@@ -90,6 +90,7 @@ func MaintainCheckout() {
 	}
 
 	db.ULGMaintainCheckOutUpdate()
+	errorlog.TipPrintln("MaintainCheckout Finish!!")
 }
 
 // ClearAllCache clear all cache data

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/robfig/cron"
 	"gitlab.com/WeberverByGo/data"
+	cron "gitlab.com/WeberverByGo/robfig/cron.v3"
 )
 
 func init() {

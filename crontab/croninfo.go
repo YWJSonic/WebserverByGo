@@ -1,7 +1,7 @@
 package crontab
 
 import (
-	"github.com/robfig/cron"
+	cron "gitlab.com/WeberverByGo/robfig/cron.v3"
 )
 
 // 字段名				是否必须	允许的值			允许的特定字符
