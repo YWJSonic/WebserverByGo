@@ -15,6 +15,12 @@ type AttachInfo struct {
 	ScotterID            int64
 }
 
+// NewDayScotterID ...
+func (att *AttachInfo) NewDayScotterID() int64 {
+	att.DayScotterGameCount++
+	return (att.DayScotterGameCount * 100) + int64(foundation.ServerNow().Weekday()*10)
+}
+
 func newAttchInfo() AttachInfo {
 	return AttachInfo{
 		DayScotterGameInfo:   make(map[int64]int64),
@@ -26,7 +32,7 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 	var attType int64
 	var attIValue int64
 	attachInfo := newAttchInfo()
-	// attachInfo.JackPartBonusPool = make(map[int64]int64)
+	// attachInfo.JackPotBonusPool = make(map[int64]int64)
 	if len(att) > 0 {
 		for _, row := range att {
 			attIValue = foundation.InterfaceToInt64(row["IValue"])
@@ -36,9 +42,9 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 
 			if attType == 1 {
 				attachInfo.DayScotterGameCount = attIValue
-			} else if (attType%100)/10 == 1 {
+			} else if (attType % 10) == 1 {
 				attachInfo.DayScotterGameInfo[attType] = attIValue
-			} else if (attType%100)/10 == 2 {
+			} else if (attType % 10) == 2 {
 				attachInfo.FreeGameBetLockIndex[attType] = attIValue
 			}
 		}
@@ -74,17 +80,12 @@ func toAttMap(playerid, attKind, attType, iValue int64) map[string]interface{} {
 	}
 }
 
-// NewDayScotterGameID ...
-func NewDayScotterGameID(DayScotterGameCount int64) int64 {
-	return int64(foundation.ServerNow().Weekday()) + (DayScotterGameCount * 10)
-}
-
 // DayScotterGameInfoKey ...
 func DayScotterGameInfoKey(scotterID int64) int64 {
-	return scotterID + 10
+	return scotterID + 1
 }
 
 // FreeGameBetLockIndexKey ...
 func FreeGameBetLockIndexKey(scotterID int64) int64 {
-	return scotterID + 20
+	return scotterID + 2
 }

@@ -67,19 +67,6 @@ func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map
 
 	result, otherdata := logicResult(betMoney, &attinfo)
 
-	if value, ok := otherdata["isscotter"]; ok && value == 1 {
-		attinfo.DayScotterGameCount++
-		weekDay := int64(foundation.ServerNow().Weekday())
-		scotterid := attinfo.DayScotterGameCount*100 + weekDay
-		attinfo.DayScotterGameInfo[scotterid+10] = 0
-		attinfo.FreeGameBetLockIndex[scotterid+20] = betMoney
-		result["isscotter"] = 1
-		result["scotterid"] = scotterid
-	} else {
-		result["isscotter"] = 0
-		result["scotterid"] = 0
-	}
-
 	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
 	otherdata["betmoney"] = betMoney
 
@@ -98,18 +85,7 @@ func ScotterGameRequest(playerID, betMoney, luckydrawselect int64, attach []map[
 	}
 
 	result, otherdata := logicScotterGameResult(betMoney, scotterCombination[0], scotterCombination[1], &attinfo)
-
-	if value, ok := otherdata["isscotter"]; ok && value == 1 {
-		attinfo.DayScotterGameCount++
-		weekDay := int64(foundation.ServerNow().Weekday())
-		scotterid := attinfo.DayScotterGameCount*100 + weekDay
-		attinfo.DayScotterGameInfo[scotterid+10] = 0
-		attinfo.FreeGameBetLockIndex[scotterid+20] = betMoney
-		result["isscotter"] = 1
-		result["scotterid"] = scotterid
-	}
-
-	// otherdata := make(map[string]int64)
+	result["scottercombination"] = scotterCombination
 	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
 	otherdata["betmoney"] = betMoney
 

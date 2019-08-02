@@ -139,7 +139,7 @@ func scottergameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	// gametype check
 	err := messagehandle.New()
 
-	if scotterid%100 > 10 {
+	if scotterid%10 != 0 {
 		err.ErrorCode = code.DataLoss
 		err.Msg = "Scotter Game Error"
 		myhttp.HTTPResponse(w, "", err)
@@ -189,7 +189,7 @@ func scottergameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	var otherdata map[string]interface{}
 
 	att = attach.GetAttachByType(playerInfo.ID, gameRule.GameIndex, gameRule.DayScotterGameCountKey, gameRule.IsAttachSaveToDB)
-	targetAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+20)
+	targetAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+2)
 	att = append(att, targetAtt...)
 	tmpTargetAtt := gameRule.ConvertToGameAttach(playerID, att)
 	if value, ok := tmpTargetAtt.DayScotterGameInfo[gameRule.DayScotterGameInfoKey(scotterid)]; !ok || value == 1 {

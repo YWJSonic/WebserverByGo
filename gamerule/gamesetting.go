@@ -25,10 +25,11 @@ var WinScoreLimit int64
 // WinBetRateLimit game round win rate limit
 var WinBetRateLimit int64
 
-// BetRate ...
-var betRate = []int64{100, 500, 1000, 2000, 3000}
+var betRate = []int64{30, 150, 300, 750, 1500}
 var betRateLinkIndex = []int64{0, 1, 2, 3, 4}
 var betRateDefaultIndex int64 = 1
+
+const betLine = 30
 
 // ScrollSize ...
 var scrollSize = []int{3, 3, 3, 3, 3}
@@ -59,6 +60,7 @@ var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 const space = -1
 const wild1 = 0
 const scotter = 1
+const scotterH5 = 6
 const scotterGameLimit = 3
 
 // ItemResults 0~10 item
@@ -111,8 +113,8 @@ var itemResults = [][][]int{
 		{12, 12, 12, 12, 12, 100}},
 }
 
-var normalWildWinRate = []int{1, 2, 3, 5, 8, 10, 15, 30, 40}
-var normalWildWinRateWeightings = []int{1116, 60, 30, 15, 8, 5, 3, 2, 1}
+var normalWildWinRate = []int64{1, 2, 3, 5, 8, 10, 15, 30, 40}
+var normalWildWinRateWeightings = []int64{1116, 60, 30, 15, 8, 5, 3, 2, 1}
 
 var scotterGameSpinTime = []int{25, 20, 15, 13, 10, 6}
 var scotterGameWildWinRate = [][]int64{
@@ -123,7 +125,7 @@ var scotterGameWildWinRate = [][]int64{
 	{10, 15, 30},
 	{15, 30, 40},
 }
-var scotterGameWildWinRateWeightings = [][]int{
+var scotterGameWildWinRateWeightings = [][]int64{
 	{16, 4, 2},
 	{80, 34, 10},
 	{23, 10, 4},
