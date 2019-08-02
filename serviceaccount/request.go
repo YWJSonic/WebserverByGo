@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame8/serversetting"
 
-	"github.com/julienschmidt/httprouter"
+	"gitlab.com/ServerUtility/httprouter"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/apithirdparty"
-	log "gitlab.com/WeberverByGo/handlelog"
+	"gitlab.com/WeberverByGoGame8/apithirdparty"
+	log "gitlab.com/WeberverByGoGame8/handlelog"
 )
 
 var isInit = false

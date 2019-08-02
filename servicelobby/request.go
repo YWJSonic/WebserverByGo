@@ -4,22 +4,22 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGo/apithirdparty"
-	attach "gitlab.com/WeberverByGo/handleattach"
+	"gitlab.com/WeberverByGoGame8/apithirdparty"
+	attach "gitlab.com/WeberverByGoGame8/handleattach"
 
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame8/serversetting"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	mycache "gitlab.com/WeberverByGo/handlecache"
-	log "gitlab.com/WeberverByGo/handlelog"
-	"gitlab.com/WeberverByGo/player"
+	mycache "gitlab.com/WeberverByGoGame8/handlecache"
+	log "gitlab.com/WeberverByGoGame8/handlelog"
+	"gitlab.com/WeberverByGoGame8/player"
 
-	"github.com/julienschmidt/httprouter"
-	gameRule "gitlab.com/WeberverByGo/gamerule"
+	"gitlab.com/ServerUtility/httprouter"
+	gameRule "gitlab.com/WeberverByGoGame8/gamerule"
 )
 
 var isInit = false
@@ -87,8 +87,10 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
-	result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
 
+	if gameRule.IsAttachInit {
+		result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
+	}
 	myhttp.HTTPResponse(w, result, err)
 }
 

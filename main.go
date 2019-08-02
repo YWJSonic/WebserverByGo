@@ -1,22 +1,22 @@
 package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/fileload"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
+	_ "gitlab.com/ServerUtility/mysql"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
-	"gitlab.com/WeberverByGo/gamerule"
-	crontab "gitlab.com/WeberverByGo/handlecrontab"
-	db "gitlab.com/WeberverByGo/handledb"
-	event "gitlab.com/WeberverByGo/handleevent"
-	"gitlab.com/WeberverByGo/serversetting"
-	login "gitlab.com/WeberverByGo/serviceaccount"
-	game "gitlab.com/WeberverByGo/servicegame"
-	lobby "gitlab.com/WeberverByGo/servicelobby"
-	"gitlab.com/WeberverByGo/servicethirdparty/api"
+	"gitlab.com/WeberverByGoGame8/foundation/myrestful"
+	"gitlab.com/WeberverByGoGame8/gamerule"
+	crontab "gitlab.com/WeberverByGoGame8/handlecrontab"
+	db "gitlab.com/WeberverByGoGame8/handledb"
+	event "gitlab.com/WeberverByGoGame8/handleevent"
+	"gitlab.com/WeberverByGoGame8/serversetting"
+	login "gitlab.com/WeberverByGoGame8/serviceaccount"
+	game "gitlab.com/WeberverByGoGame8/servicegame"
+	lobby "gitlab.com/WeberverByGoGame8/servicelobby"
+	"gitlab.com/WeberverByGoGame8/servicethirdparty/api"
 )
 
 func main() {

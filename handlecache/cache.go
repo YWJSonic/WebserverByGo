@@ -3,7 +3,7 @@ package mycache
 import (
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"gitlab.com/ServerUtility/redigo/redis"
 )
 
 func get(ket string) (interface{}, error) {

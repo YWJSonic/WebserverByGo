@@ -18,18 +18,18 @@ func ConvertToGameAttach(playerID int64, attinfo []map[string]interface{}) Attac
 // SetInfo ...
 func SetInfo(gameIndex int, att map[string]interface{}) {
 	if GameIndex != gameIndex {
-		messagehandle.ErrorLogPrintln("game7", "SetInfo Index Error")
+		messagehandle.ErrorLogPrintln("SetInfo Error:", gameIndex, att)
 		return
 	}
 
-	RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
+	// RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
 }
 
 // GetInitScroll ...
 func GetInitScroll() interface{} {
 	scrollmap := map[string][][]int{
-		"normalreel": normalScroll,
-		"respinreel": {respinScroll1},
+		"normalreel":  normalScroll,
+		"scotterreel": scotterScroll,
 	}
 	return scrollmap
 }
@@ -40,13 +40,18 @@ func GetInitBetRate() interface{} {
 	tmp["betrate"] = betRate
 	tmp["betratelinkindex"] = betRateLinkIndex
 	tmp["betratedefaultindex"] = betRateDefaultIndex
-	tmp["winratearray"] = resultRateArray
+	tmp["luckydrawcombination"] = luckydrawInit()
+	tmp["luckydrawwinrate"] = scotterGameWildWinRate
+	tmp["luckydrawspin"] = scotterGameSpinTime
 	return tmp
 }
 
 // GetBetMoney ...
 func GetBetMoney(betIndex int64) int64 {
 	betrate := BetRate()
+	if betIndex >= int64(len(betrate)) {
+		return betrate[betRateDefaultIndex]
+	}
 	return betrate[betIndex]
 }
 
@@ -56,23 +61,41 @@ func BetRate() []int64 {
 }
 
 // GameRequest game server api return game result, game attach, totalwin
-func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]int64) {
+func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
 	attinfo := attachDataToAttachInfo(playerID, attach)
 	betMoney := GetBetMoney(betIndex)
-	attinfo.JackPartBonusPoolx2 += int64(float64(betMoney) * jackPortTex[2])
-	attinfo.JackPartBonusPoolx3 += int64(float64(betMoney) * jackPortTex[1])
-	attinfo.JackPartBonusPoolx5 += int64(float64(betMoney) * jackPortTex[0])
 
-	JackPartBonusPoolx2 := attinfo.JackPartBonusPoolx2
-	JackPartBonusPoolx3 := attinfo.JackPartBonusPoolx3
-	JackPartBonusPoolx5 := attinfo.JackPartBonusPoolx5
-	result := logicResult(betMoney, &attinfo)
-	otherdata := make(map[string]int64)
+	result, otherdata := logicResult(betMoney, &attinfo)
+
 	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
-	otherdata["betMoney"] = betMoney
-	otherdata["JackPartBonusx2"] = JackPartBonusPoolx2 - attinfo.JackPartBonusPoolx2
-	otherdata["JackPartBonusx3"] = JackPartBonusPoolx3 - attinfo.JackPartBonusPoolx3
-	otherdata["JackPartBonusx5"] = JackPartBonusPoolx5 - attinfo.JackPartBonusPoolx5
+	otherdata["betmoney"] = betMoney
 
 	return result, attachInfoToAttachData(attinfo), otherdata
+}
+
+// ScotterGameRequest game server api return game result, game attach, totalwin
+func ScotterGameRequest(playerID, betMoney, luckydrawselect int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
+	attinfo := attachDataToAttachInfo(playerID, attach)
+	var scotterCombination []int
+
+	if luckydrawselect == 6 {
+		scotterCombination = scotterGameMysteryIndexCombination[foundation.RangeRandom(scotterGameMysteryWeightings)]
+	} else {
+		scotterCombination = scotterGameMysteryIndexCombination[scotterGameDefaultCombinationIndex[luckydrawselect]]
+	}
+
+	result, otherdata := logicScotterGameResult(betMoney, scotterCombination[0], scotterCombination[1], &attinfo)
+	result["scottercombination"] = scotterCombination
+	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
+	otherdata["betmoney"] = betMoney
+
+	return result, attachInfoToAttachData(attinfo), otherdata
+}
+
+func luckydrawInit() [][]int {
+	var result [][]int
+	for _, DefaultCombination := range scotterGameDefaultCombinationIndex {
+		result = append(result, scotterGameMysteryIndexCombination[DefaultCombination])
+	}
+	return result
 }

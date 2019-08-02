@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/robfig/cron"
+	"gitlab.com/ServerUtility/cron"
 	"gitlab.com/ServerUtility/foundation"
 )
 
