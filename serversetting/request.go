@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/ServerUtility/cron"
+	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/foundation"
 )
 
