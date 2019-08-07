@@ -28,7 +28,7 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 // GetInitScroll ...
 func GetInitScroll() interface{} {
 	scrollmap := map[string][][]int{
-		"normalreel":  normalScroll,
+		"normalreel":  getNormalScorll(),
 		"scotterreel": scotterScroll,
 	}
 	return scrollmap
@@ -98,4 +98,36 @@ func luckydrawInit() [][]int {
 		result = append(result, scotterGameMysteryIndexCombination[DefaultCombination])
 	}
 	return result
+}
+
+func getNormalScorll() [][]int {
+	if RTPSetting == 6 {
+		return normalScroll[5]
+	} else if RTPSetting == 5 {
+		return normalScroll[4]
+	} else if RTPSetting == 4 {
+		return normalScroll[3]
+	} else if RTPSetting == 3 {
+		return normalScroll[2]
+	} else if RTPSetting == 2 {
+		return normalScroll[1]
+	} else {
+		return normalScroll[0]
+	}
+}
+
+func getNormalWildWinRateWeightings() []int64 {
+	if RTPSetting == 6 {
+		return normalWildWinRateWeightings[5]
+	} else if RTPSetting == 5 {
+		return normalWildWinRateWeightings[4]
+	} else if RTPSetting == 4 {
+		return normalWildWinRateWeightings[3]
+	} else if RTPSetting == 3 {
+		return normalWildWinRateWeightings[2]
+	} else if RTPSetting == 2 {
+		return normalWildWinRateWeightings[1]
+	} else {
+		return normalWildWinRateWeightings[0]
+	}
 }

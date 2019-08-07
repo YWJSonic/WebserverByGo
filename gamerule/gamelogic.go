@@ -65,7 +65,7 @@ func outputGame(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, ma
 	normalResult := make(map[string]interface{})
 	otherdata := make(map[string]interface{})
 
-	normalResult, otherdata, totalScores = aRound(betMoney, normalWildWinRate, normalWildWinRateWeightings, normalScroll)
+	normalResult, otherdata, totalScores = aRound(betMoney, normalWildWinRate, getNormalWildWinRateWeightings(), getNormalScorll())
 
 	return normalResult, otherdata, totalScores
 }
@@ -79,7 +79,7 @@ func outputScotterGame(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex
 	otherdata := make(map[string]interface{})
 	WinRate := scotterGameWildWinRate[scotterWinRateIndex]
 	WinRateWeightings := scotterGameWildWinRateWeightings[scotterWinRateIndex]
-	SpinTime := scotterGameSpinTime[scotterWinRateIndex]
+	SpinTime := scotterGameSpinTime[scotterSpinTimeIndex]
 
 	for i, imax := 0, SpinTime; i < imax; i++ {
 
@@ -130,6 +130,7 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 		Wild:    []int{wild1},
 	}
 	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
+
 	for _, ItemNum := range items {
 		symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
 
@@ -143,7 +144,6 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 		for _, payLine := range itemResults[len(symbolNumCollation)] {
 			if ItemNum == payLine[0] {
 				wildRandWinRate = spWinRate[foundation.RangeRandomInt64(spWinWeightings)]
-				// lineInfo = newBaseInfoLine(symbolNumCollation, symBolPointCollation, payLine, betMoney, wildRandWinRate, option)
 				var lineCount, lineNormal = 1, 1
 				lineInfo = gameplate.NewInfoLine243()
 
@@ -282,18 +282,6 @@ func mysteryCombination() []int {
 	mysteryIndex := foundation.RangeRandom(scotterGameMysteryWeightings)
 	mysteryIndexCombination := scotterGameMysteryIndexCombination[mysteryIndex]
 	return mysteryIndexCombination
-}
-
-func plateScotterCount(plate [][]int, option gameplate.PlateOption) int {
-	var scotterCount int
-	for _, col := range plate {
-		for _, row := range col {
-			if isScotter, _ := option.IsScotter(row); isScotter {
-				scotterCount++
-			}
-		}
-	}
-	return scotterCount
 }
 
 func isSpeicalH5Win(plateSymbol [][]int) bool {

@@ -98,6 +98,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet ...
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := myhttp.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
