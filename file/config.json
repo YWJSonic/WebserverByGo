@@ -5,7 +5,7 @@
 "ULGExchangeURL":"https://dev-new-api.ulgplay.com/api/v1/game/exchange",
 "ULGCheckoutURL":"https://dev-new-api.ulgplay.com/api/v1/game/checkout",
 "GameTypeID":"86A85BE09A724136E3222121706C0DA1",
-"IP":"192.168.1.32",
+"IP":"192.168.1.53",
 "PORT":"8000",
 "DBIP":"192.168.1.17",
 "DBPORT":"3306",
@@ -17,6 +17,7 @@
 "MaintainFinishTime": "10 15 * * *",
 "ULGMaintainCheckoutTime":"5 15 * * *",
 "RespinSetting":1,
+"RTPSetting":1,
 "Maintain":false,
 "DebugLog":true
 }
