@@ -22,14 +22,19 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 		return
 	}
 
-	// RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
+	if value, ok := att["RespinSetting"]; ok {
+		RespinSetting = foundation.InterfaceToInt(value)
+	}
+	if value, ok := att["RTPSetting"]; ok {
+		RTPSetting = foundation.InterfaceToInt(value)
+	}
 }
 
 // GetInitScroll ...
 func GetInitScroll() interface{} {
 	scrollmap := map[string][][]int{
-		"normalreel":  normalScroll,
-		"scotterreel": scotterScroll,
+		"normalreel": getNormalScorll(),
+		"freereel":   freeScroll,
 	}
 	return scrollmap
 }
@@ -40,9 +45,6 @@ func GetInitBetRate() interface{} {
 	tmp["betrate"] = betRate
 	tmp["betratelinkindex"] = betRateLinkIndex
 	tmp["betratedefaultindex"] = betRateDefaultIndex
-	tmp["luckydrawcombination"] = luckydrawInit()
-	tmp["luckydrawwinrate"] = scotterGameWildWinRate
-	tmp["luckydrawspin"] = scotterGameSpinTime
 	return tmp
 }
 
@@ -73,29 +75,18 @@ func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map
 	return result, attachInfoToAttachData(attinfo), otherdata
 }
 
-// ScotterGameRequest game server api return game result, game attach, totalwin
-func ScotterGameRequest(playerID, betMoney, luckydrawselect int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
-	attinfo := attachDataToAttachInfo(playerID, attach)
-	var scotterCombination []int
-
-	if luckydrawselect == 6 {
-		scotterCombination = scotterGameMysteryIndexCombination[foundation.RangeRandom(scotterGameMysteryWeightings)]
+func getNormalScorll() [][]int {
+	if RTPSetting == 6 {
+		return normalScroll[RTPSetting-1]
+	} else if RTPSetting == 5 {
+		return normalScroll[RTPSetting-1]
+	} else if RTPSetting == 4 {
+		return normalScroll[RTPSetting-1]
+	} else if RTPSetting == 3 {
+		return normalScroll[RTPSetting-1]
+	} else if RTPSetting == 2 {
+		return normalScroll[RTPSetting-1]
 	} else {
-		scotterCombination = scotterGameMysteryIndexCombination[scotterGameDefaultCombinationIndex[luckydrawselect]]
+		return normalScroll[0]
 	}
-
-	result, otherdata := logicScotterGameResult(betMoney, scotterCombination[0], scotterCombination[1], &attinfo)
-	result["scottercombination"] = scotterCombination
-	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
-	otherdata["betmoney"] = betMoney
-
-	return result, attachInfoToAttachData(attinfo), otherdata
-}
-
-func luckydrawInit() [][]int {
-	var result [][]int
-	for _, DefaultCombination := range scotterGameDefaultCombinationIndex {
-		result = append(result, scotterGameMysteryIndexCombination[DefaultCombination])
-	}
-	return result
 }
