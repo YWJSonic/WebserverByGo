@@ -3,8 +3,8 @@ package gamerule
 import (
 	"fmt"
 
+	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gameplate"
-	"gitlab.com/WeberverByGo/foundation"
 )
 
 // Result ...
