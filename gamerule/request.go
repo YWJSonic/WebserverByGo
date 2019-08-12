@@ -59,14 +59,17 @@ func BetRate() []int64 {
 func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]int64) {
 	attinfo := attachDataToAttachInfo(playerID, attach)
 	betMoney := GetBetMoney(betIndex)
-	attinfo.JackPartBonusPoolx2 += int64(float64(betMoney) * jackPortTex[2])
-	attinfo.JackPartBonusPoolx3 += int64(float64(betMoney) * jackPortTex[1])
-	attinfo.JackPartBonusPoolx5 += int64(float64(betMoney) * jackPortTex[0])
 
 	JackPartBonusPoolx2 := attinfo.JackPartBonusPoolx2
 	JackPartBonusPoolx3 := attinfo.JackPartBonusPoolx3
 	JackPartBonusPoolx5 := attinfo.JackPartBonusPoolx5
+
 	result := logicResult(betMoney, &attinfo)
+
+	attinfo.JackPartBonusPoolx2 += int64(float64(betMoney) * jackPortTex[2])
+	attinfo.JackPartBonusPoolx3 += int64(float64(betMoney) * jackPortTex[1])
+	attinfo.JackPartBonusPoolx5 += int64(float64(betMoney) * jackPortTex[0])
+
 	otherdata := make(map[string]int64)
 	otherdata["totalwinscore"] = foundation.InterfaceToInt64(result["totalwinscore"])
 	otherdata["betMoney"] = betMoney
