@@ -11,7 +11,7 @@ import (
 func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, map[string]interface{}) {
 	var result = make(map[string]interface{})
 	var totalWin int64
-	var scotterIDArray []int64
+	var scotterIDArray = make([]int64, 0)
 
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, attinfo)
 	result["normalresult"] = normalresult
@@ -19,21 +19,22 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 
 	if otherdata["isscotter"] == 1 {
 		scotterid := attinfo.NewDayScotterID()
-		attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
-		attinfo.FreeGameBetLockIndex[FreeGameBetLockIndexKey(scotterid)] = betMoney
 		scotterIDArray = append(scotterIDArray, scotterid)
-		result["scotterid"] = scotterIDArray
-	} else {
-		result["scotterid"] = []int64{}
+		attinfo.NewScotterInfo(scotterid, 0, betMoney)
+		// attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
+		// attinfo.FreeGameBetLockMoney[FreeGameBetLockIndexKey(scotterid)] = betMoney
+		scotterIDArray = append(scotterIDArray, scotterid)
+
 	}
 
+	result["scotterid"] = scotterIDArray
 	result["totalwinscore"] = totalWin
 	return result, otherdata
 }
 func logicScotterGameResult(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex int, attinfo *AttachInfo) (map[string]interface{}, map[string]interface{}) {
 	var result = make(map[string]interface{})
 	var totalWin int64
-	var scotterIDArray []int64
+	var scotterIDArray = make([]int64, 0)
 
 	scotterresult, otherdata, scottertotalwin := outputScotterGame(betMoney, scotterWinRateIndex, scotterSpinTimeIndex, attinfo)
 	// result = foundation.AppendMap(result, otherdata)
@@ -44,16 +45,14 @@ func logicScotterGameResult(betMoney int64, scotterWinRateIndex, scotterSpinTime
 	if otherdata["isscotter"] == 1 {
 		for i, imax := 0, scotterCount; i < imax; i++ {
 			scotterid := attinfo.NewDayScotterID()
-			attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
-			attinfo.FreeGameBetLockIndex[FreeGameBetLockIndexKey(scotterid)] = betMoney
 			scotterIDArray = append(scotterIDArray, scotterid)
+			attinfo.NewScotterInfo(scotterid, 0, betMoney)
+			// attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
+			// attinfo.FreeGameBetLockMoney[FreeGameBetLockIndexKey(scotterid)] = betMoney
 		}
-		result["scotterid"] = scotterIDArray
-	} else {
-		result["scotterid"] = []int64{}
-
 	}
 
+	result["scotterid"] = scotterIDArray
 	result["totalwinscore"] = totalWin
 	return result, otherdata
 }
@@ -130,7 +129,9 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 		Wild:    []int{wild1},
 	}
 	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
-
+	// scotterPlateIndexTest = scotterPlateIndexTest % len(scotterPlateTest)
+	// plateSymbol = scotterPlateTest[scotterPlateIndexTest]
+	// scotterPlateIndexTest++
 	for _, ItemNum := range items {
 		symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
 
@@ -170,11 +171,11 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 				totalScores += lineInfo.Score
 				winLineInfo = append(winLineInfo, lineInfo)
 
-				if len(spWinRate) > 3 {
-					normalPayCount[fmt.Sprintf("%v", payLine)] += int64(lineCount)
-				} else {
-					scotterPayCount[fmt.Sprintf("%v", payLine)] += int64(lineCount)
-				}
+				// if len(spWinRate) > 3 {
+				// 	normalPayCount[fmt.Sprintf("%v", payLine)] += int64(lineCount)
+				// } else {
+				// 	scotterPayCount[fmt.Sprintf("%v", payLine)] += int64(lineCount)
+				// }
 			}
 		}
 	}
@@ -302,4 +303,43 @@ func isSpeicalH5Win(plateSymbol [][]int) bool {
 		return true
 	}
 	return false
+}
+
+var scotterPlateIndexTest = 0
+var scotterPlateTest = [][][]int{
+	{
+		{7, 8, 9},
+		{4, 5, 6},
+		{7, 8, 9},
+		{4, 5, 6},
+		{7, 8, 9},
+	},
+	{
+		{7, 8, 9},
+		{4, 5, 6},
+		{8, 5, 2},
+		{4, 6, 1},
+		{5, 2, 6},
+	},
+	{
+		{1, 5, 4},
+		{1, 6, 8},
+		{1, 5, 6},
+		{8, 9, 7},
+		{7, 6, 9},
+	},
+	{
+		{3, 4, 8},
+		{6, 5, 7},
+		{3, 4, 5},
+		{2, 3, 4},
+		{4, 5, 7},
+	},
+	{
+		{1, 4, 5},
+		{1, 6, 8},
+		{1, 8, 5},
+		{1, 6, 8},
+		{1, 7, 9},
+	},
 }

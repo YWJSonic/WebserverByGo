@@ -10,21 +10,40 @@ type AttachInfo struct {
 	PlayerID             int64
 	Kind                 int64
 	DayScotterGameCount  int64
-	FreeGameBetLockIndex map[int64]int64 //Key: DayScotterGameCount * 100 + 1 * 10 + WeekDay
+	FreeGameBetLockMoney map[int64]int64 //Key: DayScotterGameCount * 100 + 1 * 10 + WeekDay
 	DayScotterGameInfo   map[int64]int64 //Key: DayScotterGameCount * 100 + 2 * 10 + WeekDay
+	ScotterInfos         map[int64]ScotterInfo
 	ScotterID            int64
 }
 
+// NewScotterInfo ...
+func (info *AttachInfo) NewScotterInfo(scotterID, dayScotterGameInfo, freeGameBetLockMoney int64) {
+	scotterInfo := ScotterInfo{
+		ScotterID:            scotterID,
+		DayScotterGameInfo:   dayScotterGameInfo,
+		FreeGameBetLockMoney: freeGameBetLockMoney,
+	}
+	info.ScotterInfos[scotterID] = scotterInfo
+}
+
 // NewDayScotterID ...
-func (att *AttachInfo) NewDayScotterID() int64 {
-	att.DayScotterGameCount++
-	return (att.DayScotterGameCount * 100) + int64(foundation.ServerNow().Weekday()*10)
+func (info *AttachInfo) NewDayScotterID() int64 {
+	info.DayScotterGameCount++
+	return (info.DayScotterGameCount * 100) + int64(foundation.ServerNow().Weekday()*10)
+}
+
+// ScotterInfo ...
+type ScotterInfo struct {
+	ScotterID            int64
+	FreeGameBetLockMoney int64
+	DayScotterGameInfo   int64
 }
 
 func newAttchInfo() AttachInfo {
 	return AttachInfo{
 		DayScotterGameInfo:   make(map[int64]int64),
-		FreeGameBetLockIndex: make(map[int64]int64),
+		FreeGameBetLockMoney: make(map[int64]int64),
+		ScotterInfos:         make(map[int64]ScotterInfo),
 	}
 }
 
@@ -43,10 +62,36 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 			if attType == 1 {
 				attachInfo.DayScotterGameCount = attIValue
 			} else if (attType % 10) == 1 {
-				attachInfo.DayScotterGameInfo[attType] = attIValue
+				// attachInfo.DayScotterGameInfo[attType] = attIValue
+				scotterID := GameInfoKeyToScotterID(attType)
+
+				if Info, ok := attachInfo.ScotterInfos[scotterID]; ok {
+					Info.DayScotterGameInfo = attIValue
+					attachInfo.ScotterInfos[scotterID] = Info
+				} else {
+					Info := ScotterInfo{
+						DayScotterGameInfo: attIValue,
+						ScotterID:          scotterID,
+					}
+					attachInfo.ScotterInfos[scotterID] = Info
+				}
 			} else if (attType % 10) == 2 {
-				attachInfo.FreeGameBetLockIndex[attType] = attIValue
+				// attachInfo.FreeGameBetLockMoney[attType] = attIValue
+				scotterID := LockIndexKeyToScotterID(attType)
+
+				if Info, ok := attachInfo.ScotterInfos[scotterID]; ok {
+					Info.FreeGameBetLockMoney = attIValue
+					attachInfo.ScotterInfos[scotterID] = Info
+				} else {
+					Info := ScotterInfo{
+						FreeGameBetLockMoney: attIValue,
+						ScotterID:            scotterID,
+					}
+					attachInfo.ScotterInfos[scotterID] = Info
+
+				}
 			}
+
 		}
 	} else {
 		attachInfo.Kind = GameIndex
@@ -61,11 +106,17 @@ func attachInfoToAttachData(attachInfo AttachInfo) []map[string]interface{} {
 	attKind := attachInfo.Kind
 
 	att = append(att, toAttMap(playerID, attKind, DayScotterGameCountKey, attachInfo.DayScotterGameCount))
-	for attType, attIValue := range attachInfo.FreeGameBetLockIndex {
-		att = append(att, toAttMap(playerID, attKind, attType, attIValue))
-	}
-	for attType, attIValue := range attachInfo.DayScotterGameInfo {
-		att = append(att, toAttMap(playerID, attKind, attType, attIValue))
+
+	// var tmpLockID int64
+	// for attType, attIValue := range attachInfo.DayScotterGameInfo {
+	// 	att = append(att, toAttMap(playerID, attKind, attType, attIValue))
+	// 	tmpLockID = FreeGameBetLockIndexKey(GameInfoKeyToScotterID(attType))
+	// 	att = append(att, toAttMap(playerID, attKind, tmpLockID, attachInfo.FreeGameBetLockMoney[tmpLockID]))
+	// }
+
+	for scotterID, Info := range attachInfo.ScotterInfos {
+		att = append(att, toAttMap(playerID, attKind, DayScotterGameInfoKey(scotterID), Info.DayScotterGameInfo))
+		att = append(att, toAttMap(playerID, attKind, FreeGameBetLockIndexKey(scotterID), Info.FreeGameBetLockMoney))
 	}
 
 	return att
@@ -85,7 +136,17 @@ func DayScotterGameInfoKey(scotterID int64) int64 {
 	return scotterID + 1
 }
 
+// GameInfoKeyToScotterID ...
+func GameInfoKeyToScotterID(GameInfoKey int64) int64 {
+	return GameInfoKey - 1
+}
+
 // FreeGameBetLockIndexKey ...
 func FreeGameBetLockIndexKey(scotterID int64) int64 {
 	return scotterID + 2
+}
+
+// LockIndexKeyToScotterID ...
+func LockIndexKeyToScotterID(GameInfoKey int64) int64 {
+	return GameInfoKey - 2
 }

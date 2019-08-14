@@ -74,8 +74,11 @@ func GameRequest(playerID, betIndex int64, attach []map[string]interface{}) (map
 }
 
 // ScotterGameRequest game server api return game result, game attach, totalwin
-func ScotterGameRequest(playerID, betMoney, luckydrawselect int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
+func ScotterGameRequest(playerID, betMoney, luckydrawselect, scotterID int64, attach []map[string]interface{}) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
 	attinfo := attachDataToAttachInfo(playerID, attach)
+	scotterIndo := attinfo.ScotterInfos[scotterID]
+	scotterIndo.DayScotterGameInfo = 1
+	attinfo.ScotterInfos[scotterID] = scotterIndo
 	var scotterCombination []int
 
 	if luckydrawselect == 6 {

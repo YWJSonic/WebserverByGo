@@ -1,6 +1,6 @@
 package gamerule
 
-// 花開富貴
+// Q財神
 
 // Version ...
 const Version = "0.0.1"

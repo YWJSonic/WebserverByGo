@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/WeberverByGoGame6/apithirdparty"
 	attach "gitlab.com/WeberverByGoGame6/handleattach"
+	"gitlab.com/WeberverByGoGame6/servicethirdparty/api"
 
 	"gitlab.com/WeberverByGoGame6/serversetting"
 
@@ -199,6 +200,8 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
+
+	api.RunNotFinishSoctter(playerInfo.ID)
 
 	ulgCheckOutResult, err := apithirdparty.CheckOut(playerInfo, serversetting.GameTypeID)
 	if err.ErrorCode != code.OK {

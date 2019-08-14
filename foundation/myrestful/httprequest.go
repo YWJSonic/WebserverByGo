@@ -1,10 +1,11 @@
 package myrestful
 
 import (
+	"crypto/tls"
 	"net/http"
 
-	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/code"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGoGame6/serversetting"
@@ -27,6 +28,7 @@ func connectPool() *http.Client {
 	if clientConnect == nil {
 		clientConnect = new(httpClient)
 		httptr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 
 			MaxIdleConns:        50,
 			MaxIdleConnsPerHost: 50,
