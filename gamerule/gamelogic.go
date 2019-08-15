@@ -19,12 +19,14 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, attinfo, option)
 	result["normalresult"] = normalresult
+	result["isfreegame"] = 0
 	totalWin += normaltotalwin
 
-	if iscotter, ok := otherdata["isscotter"]; ok && iscotter.(int) == 1 {
+	if iscotter, ok := otherdata["isfreegame"]; ok && iscotter.(int) == 1 {
 		freeresult, freeotherdata, freetotalwin := outputFreeGame(betMoney, attinfo, option)
 		result["freeresult"] = freeresult
 		result["freewildbonusrate"] = freeotherdata["wildbonusrate"]
+		result["isfreegame"] = 1
 		totalWin += freetotalwin
 	}
 
@@ -130,83 +132,11 @@ func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.P
 	}
 
 	if isFreeGame(plateSymbol, option) {
-		otherdata["isscotter"] = 1
+		otherdata["isfreegame"] = 1
 	} else {
-		otherdata["isscotter"] = 0
+		otherdata["isfreegame"] = 0
 	}
 	return result, otherdata, totalScores
-}
-
-func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption) ([][]int, [][]int) {
-	var symBolPointCollation = make([][]int, 0)
-	var symbolNumCollation = make([][]int, 0)
-	// var mainSymbol = option.EmptyNum()
-	var IsWildTarget, _ = option.IsWild(symbolNum)
-	var IsScotterTarget, _ = option.IsScotter(symbolNum)
-
-	for _, colArray := range plate {
-		var rowPointArray []int
-		var rowSymbolArray []int
-		for rowIndex, rowSymbol := range colArray {
-			if IsWildTarget {
-				if symbolNum == rowSymbol {
-					rowSymbolArray = append(rowSymbolArray, rowSymbol)
-					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
-				}
-			} else if IsScotterTarget {
-				if symbolNum == rowSymbol {
-					rowSymbolArray = append(rowSymbolArray, rowSymbol)
-					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
-				}
-			} else {
-				IsWild, _ := option.IsWild(rowSymbol)
-
-				if symbolNum == rowSymbol {
-					rowSymbolArray = append(rowSymbolArray, rowSymbol)
-					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
-				} else if IsWild {
-					rowSymbolArray = append(rowSymbolArray, rowSymbol)
-					rowPointArray = append(rowPointArray, rowIndex)
-
-					// if isWild, _ := option.IsWild(symbolNum); isWild {
-					// 	mainSymbol = rowSymbol
-					// }
-
-				}
-			}
-
-		}
-
-		if len(rowPointArray) <= 0 {
-			break
-		}
-		symbolNumCollation = append(symbolNumCollation, rowSymbolArray)
-		symBolPointCollation = append(symBolPointCollation, rowPointArray)
-	}
-
-	// if mainSymbol != symbolNum {
-	// 	return make([][]int, 0), make([][]int, 0)
-	// }
-	return symbolNumCollation, symBolPointCollation
-	// if mainSymbol != symbolNum {
-	// 	return mainSymbol, make([][]int, 0), make([][]int, 0)
-	// }
-	// return mainSymbol, symbolNumCollation, symBolPointCollation
-}
-
-func plateScotterCount(plate [][]int, option gameplate.PlateOption) int {
-	var scotterCount int
-	for _, col := range plate {
-		for _, row := range col {
-			if isScotter, _ := option.IsScotter(row); isScotter {
-				scotterCount++
-			}
-		}
-	}
-	return scotterCount
 }
 
 func setRandomWild(plateSymbol [][]int, randomWildPoint [][]int) [][]int {
