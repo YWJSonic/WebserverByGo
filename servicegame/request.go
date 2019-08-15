@@ -37,7 +37,7 @@ var HandleURL []myhttp.RESTfulURL
 func init() {
 	mu = new(sync.RWMutex)
 	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "game/gameresult", Fun: gameresult, ConnType: myhttp.Client})
-	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "game/scottergameresult", Fun: scottergameresulttest, ConnType: myhttp.Client})
+	HandleURL = append(HandleURL, myhttp.RESTfulURL{RequestType: "POST", URL: "game/scottergameresult", Fun: scottergameresult, ConnType: myhttp.Client})
 }
 
 // ServiceStart ...
@@ -138,7 +138,6 @@ func scottergameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	token := foundation.InterfaceToString(postData["token"])
 	scotterid := foundation.InterfaceToInt64(postData["scotterid"])
 	luckydrawselect := foundation.InterfaceToInt64(postData["luckydrawselect"])
-	// gametype check
 	err := messagehandle.New()
 
 	if scotterid%10 != 0 {
@@ -184,203 +183,12 @@ func scottergameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	var att []map[string]interface{}
-	var totalwinscore int64
-	var result map[string]interface{}
-	var newatt []map[string]interface{}
-	var otherdata map[string]interface{}
+	att := attach.GetAttachByType(playerInfo.ID, gameRule.GameIndex, gameRule.DayScotterGameCountKey, gameRule.IsAttachSaveToDB)
+	noCacheAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+2)
+	att = append(att, noCacheAtt...)
+	attInfo := gameRule.ConvertToGameAttach(playerID, att)
 
-	att = attach.GetAttachByType(playerInfo.ID, gameRule.GameIndex, gameRule.DayScotterGameCountKey, gameRule.IsAttachSaveToDB)
-	targetAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+2)
-	att = append(att, targetAtt...)
-	tmpTargetAtt := gameRule.ConvertToGameAttach(playerID, att)
-	if value, ok := tmpTargetAtt.DayScotterGameInfo[gameRule.DayScotterGameInfoKey(scotterid)]; !ok || value == 1 {
-		err.ErrorCode = code.FailedPrecondition
-		err.Msg = "Scotter Game ID Error"
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-
-	betMoney := tmpTargetAtt.FreeGameBetLockMoney[gameRule.FreeGameBetLockIndexKey(scotterid)]
-	for index, max := 0, 2; index < max; index++ {
-		result, newatt, otherdata = gameRule.ScotterGameRequest(playerID, betMoney, luckydrawselect, scotterid, att)
-		totalwinscore = otherdata["totalwinscore"].(int64)
-
-		if gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, totalwinscore) && gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, totalwinscore) {
-			break
-		}
-
-	}
-
-	playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
-	attach.SaveAttach(playerInfo.ID, gameRule.GameIndex, []map[string]interface{}{newatt[0]}, false)
-	attach.SaveAttachToDB(playerInfo.ID, gameRule.GameIndex, newatt)
-	result["playermoney"] = playerInfo.Money
-
-	ulginfo.TotalBet += betMoney
-	ulginfo.TotalWin += totalwinscore
-	player.SavePlayerInfo(playerInfo)
-	ulg.SaveULGInfo(ulginfo)
-
-	msg := foundation.JSONToString(result)
-	msg = strings.ReplaceAll(msg, "\"", "\\\"")
-	loginfo := loginfo.New(loginfo.GameResult)
-	loginfo.PlayerID = playerID
-	loginfo.IValue1 = foundation.InterfaceToInt64(result["totalwinscore"])
-	loginfo.IValue2 = otherdata["betmoney"].(int64)
-	loginfo.IValue3 = scotterid
-	loginfo.Msg = msg
-	log.SaveLog(loginfo)
-
-	myhttp.HTTPResponse(w, result, err)
-
-}
-
-// AutoRunScotterGameResult at checkout and maintain process not finish scotter
-func AutoRunScotterGameResult(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, scotterCountAttach, scotterIDAttach, LockMoneyAttach map[string]interface{}, scotterid, luckydrawselect int64) {
-	err := messagehandle.New()
-
-	if scotterid%10 != 0 {
-		err.ErrorCode = code.DataLoss
-		err.Msg = "Scotter Game Error"
-		return
-	}
-	if luckydrawselect > 6 {
-		err.ErrorCode = code.DataLoss
-		err.Msg = "Scotter Game Select Error"
-		return
-	}
-
-	// var att []map[string]interface{}
-	var totalwinscore int64
-	var result map[string]interface{}
-	var newatt []map[string]interface{}
-	var otherdata map[string]interface{}
-
-	var extraScotter []map[string]interface{}
-
-	// att = attach.GetAttachByType(playerInfo.ID, gameRule.GameIndex, gameRule.DayScotterGameCountKey, gameRule.IsAttachSaveToDB)
-	// targetAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+2)
-	// att = append(att, targetAtt...)
-
-	for {
-
-		var att []map[string]interface{}
-		att = []map[string]interface{}{scotterCountAttach, scotterIDAttach, LockMoneyAttach}
-
-		tmpTargetAtt := gameRule.ConvertToGameAttach(playerInfo.ID, att)
-		if value, ok := tmpTargetAtt.DayScotterGameInfo[gameRule.DayScotterGameInfoKey(scotterid)]; !ok || value == 1 {
-			err.ErrorCode = code.FailedPrecondition
-			err.Msg = "Scotter Game ID Error"
-			return
-		}
-
-		betMoney := tmpTargetAtt.FreeGameBetLockMoney[gameRule.FreeGameBetLockIndexKey(scotterid)]
-		for index, max := 0, 2; index < max; index++ {
-			result, newatt, otherdata = gameRule.ScotterGameRequest(playerInfo.ID, betMoney, luckydrawselect, scotterid, att)
-			totalwinscore = otherdata["totalwinscore"].(int64)
-
-			if gamelimit.IsInTotalMoneyWinLimit(gameRule.WinScoreLimit, betMoney, totalwinscore) && gamelimit.IsInTotalBetRateWinLimit(gameRule.WinBetRateLimit, betMoney, totalwinscore) {
-				break
-			}
-
-		}
-
-		playerInfo.Money = playerInfo.Money + totalwinscore - betMoney
-
-		attach.SaveAttach(playerInfo.ID, gameRule.GameIndex, []map[string]interface{}{newatt[0]}, false)
-		attach.SaveAttachToDB(playerInfo.ID, gameRule.GameIndex, newatt[1:])
-		result["playermoney"] = playerInfo.Money
-
-		ulginfo.TotalBet += betMoney
-		ulginfo.TotalWin += totalwinscore
-		player.SavePlayerInfo(playerInfo)
-		ulg.SaveULGInfo(ulginfo)
-
-		msg := foundation.JSONToString(result)
-		msg = strings.ReplaceAll(msg, "\"", "\\\"")
-		loginfo := loginfo.New(loginfo.GameResult)
-		loginfo.PlayerID = playerInfo.ID
-		loginfo.IValue1 = foundation.InterfaceToInt64(result["totalwinscore"])
-		loginfo.IValue2 = otherdata["betmoney"].(int64)
-		loginfo.IValue3 = scotterid
-		loginfo.Msg = msg
-		log.SaveLog(loginfo)
-
-		if len(newatt) > 3 {
-			extraScotter = append(extraScotter, newatt[3:]...)
-			scotterCountAttach = newatt[0]
-			// scotterIDAttach, extraScotter = foundation.ArrayShift(extraScotter)
-			// LockMoneyAttach,extraScotter =
-		} else if len(extraScotter) > 0 {
-
-		} else {
-			break
-		}
-	}
-
-}
-
-/////////////////////-- test --
-func scottergameresulttest(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	postData := myhttp.PostData(r)
-	token := foundation.InterfaceToString(postData["token"])
-	scotterid := foundation.InterfaceToInt64(postData["scotterid"])
-	luckydrawselect := foundation.InterfaceToInt64(postData["luckydrawselect"])
-	// gametype check
-	err := messagehandle.New()
-
-	if scotterid%10 != 0 {
-		err.ErrorCode = code.DataLoss
-		err.Msg = "Scotter Game Error"
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-	if luckydrawselect > 6 {
-		err.ErrorCode = code.DataLoss
-		err.Msg = "Scotter Game Select Error"
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-
-	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
-	if gametypeid != serversetting.GameTypeID {
-		err.ErrorCode = code.GameTypeError
-		err.Msg = "GameTypeError"
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-
-	// get player
-	playerID := foundation.InterfaceToInt64(postData["playerid"])
-	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
-	if err.ErrorCode != code.OK {
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-
-	// check token
-	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
-		myhttp.HTTPResponse(w, "", err)
-		return
-	}
-
-	// get thirdparty info data
-	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
-	if err.ErrorCode != code.OK {
-		myhttp.HTTPResponse(w, "", err)
-		fmt.Println(ulginfo)
-		return
-	}
-
-	var att []map[string]interface{}
-
-	att = attach.GetAttachByType(playerInfo.ID, gameRule.GameIndex, gameRule.DayScotterGameCountKey, gameRule.IsAttachSaveToDB)
-	targetAtt := attach.GetAttachByTypeRange(playerInfo.ID, gameRule.GameIndex, scotterid, scotterid+2)
-	att = append(att, targetAtt...)
-	tmpTargetAtt := gameRule.ConvertToGameAttach(playerID, att)
-
-	scotterInfo, ok := tmpTargetAtt.ScotterInfos[scotterid]
+	scotterInfo, ok := attInfo.ScotterInfos[scotterid]
 	if !ok {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "Scotter Game ID Error"
@@ -400,13 +208,11 @@ func scottergameresulttest(w http.ResponseWriter, r *http.Request, ps httprouter
 
 }
 
-// AutoRunScotterGameResulttest at checkout and maintain process not finish scotter
-func AutoRunScotterGameResulttest(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att []map[string]interface{}, luckydrawselect int64) {
-	err := messagehandle.New()
+// AutoRunScotterGameResult at checkout and maintain process not finish scotter
+func AutoRunScotterGameResult(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att []map[string]interface{}, luckydrawselect int64) {
 
 	if luckydrawselect > 6 {
-		err.ErrorCode = code.DataLoss
-		err.Msg = "Scotter Game Select Error"
+		messagehandle.ErrorLogPrintln("Scotter Game Error", att, luckydrawselect)
 		return
 	}
 
@@ -421,21 +227,19 @@ func AutoRunScotterGameResulttest(playerInfo *playerinfo.Info, ulginfo *ulginfo.
 		for scotterid, Info = range tmpTargetAtt.ScotterInfos {
 
 			if scotterid%10 != 0 {
-				err.ErrorCode = code.DataLoss
-				err.Msg = "Scotter Game Error"
+				messagehandle.ErrorLogPrintln("Scotter Game Error", Info)
 				return
 			}
 
 			if Info.DayScotterGameInfo == 1 {
-				err.ErrorCode = code.FailedPrecondition
-				err.Msg = "Scotter Isfinish Error"
+				messagehandle.ErrorLogPrintln("Scotter Isfinish Error", Info)
 				return
 			}
-
 		}
 
 		betMoney := Info.FreeGameBetLockMoney
 		_, newatt, _ := scotterGameProcess(playerInfo, ulginfo, att, betMoney, scotterid, luckydrawselect)
+
 		if len(newatt) > 3 {
 			att[0] = newatt[0]
 			extraScotter = append(extraScotter, newatt[3:]...)
@@ -448,11 +252,11 @@ func AutoRunScotterGameResulttest(playerInfo *playerinfo.Info, ulginfo *ulginfo.
 
 		} else {
 			break
+
 		}
 	}
 }
 
-// AutoRunScotterGameResult at checkout and maintain process not finish scotter
 func scotterGameProcess(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att []map[string]interface{}, betMoney, scotterid, luckydrawselect int64) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
 
 	var totalwinscore int64
@@ -476,7 +280,6 @@ func scotterGameProcess(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att 
 	attach.SaveAttachToDB(playerInfo.ID, gameRule.GameIndex, newatt[1:])
 	result["playermoney"] = playerInfo.Money
 
-	// ulginfo.TotalBet += betMoney
 	ulginfo.TotalWin += totalwinscore
 	player.SavePlayerInfo(playerInfo)
 	ulg.SaveULGInfo(ulginfo)

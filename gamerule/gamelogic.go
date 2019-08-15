@@ -47,8 +47,6 @@ func logicScotterGameResult(betMoney int64, scotterWinRateIndex, scotterSpinTime
 			scotterid := attinfo.NewDayScotterID()
 			scotterIDArray = append(scotterIDArray, scotterid)
 			attinfo.NewScotterInfo(scotterid, 0, betMoney)
-			// attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
-			// attinfo.FreeGameBetLockMoney[FreeGameBetLockIndexKey(scotterid)] = betMoney
 		}
 	}
 
@@ -88,8 +86,9 @@ func outputScotterGame(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex
 		}
 
 		if isSpeicalH5Win(tmpResult["plate"].([][]int)) {
-			totalScores += int64(scotterH5SpecialWinRate[foundation.RangeRandom(scotterH5SpecialWinRateWeightings[scotterWinRateIndex])]) * betMoney
-			tmpResult["h5score"] = int64(scotterH5SpecialWinRate[foundation.RangeRandom(scotterH5SpecialWinRateWeightings[scotterWinRateIndex])]) * betMoney
+			h5Score := int64(scotterH5SpecialWinRate[foundation.RangeRandom(scotterH5SpecialWinRateWeightings[scotterWinRateIndex])]) * betMoney
+			totalScores += h5Score
+			tmpResult["h5score"] = h5Score
 		} else {
 			tmpResult["h5score"] = int64(0)
 		}
@@ -97,12 +96,12 @@ func outputScotterGame(betMoney int64, scotterWinRateIndex, scotterSpinTimeIndex
 		scotterResult = append(scotterResult, tmpResult)
 	}
 
+	otherdata["isscotter"] = 0
+	otherdata["scottercount"] = scotterCount
+
 	if scotterCount > 0 {
 		otherdata["isscotter"] = 1
-	} else {
-		otherdata["isscotter"] = 0
 	}
-	otherdata["scottercount"] = scotterCount
 	return scotterResult, otherdata, totalScores
 }
 
@@ -123,15 +122,13 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 	var lineInfo gameplate.InfoLine243
 	otherdata := make(map[string]interface{})
 	result := make(map[string]interface{})
+	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
 
 	option := gameplate.PlateOption{
 		Scotter: []int{scotter},
 		Wild:    []int{wild1},
 	}
-	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
-	// scotterPlateIndexTest = scotterPlateIndexTest % len(scotterPlateTest)
-	// plateSymbol = scotterPlateTest[scotterPlateIndexTest]
-	// scotterPlateIndexTest++
+
 	for _, ItemNum := range items {
 		symbolNumCollation, symBolPointCollation := symbolCollation(ItemNum, plateSymbol, option)
 
@@ -199,7 +196,6 @@ func aRound(betMoney int64, spWinRate, spWinWeightings []int64, scorll [][]int) 
 func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption) ([][]int, [][]int) {
 	var symBolPointCollation = make([][]int, 0)
 	var symbolNumCollation = make([][]int, 0)
-	// var mainSymbol = option.EmptyNum()
 	var IsWildTarget, _ = option.IsWild(symbolNum)
 	var IsScotterTarget, _ = option.IsScotter(symbolNum)
 
@@ -211,13 +207,11 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 				if symbolNum == rowSymbol {
 					rowSymbolArray = append(rowSymbolArray, rowSymbol)
 					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
 				}
 			} else if IsScotterTarget {
 				if symbolNum == rowSymbol {
 					rowSymbolArray = append(rowSymbolArray, rowSymbol)
 					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
 				}
 			} else {
 				IsWild, _ := option.IsWild(rowSymbol)
@@ -225,18 +219,11 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 				if symbolNum == rowSymbol {
 					rowSymbolArray = append(rowSymbolArray, rowSymbol)
 					rowPointArray = append(rowPointArray, rowIndex)
-					// mainSymbol = rowSymbol
 				} else if IsWild {
 					rowSymbolArray = append(rowSymbolArray, rowSymbol)
 					rowPointArray = append(rowPointArray, rowIndex)
-
-					// if isWild, _ := option.IsWild(symbolNum); isWild {
-					// 	mainSymbol = rowSymbol
-					// }
-
 				}
 			}
-
 		}
 
 		if len(rowPointArray) <= 0 {
@@ -246,14 +233,7 @@ func symbolCollation(symbolNum int, plate [][]int, option gameplate.PlateOption)
 		symBolPointCollation = append(symBolPointCollation, rowPointArray)
 	}
 
-	// if mainSymbol != symbolNum {
-	// 	return make([][]int, 0), make([][]int, 0)
-	// }
 	return symbolNumCollation, symBolPointCollation
-	// if mainSymbol != symbolNum {
-	// 	return mainSymbol, make([][]int, 0), make([][]int, 0)
-	// }
-	// return mainSymbol, symbolNumCollation, symBolPointCollation
 }
 
 func newBaseInfoLine(lineSymbol [][]int, linePoint [][]int, payLine []int, betMoney, wildRandWinRate int64, option gameplate.PlateOption) gameplate.InfoLine243 {
@@ -303,43 +283,4 @@ func isSpeicalH5Win(plateSymbol [][]int) bool {
 		return true
 	}
 	return false
-}
-
-var scotterPlateIndexTest = 0
-var scotterPlateTest = [][][]int{
-	{
-		{7, 8, 9},
-		{4, 5, 6},
-		{7, 8, 9},
-		{4, 5, 6},
-		{7, 8, 9},
-	},
-	{
-		{7, 8, 9},
-		{4, 5, 6},
-		{8, 5, 2},
-		{4, 6, 1},
-		{5, 2, 6},
-	},
-	{
-		{1, 5, 4},
-		{1, 6, 8},
-		{1, 5, 6},
-		{8, 9, 7},
-		{7, 6, 9},
-	},
-	{
-		{3, 4, 8},
-		{6, 5, 7},
-		{3, 4, 5},
-		{2, 3, 4},
-		{4, 5, 7},
-	},
-	{
-		{1, 4, 5},
-		{1, 6, 8},
-		{1, 8, 5},
-		{1, 6, 8},
-		{1, 7, 9},
-	},
 }

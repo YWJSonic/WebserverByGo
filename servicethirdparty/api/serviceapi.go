@@ -161,10 +161,7 @@ func RunNotFinishSoctter(playerID int64) {
 		if ivalue, ok := playerAttach[ii]["IValue"]; !ok && ivalue != 0 {
 			break
 		}
-		// scotterCheckID := foundation.InterfaceToInt64(playerAttach[ii]["Type"])
-		// scotterID := gameRules.GameInfoKeyToScotterID(scotterCheckID)
-		game.AutoRunScotterGameResulttest(playerInfo, ulginfo, scotterAtt, 6)
+		game.AutoRunScotterGameResult(playerInfo, ulginfo, scotterAtt, 6)
 
 	}
-	// fmt.Println(playerAttach)
 }

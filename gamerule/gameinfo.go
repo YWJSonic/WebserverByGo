@@ -51,7 +51,7 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 	var attType int64
 	var attIValue int64
 	attachInfo := newAttchInfo()
-	// attachInfo.JackPotBonusPool = make(map[int64]int64)
+
 	if len(att) > 0 {
 		for _, row := range att {
 			attIValue = foundation.InterfaceToInt64(row["IValue"])
@@ -62,7 +62,6 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 			if attType == 1 {
 				attachInfo.DayScotterGameCount = attIValue
 			} else if (attType % 10) == 1 {
-				// attachInfo.DayScotterGameInfo[attType] = attIValue
 				scotterID := GameInfoKeyToScotterID(attType)
 
 				if Info, ok := attachInfo.ScotterInfos[scotterID]; ok {
@@ -76,7 +75,6 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 					attachInfo.ScotterInfos[scotterID] = Info
 				}
 			} else if (attType % 10) == 2 {
-				// attachInfo.FreeGameBetLockMoney[attType] = attIValue
 				scotterID := LockIndexKeyToScotterID(attType)
 
 				if Info, ok := attachInfo.ScotterInfos[scotterID]; ok {
@@ -91,7 +89,6 @@ func attachDataToAttachInfo(playerID int64, att []map[string]interface{}) Attach
 
 				}
 			}
-
 		}
 	} else {
 		attachInfo.Kind = GameIndex
