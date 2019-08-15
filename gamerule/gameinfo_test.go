@@ -77,7 +77,7 @@ func Test243GameRequest(test *testing.T) {
 			aRoundScotterCount := 0
 			for i, imax := 0, len(scotteridarray); i < imax; i++ {
 				aRoundScotterCount++
-				result, newatt, otherdata = ScotterGameRequest(playerid, betmoney, 0, newatt)
+				result, newatt, otherdata = ScotterGameRequest(playerid, betmoney, 0, scotteridarray[i], newatt)
 				scotteridarray := result["scotterid"].([]int64)
 				ScotterCombinationCount[fmt.Sprintf("%v", result["scottercombination"])]++
 				imax += len(scotteridarray)
