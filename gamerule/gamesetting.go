@@ -8,6 +8,12 @@ const Version = "0.0.1"
 // GameIndex game sort id
 const GameIndex = 6
 
+// RTPSetting 1 RTP:84, 2 RTP:88, 3 RTP:92, 4 RTP:96, 5 RTP:99
+var RTPSetting = 1
+
+// RespinSetting respint select 1 is first
+var RespinSetting = 1
+
 // IsSingleLine game result only output one result
 var isSingleLine = false
 
@@ -86,9 +92,6 @@ var scotterScroll = [][]int{
 	{8, 12, 10, 0, 12, 10, 3, 8, 4, 11, 2, 12, 6, 7, 1, 9, 4, 11, 3, 7, 8, 5, 7, 10, 1, 11, 6, 9, 5},
 	{8, 2, 7, 4, 8, 5, 7, 9, 3, 10, 12, 6, 11, 8, 5, 10, 12, 1, 9, 7, 4, 10, 7, 12, 5, 11, 7, 6, 9, 7, 3, 11, 4},
 }
-
-// RTPSetting 1 RTP:84, 2 RTP:88, 3 RTP:92, 4 RTP:96, 5 RTP:99
-var RTPSetting = 1
 
 // Items item    W1,F1,H1,H2,H3,H4,H5,L1,L2,L3, L4, L5, L6
 var items = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}

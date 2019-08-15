@@ -22,7 +22,12 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 		return
 	}
 
-	// RespinSetting = foundation.InterfaceToInt(att["RespinSetting"])
+	if value, ok := att["RespinSetting"]; ok {
+		RespinSetting = foundation.InterfaceToInt(value)
+	}
+	if value, ok := att["RTPSetting"]; ok {
+		RTPSetting = foundation.InterfaceToInt(value)
+	}
 }
 
 // GetInitScroll ...
