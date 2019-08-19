@@ -38,6 +38,10 @@ var (
 	// RedisURL cache server address
 	RedisURL = "127.0.0.1:6379"
 )
+var (
+	// ServerTotalPayScore All player win score
+	serverTotalPayScore int64
+)
 
 // Maintain Is sow maintain time
 var maintain = false

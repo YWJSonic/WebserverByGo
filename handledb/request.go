@@ -165,23 +165,9 @@ func GetSettingKey(key string) ([]map[string]interface{}, messagehandle.ErrorMsg
 	return result, err
 }
 
-// NewSetting ...
-func NewSetting(args ...interface{}) {
-	qu := dbinfo.SqlQuary{
-		Quary: dbinfo.MakeProcedureQueryStr("SettingNew_Write", len(args)),
-		Args:  args,
-	}
-
-	if UseChanQueue {
-		go func() { WriteGameChan <- qu }()
-	} else {
-		dbinfo.CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
-	}
-}
-
 // UpdateSetting ...
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
-	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettomgSet_Update", len(args)), args...)
+	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update", len(args)), args...)
 	return err
 }
 
