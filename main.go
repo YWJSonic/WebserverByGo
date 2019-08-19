@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/fileload"
 	"gitlab.com/ServerUtility/messagehandle"
@@ -53,6 +54,11 @@ func main() {
 	initArray = append(initArray, api.ServiceStart())
 	db.SetDBConn()
 
+	result, err := db.GetSetting()
+	if err.ErrorCode == code.OK {
+		serverSettingFromDB(result)
+	}
+
 	crontab.NewCron(serversetting.MaintainStartTime, func() {
 		serversetting.EnableMaintain(true)
 	})
@@ -64,4 +70,15 @@ func main() {
 
 	go event.Update()
 	myrestful.HTTPLisentRun(serversetting.ServerURL(), initArray...)
+}
+
+func serverSettingFromDB(settingInfos []map[string]interface{}) {
+	var settingKey string
+	for _, settingInfo := range settingInfos {
+		settingKey = foundation.InterfaceToString(settingInfo["Key"])
+
+		if settingKey == foundation.ServerTotalPayScoreKey(gamerule.GameIndex) {
+			serversetting.SetServerTotalPayScore(foundation.InterfaceToInt64(settingInfo["IValue"]))
+		}
+	}
 }

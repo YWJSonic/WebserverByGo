@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
+	db "gitlab.com/WeberverByGoGame6/handledb"
 	"gitlab.com/WeberverByGoGame6/player"
 	"gitlab.com/WeberverByGoGame6/serversetting"
 
@@ -50,6 +51,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	token := foundation.InterfaceToString(postData["token"])
 	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	betMoney := gameRule.GetBetMoney(betIndex)
+	serverTotalPayScore := serversetting.GetServerTotalPayScore()
 
 	// gametype check
 	err := messagehandle.New()
@@ -129,6 +131,11 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 
+	if totalwinscore > 0 {
+		serverTotalPayScore += totalwinscore
+		serversetting.SetServerTotalPayScore(serverTotalPayScore)
+		db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRule.GameIndex), serverTotalPayScore, "")
+	}
 	myhttp.HTTPResponse(w, result, err)
 
 }
@@ -203,7 +210,6 @@ func scottergameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 
 	betMoney := scotterInfo.FreeGameBetLockMoney
 	result, _, _ := scotterGameProcess(playerInfo, ulginfo, att, betMoney, scotterid, luckydrawselect)
-
 	myhttp.HTTPResponse(w, result, err)
 
 }
@@ -259,6 +265,7 @@ func AutoRunScotterGameResult(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info
 
 func scotterGameProcess(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att []map[string]interface{}, betMoney, scotterid, luckydrawselect int64) (map[string]interface{}, []map[string]interface{}, map[string]interface{}) {
 
+	serverTotalPayScore := serversetting.GetServerTotalPayScore()
 	var totalwinscore int64
 	var result map[string]interface{}
 	var newatt []map[string]interface{}
@@ -293,6 +300,12 @@ func scotterGameProcess(playerInfo *playerinfo.Info, ulginfo *ulginfo.Info, att 
 	loginfo.IValue3 = scotterid
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
+
+	if totalwinscore > 0 {
+		serverTotalPayScore += totalwinscore
+		serversetting.SetServerTotalPayScore(serverTotalPayScore)
+		db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRule.GameIndex), serverTotalPayScore, "")
+	}
 
 	return result, newatt, otherdata
 }

@@ -97,6 +97,7 @@ func MaintainCheckout() {
 
 	mycache.ClearAllCache()
 	db.Game6ClearDBScotterCount()
+	db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRules.GameIndex), 0, "")
 	db.ULGMaintainCheckOutUpdate()
 }
 

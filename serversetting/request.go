@@ -32,6 +32,20 @@ func EnableMaintain(enable bool) {
 	maintain = enable
 }
 
+// GetServerTotalPayScore ...
+func GetServerTotalPayScore() int64 {
+	mu.RLock()
+	defer mu.RUnlock()
+	return serverTotalPayScore
+}
+
+// SetServerTotalPayScore ...
+func SetServerTotalPayScore(value int64) {
+	mu.Lock()
+	defer mu.Unlock()
+	serverTotalPayScore = value
+}
+
 // ServerTime ...
 func serverTime() int64 {
 	return foundation.ServerNowTime()
