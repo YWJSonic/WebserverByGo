@@ -21,31 +21,26 @@ func TestGetInitScroll(test *testing.T) {
 }
 
 func Test243GameRequest(test *testing.T) {
+	var processLogSplit = 10
 
 	for ii, iimax := 1, 6; ii < iimax; ii++ {
 		var att []map[string]interface{}
 		var result map[string]interface{}
 		var otherdata map[string]interface{}
-		var normalScore, freeScore, totalwinscore, totalbetscore, betindex int64
+		var normalScore, freeScore, totalwinscore, totalbetscore, betindex, bonusscore, freegamecount, normalbonusganecount, freebonusganecount int64
 
-		randwildCount := make(map[string]int64)
+		winLinePay = make(map[string]string)
+
+		scotterRatecount := make(map[string]int64)
+		Scotter1SymbolCount = make(map[string]int64)
+
 		normalPayLineCount = make(map[string]int)
+		normalGamePayLineScore := make(map[string]int64)
+		normalgameScotter2SymbolCount = make(map[string]int64)
+
 		freePayLineCount = make(map[string]int)
-		freeWildCount = make(map[string]int)
-		freeWildBonusRateCount = make(map[string]int)
-
-		normalPlateCount := make([]map[string]int64, len(scrollSize))
-		normalPlateScore := make(map[string]int)
-		normalScoreCount := make(map[string]int)
-
-		freePlateCount := make([]map[string]int64, len(scrollSize))
-		freePlateScore := make(map[string]int)
-		freeScoreCount := make(map[string]int)
-
-		for i := range normalPlateCount {
-			normalPlateCount[i] = make(map[string]int64)
-			freePlateCount[i] = make(map[string]int64)
-		}
+		freeGamePayLineScore := make(map[string]int64)
+		freegameScotter2SymbolCount = make(map[string]int64)
 
 		var playerid int64 = 24
 		betmoney := GetBetMoney(betindex)
@@ -58,18 +53,13 @@ func Test243GameRequest(test *testing.T) {
 
 			result, _, otherdata = GameRequest(playerid, betindex, att)
 			if normalresult, ok := result["normalresult"]; ok {
-				plate := ((normalresult).(map[string]interface{})["plate"]).([][]int)
-				for i, rowSymbolarray := range plate {
-					logplate := fmt.Sprintf("%v", rowSymbolarray)
-					normalPlateCount[i][logplate]++
+				tmpbonusrate := ((normalresult).(map[string]interface{})["bonusrate"]).(int64)
+				if tmpbonusrate > 0 {
+					bonusscore += (tmpbonusrate * betmoney)
+					totalwinscore += (tmpbonusrate * betmoney)
+					normalbonusganecount++
+					scotterRatecount[fmt.Sprintf("%v", tmpbonusrate)]++
 				}
-
-				randwild := ((normalresult).(map[string]interface{})["randwild"]).([][]int)
-				var wildcount int
-				for _, col := range randwild {
-					wildcount += len(col)
-				}
-				randwildCount[fmt.Sprintf("%v", wildcount)]++
 
 				gameresult, ok := ((normalresult).(map[string]interface{})["gameresult"]).([]interface{})
 				if ok && len(gameresult) > 0 {
@@ -78,20 +68,22 @@ func Test243GameRequest(test *testing.T) {
 						score := roundResult.Score
 						normalScore += score
 						totalwinscore += score
-						normalPlateScore[fmt.Sprintf("%v", roundResult.LineSymbolNum)] = roundResult.LineWinRate
-						normalScoreCount[fmt.Sprintf("%v", roundResult.LineWinRate)]++
+						normalGamePayLineScore[fmt.Sprintf("%v", roundResult.LineSymbolNum)] = roundResult.Score
 					}
 				}
 			}
 			// free game
 			if freeresult, ok := result["freeresult"]; ok {
+				freegamecount++
 				result := freeresult.([]map[string]interface{})
 
 				for _, value := range result {
-					plate := (value["plate"]).([][]int)
-					for i, rowSymbolarray := range plate {
-						logplate := fmt.Sprintf("%v", rowSymbolarray)
-						freePlateCount[i][logplate]++
+					tmpbonusrate := (value["bonusrate"]).(int64)
+					if tmpbonusrate > 0 {
+						freeScore += (tmpbonusrate * betmoney)
+						totalwinscore += (tmpbonusrate * betmoney)
+						freebonusganecount++
+						scotterRatecount[fmt.Sprintf("%v", tmpbonusrate)]++
 					}
 
 					gameresult, ok := (value["gameresult"]).([]interface{})
@@ -101,40 +93,41 @@ func Test243GameRequest(test *testing.T) {
 							score := roundResult.Score
 							freeScore += score
 							totalwinscore += score
-							freePlateScore[fmt.Sprintf("%v", roundResult.LineSymbolNum)] = roundResult.LineWinRate
-							freeScoreCount[fmt.Sprintf("%v", roundResult.LineWinRate)]++
+							freeGamePayLineScore[fmt.Sprintf("%v", roundResult.LineSymbolNum)] = roundResult.Score
 						}
 					}
 				}
 			}
 
-			// moneypool.RTPControl(betmoney, otherdata["totalwinscore"])
 			if otherdata["totalwinscore"].(int64) > 0 {
 				// fmt.Println("Index:", index, "RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
 			}
-			if index%(max/100) == 0 {
+			if index%(max/processLogSplit) == 0 {
 				fmt.Println("Progress Rate:", float64(index)/float64(max)*100)
 			}
 		}
 
-		fmt.Println("randwildCount:", foundation.JSONToString(randwildCount))
+		fmt.Println("------------------------------------------------------------------------------------------------")
+		fmt.Println("freeCount:", freegamecount)
+		fmt.Println("normalbonusganecount:", normalbonusganecount)
+		fmt.Println("freebonusganecount:", freebonusganecount)
 
-		fmt.Println("normalPlateCount:", foundation.JSONToString(normalPlateCount))
-		fmt.Println("normalPlateScore:", foundation.JSONToString(normalPlateScore))
-		fmt.Println("normalScoreCount:", foundation.JSONToString(normalScoreCount))
+		fmt.Println("winLinePay:", foundation.JSONToString(winLinePay))
+		fmt.Println("scotterRatecount:", foundation.JSONToString(scotterRatecount))
+		fmt.Println("Scotter1SymbolCount:", foundation.JSONToString(Scotter1SymbolCount))
+
 		fmt.Println("normalPayLineCount:", foundation.JSONToString(normalPayLineCount))
+		fmt.Println("normalGamePayLineScore:", foundation.JSONToString(normalGamePayLineScore))
+		fmt.Println("normalgameScotter2SymbolCount:", foundation.JSONToString(normalgameScotter2SymbolCount))
 
-		fmt.Println("freePlateCount:", foundation.JSONToString(freePlateCount))
-		fmt.Println("freePlateScore:", foundation.JSONToString(freePlateScore))
-		fmt.Println("freeScoreCount:", foundation.JSONToString(freeScoreCount))
 		fmt.Println("freePayLineCount:", foundation.JSONToString(freePayLineCount))
-		fmt.Println("freeWildCount:", foundation.JSONToString(freeWildCount))
-		fmt.Println("freeWildBonusRateCount:", foundation.JSONToString(freeWildBonusRateCount))
+		fmt.Println("freeGamePayLineScore:", foundation.JSONToString(freeGamePayLineScore))
+		fmt.Println("freegameScotter2SymbolCount:", foundation.JSONToString(freegameScotter2SymbolCount))
 
 		fmt.Println("Normal RTP:", fmt.Sprintf("%.2f", RTP(normalScore, totalbetscore)), "normalScore:", normalScore, "TotalBet:", totalbetscore)
-		fmt.Println("Scotter RTP:", fmt.Sprintf("%.2f", RTP(freeScore, totalbetscore)), "scotterScore:", freeScore, "TotalBet:", totalbetscore)
+		fmt.Println("freeScore RTP:", fmt.Sprintf("%.2f", RTP(freeScore, totalbetscore)), "scotterScore:", freeScore, "TotalBet:", totalbetscore)
+		fmt.Println("Bonus RTP:", fmt.Sprintf("%.2f", RTP(bonusscore, totalbetscore)), "BonusScore:", bonusscore, "TotalBet:", totalbetscore)
 		fmt.Println("RTP:", fmt.Sprintf("%.2f", RTP(totalwinscore, totalbetscore)), "TotalWin:", totalwinscore, "TotalBet:", totalbetscore)
-		// fmt.Println("InRespintCount:", inRespintCount, "RespinCountMap:", foundation.JSONToString(respinCountMap))
 		fmt.Println("------------------------------------------------------------------------------------------------")
 	}
 

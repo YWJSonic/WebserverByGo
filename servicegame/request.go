@@ -6,13 +6,13 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/WeberverByGoGame8/apithirdparty/ulg"
-	"gitlab.com/WeberverByGoGame8/player"
-	"gitlab.com/WeberverByGoGame8/serversetting"
+	"gitlab.com/WeberverByGoGame9/apithirdparty/ulg"
+	"gitlab.com/WeberverByGoGame9/player"
+	"gitlab.com/WeberverByGoGame9/serversetting"
 
-	gameRule "gitlab.com/WeberverByGoGame8/gamerule"
-	mycache "gitlab.com/WeberverByGoGame8/handlecache"
-	log "gitlab.com/WeberverByGoGame8/handlelog"
+	gameRule "gitlab.com/WeberverByGoGame9/gamerule"
+	mycache "gitlab.com/WeberverByGoGame9/handlecache"
+	log "gitlab.com/WeberverByGoGame9/handlelog"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"

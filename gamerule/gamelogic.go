@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/foundation/math"
 	"gitlab.com/ServerUtility/gameplate"
 )
 
@@ -13,17 +14,19 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 	var totalWin int64
 
 	option := gameplate.PlateOption{
-		Scotter: []int{scotter},
+		Scotter: []int{scotter1, scotter2},
 		Wild:    []int{wild1},
 	}
 
 	normalresult, otherdata, normaltotalwin := outputGame(betMoney, attinfo, option)
+	FreeGameCount := foundation.InterfaceToInt(otherdata["freegamecount"])
+	result["freegamecount"] = FreeGameCount
 	result["normalresult"] = normalresult
 	result["isfreegame"] = 0
 	totalWin += normaltotalwin
 
-	if iscotter, ok := otherdata["isfreegame"]; ok && iscotter.(int) == 1 {
-		freeresult, freeotherdata, freetotalwin := outputFreeGame(betMoney, attinfo, option)
+	if FreeGameCount > 0 {
+		freeresult, freeotherdata, freetotalwin := outputFreeGame(betMoney, FreeGameCount, attinfo, option)
 		result["freeresult"] = freeresult
 		result["freewildbonusrate"] = freeotherdata["wildbonusrate"]
 		result["isfreegame"] = 1
@@ -40,176 +43,186 @@ func outputGame(betMoney int64, attinfo *AttachInfo, option gameplate.PlateOptio
 	normalResult := make(map[string]interface{})
 	otherdata := make(map[string]interface{})
 
-	randWild := randWild()
-	normalResult, otherdata, totalScores = aRound(betMoney, getNormalScorll(), randWild, option, 1)
-	normalResult["randwild"] = randWild
-	// normalResult["randwild"] = [][]int{}
+	normalResult, otherdata, totalScores = aRound(betMoney, getNormalScorll(), option, 1)
 
 	return normalResult, otherdata, totalScores
 }
 
-func outputFreeGame(betMoney int64, attinfo *AttachInfo, option gameplate.PlateOption) ([]map[string]interface{}, map[string]interface{}, int64) {
+func outputFreeGame(betMoney int64, freeCount int, attinfo *AttachInfo, option gameplate.PlateOption) ([]map[string]interface{}, map[string]interface{}, int64) {
 	var totalScores int64
-	var wildCount, bonusRate int
+	// var wildCount, bonusRate int
 	otherdata := make(map[string]interface{})
 	var freeResult []map[string]interface{}
-	var lockWildarray = make([][]int, len(scrollSize))
 
 	for i, imax := 0, freeCount; i < imax; i++ {
-		tmpResult, _, tmpTotalScores := aRound(betMoney, freeScroll, lockWildarray, option, 2)
+		tmpResult, _, tmpTotalScores := aRound(betMoney, getFreeScorll(), option, 2)
 		totalScores += tmpTotalScores
 		freeResult = append(freeResult, tmpResult)
-
-		lockWildarray = lockWild(tmpResult["plate"].([][]int), lockWildarray, option)
-	}
-	for _, colArray := range lockWildarray {
-		wildCount += len(colArray)
-	}
-	// freeWildCount[fmt.Sprintf("%v", wildCount)]++
-
-	for limitIndex, limitCount := range wildBonusLimit {
-		if wildCount >= limitCount {
-			bonusRate = wildBonusRate[limitIndex]
-		}
-	}
-	if bonusRate > 0 {
-		freeWildBonusRateCount[fmt.Sprintf("%v", bonusRate)]++
-		totalScores *= int64(bonusRate)
-		otherdata["wildbonusrate"] = bonusRate
-	} else {
-		otherdata["wildbonusrate"] = 0
 	}
 	return freeResult, otherdata, totalScores
 }
 
 var normalPayLineCount map[string]int
 var freePayLineCount map[string]int
-var freeWildCount map[string]int
-var freeWildBonusRateCount map[string]int
 
-func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.PlateOption, gameType int) (map[string]interface{}, map[string]interface{}, int64) {
+var Scotter1SymbolCount map[string]int64
+var normalgameScotter2SymbolCount map[string]int64
+var freegameScotter2SymbolCount map[string]int64
+var winLinePay map[string]string
+
+func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameType int) (map[string]interface{}, map[string]interface{}, int64) {
 
 	var winLineInfo []interface{}
-	var totalScores int64
-	otherdata := make(map[string]interface{})
-	result := make(map[string]interface{})
+	var totalScores, bonusrate int64
+	var freeGameCount, scotterCount int
+	var paylinestr string
+	var isLink bool
+	var scotterLineSymbol, scotterLinePoint [][]int
+	var plateSymbolCollectResult map[string]interface{}
+	result := map[string]interface{}{
+		"bonusrate": int64(0),
+	}
+	otherdata := map[string]interface{}{
+		"isfreegame":    0,
+		"freegamecount": 0,
+	}
 
 	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
-
-	// set random wild
-	plateSymbol = setRandomWild(plateSymbol, randWild)
+	// plateSymbol = [][]int{
+	// 	{5, 7, 8},
+	// 	{2, 1, 2},
+	// 	{1, 2, 1},
+	// 	{1, 2, 1},
+	// 	{7, 10, 8},
+	// }
 	plateLineMap := gameplate.PlateToLinePlate(plateSymbol, lineMap)
 
 	for lineIndex, plateLine := range plateLineMap {
 		newLine := gameplate.CutSymbolLink(plateLine, option) // cut line to win line point
-		for _, payLine := range itemResults[len(newLine)] {   // win line result group
-			if isWin(newLine, payLine, option) { // win result check
-				// if gameType == 1 {
-				// 	normalPayLineCount[fmt.Sprintf("%v", payLine)]++
-				// } else {
-				// 	freePayLineCount[fmt.Sprintf("%v", payLine)]++
-				// }
+		mulityLine := gameplate.LineMulitResult(newLine, option)
 
-				infoLine := gameplate.NewInfoLine()
-
-				for i, max := 0, len(payLine)-1; i < max; i++ {
-					infoLine.AddNewPoint(newLine[i], lineMap[lineIndex][i], option)
+		if len(mulityLine) > 1 {
+			isLink = false
+			infoLine := gameplate.NewInfoLine()
+			for _, winLine := range mulityLine {
+				for _, payLine := range itemResults[len(winLine)] {
+					if isWin(winLine, payLine, option) {
+						isLink = true
+						tmpline := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
+						if tmpline.Score > infoLine.Score {
+							infoLine = tmpline
+							paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
+						}
+					}
 				}
-				infoLine.LineWinRate = payLine[len(payLine)-1]
-				infoLine.Score = int64(infoLine.LineWinRate) * (betMoney / betLine)
+			}
+			if isLink {
+				if gameType == 1 {
+					normalPayLineCount[paylinestr]++
+				} else {
+					freePayLineCount[paylinestr]++
+				}
+
+				winLinePay[fmt.Sprintf("%v", newLine)] = paylinestr
 				totalScores += infoLine.Score
 				winLineInfo = append(winLineInfo, infoLine)
+			}
+		} else {
+			for _, payLine := range itemResults[len(newLine)] { // win line result group
+				if isWin(newLine, payLine, option) { // win result check
+					paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
+					winLinePay[fmt.Sprintf("%v", newLine)] = paylinestr
+					if gameType == 1 {
+						normalPayLineCount[paylinestr]++
+					} else {
+						freePayLineCount[paylinestr]++
+					}
+
+					infoLine := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
+					totalScores += infoLine.Score
+					winLineInfo = append(winLineInfo, infoLine)
+				}
 			}
 		}
 	}
 
-	result["scores"] = totalScores
-	result["gameresult"] = winLineInfo
-	if len(winLineInfo) > 0 {
-		result = gameplate.ResultMapLine(plateIndex, plateSymbol, winLineInfo)
-	} else {
-		result = gameplate.ResultMapLine(plateIndex, plateSymbol, []interface{}{})
-	}
+	// scotter 1 handle
+	plateSymbolCollectResult = gameplate.PlateSymbolCollect(scotter1, plateSymbol, option, map[string]interface{}{"isincludewild": false, "isseachallplate": true})
+	scotterCount = foundation.InterfaceToInt(plateSymbolCollectResult["targetsymbolcount"])
+	scotterCount = math.ClampInt(scotterCount, 0, len(freeGameCountAttay))
+	scotterLineSymbol = plateSymbolCollectResult["symbolnumcollation"].([][]int)
+	scotterLinePoint = plateSymbolCollectResult["symbolpointcollation"].([][]int)
 
-	if isFreeGame(plateSymbol, option) {
+	if scotterCount >= scotter1GameLimit {
+		infoLine := gameplate.NewInfoLine()
+
+		for i, max := 0, len(scotterLineSymbol); i < max; i++ {
+			if len(scotterLineSymbol[i]) > 0 {
+				infoLine.AddNewLine(scotterLineSymbol[i], scotterLinePoint[i], option)
+			} else {
+				infoLine.AddEmptyPoint()
+			}
+		}
+
+		infoLine.LineWinRate = scotter1LineRate[scotterCount]
+		infoLine.Score = int64(infoLine.LineWinRate) * betMoney
+		totalScores += infoLine.Score
+		winLineInfo = append(winLineInfo, infoLine)
+
+		freeGameCount = freeGameCountAttay[scotterCount]
+		otherdata["freegamecount"] = freeGameCount
 		otherdata["isfreegame"] = 1
+		if gameType == 1 {
+			Scotter1SymbolCount[fmt.Sprintf("%v", scotterCount)]++
+		} else {
+			Scotter1SymbolCount[fmt.Sprintf("%v", scotterCount)]++
+		}
+
+	}
+
+	// scotter 2 handle
+	plateSymbolCollectResult = gameplate.PlateSymbolCollect(scotter2, plateSymbol, option, map[string]interface{}{"isincludewild": false, "isseachallplate": true})
+	scotterCount = foundation.InterfaceToInt(plateSymbolCollectResult["targetsymbolcount"])
+	scotterCount = math.ClampInt(scotterCount, 0, len(freeGameCountAttay))
+	scotterLineSymbol = plateSymbolCollectResult["symbolnumcollation"].([][]int)
+	scotterLinePoint = plateSymbolCollectResult["symbolpointcollation"].([][]int)
+
+	if scotterCount >= scotter2GameLimit {
+		infoLine := gameplate.NewInfoLine()
+
+		for i, max := 0, len(scotterLineSymbol); i < max; i++ {
+			if len(scotterLineSymbol[i]) > 0 {
+				infoLine.AddNewLine(scotterLineSymbol[i], scotterLinePoint[i], option)
+			} else {
+				infoLine.AddEmptyPoint()
+			}
+		}
+
+		infoLine.LineWinRate = scotter1LineRate[scotterCount]
+		infoLine.Score = int64(infoLine.LineWinRate) * betMoney
+		totalScores += infoLine.Score
+		winLineInfo = append(winLineInfo, infoLine)
+
+		bonusrate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
+		result["bonusrate"] = bonusrate
+		totalScores += (bonusrate * betMoney)
+
+		if gameType == 1 {
+			normalgameScotter2SymbolCount[fmt.Sprintf("%v", scotterCount)]++
+		} else {
+			freegameScotter2SymbolCount[fmt.Sprintf("%v", scotterCount)]++
+		}
+	}
+
+	if len(winLineInfo) > 0 {
+		result = foundation.AppendMap(result, gameplate.ResultMapLine(plateIndex, plateSymbol, winLineInfo))
 	} else {
-		otherdata["isfreegame"] = 0
+		result = foundation.AppendMap(result, gameplate.ResultMapLine(plateIndex, plateSymbol, []interface{}{}))
 	}
+
+	result["gameresult"] = winLineInfo
+	result["scores"] = totalScores
 	return result, otherdata, totalScores
-}
-
-func setRandomWild(plateSymbol [][]int, randomWildPoint [][]int) [][]int {
-
-	if len(randomWildPoint) <= 0 {
-		return plateSymbol
-	}
-
-	for i, imax := 0, len(plateSymbol); i < imax; i++ {
-		for j, jmax := 0, len(randomWildPoint[i]); j < jmax; j++ {
-			plateSymbol[i][randomWildPoint[i][j]] = wild1
-		}
-	}
-	return plateSymbol
-}
-
-func randWild() [][]int {
-	var randwild = make([][]int, len(scrollSize))
-	var randpoint []int
-	var pointArray = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
-
-	wildCount := randWildCount[foundation.RangeRandom(randWildWeightings)]
-
-	if wildCount <= 0 {
-		return [][]int{}
-	}
-
-	randpoint = foundation.RandomMutily(pointArray, wildCount)
-	// sort.Sort(randpoint)
-
-	var col = 0
-	for _, value := range randpoint {
-		col = value / 3
-		randwild[col] = append(randwild[col], value%3)
-	}
-
-	return randwild
-}
-
-// plateToLinePlate ...
-func plateToLinePlate(plate [][]int, lineMap [][]int) [][]int {
-	var plateLineMap [][]int
-	var plateline []int
-
-	for _, linePoint := range lineMap {
-		plateline = []int{}
-		for lineIndex, point := range linePoint {
-			plateline = append(plateline, plate[lineIndex][point])
-		}
-		plateLineMap = append(plateLineMap, plateline)
-	}
-
-	return plateLineMap
-}
-
-// CutSymbolLink get line link array
-func cutSymbolLink(symbolLine []int, option gameplate.PlateOption) []int {
-	var newSymbolLine []int
-	mainSymbol := symbolLine[0]
-
-	for _, symbol := range symbolLine {
-		if isWild, _ := option.IsWild(symbol); isWild {
-
-		} else if isWild, _ := option.IsWild(mainSymbol); isWild {
-			mainSymbol = symbol
-		} else if symbol != mainSymbol {
-			break
-		}
-
-		newSymbolLine = append(newSymbolLine, symbol)
-	}
-
-	return newSymbolLine
 }
 
 // isWin symbol line compar parline is win
@@ -245,32 +258,20 @@ func isWin(lineSymbol []int, payLineSymbol []int, option gameplate.PlateOption) 
 	return isWin
 }
 
-func isFreeGame(plate [][]int, option gameplate.PlateOption) bool {
-	var scotterCount = 0
+func winResult(betMoney int64, lineIndex int, newLine, payLine []int, option gameplate.PlateOption, gameType int) gameplate.InfoLine {
+	mainSymbol := payLine[0]
+	infoLine := gameplate.NewInfoLine()
 
-	for _, colarray := range plate {
-		for _, rowSymbol := range colarray {
-			if isScotter, _ := option.IsScotter(rowSymbol); isScotter {
-				scotterCount++
-			}
-		}
+	for i, max := 0, len(payLine)-1; i < max; i++ {
+		infoLine.AddNewPoint(newLine[i], lineMap[lineIndex][i], option)
 	}
 
-	if scotterCount >= scotterGameLimit {
-		return true
+	if isScotter, _ := option.IsScotter(mainSymbol); isScotter {
+		infoLine.LineWinRate = payLine[len(payLine)-1]
+		infoLine.Score = int64(infoLine.LineWinRate) * betMoney
+	} else {
+		infoLine.LineWinRate = payLine[len(payLine)-1]
+		infoLine.Score = int64(infoLine.LineWinRate) * (betMoney / betLine)
 	}
-	return false
-}
-
-func lockWild(plater [][]int, lockWild [][]int, option gameplate.PlateOption) [][]int {
-
-	for colIndex, colarray := range plater {
-		for rowIndex, row := range colarray {
-			if isWild, _ := option.IsWild(row); isWild && !foundation.IsInclude(rowIndex, lockWild[colIndex]) {
-				lockWild[colIndex] = append(lockWild[colIndex], rowIndex)
-			}
-		}
-	}
-
-	return lockWild
+	return infoLine
 }

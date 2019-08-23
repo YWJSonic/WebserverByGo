@@ -34,7 +34,7 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 func GetInitScroll() interface{} {
 	scrollmap := map[string][][]int{
 		"normalreel": getNormalScorll(),
-		"freereel":   freeScroll,
+		"freereel":   getFreeScorll(),
 	}
 	return scrollmap
 }
@@ -88,5 +88,37 @@ func getNormalScorll() [][]int {
 		return normalScroll[RTPSetting-1]
 	} else {
 		return normalScroll[0]
+	}
+}
+
+func getFreeScorll() [][]int {
+	if RTPSetting == 6 {
+		return freeScroll[RTPSetting-1]
+	} else if RTPSetting == 5 {
+		return freeScroll[RTPSetting-1]
+	} else if RTPSetting == 4 {
+		return freeScroll[RTPSetting-1]
+	} else if RTPSetting == 3 {
+		return freeScroll[RTPSetting-1]
+	} else if RTPSetting == 2 {
+		return freeScroll[RTPSetting-1]
+	} else {
+		return freeScroll[0]
+	}
+}
+
+func getScotter2Weightings() []int {
+	if RTPSetting == 6 {
+		return bonusWeightings[RTPSetting-1]
+	} else if RTPSetting == 5 {
+		return bonusWeightings[RTPSetting-1]
+	} else if RTPSetting == 4 {
+		return bonusWeightings[RTPSetting-1]
+	} else if RTPSetting == 3 {
+		return bonusWeightings[RTPSetting-1]
+	} else if RTPSetting == 2 {
+		return bonusWeightings[RTPSetting-1]
+	} else {
+		return bonusWeightings[0]
 	}
 }
