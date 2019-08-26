@@ -13,7 +13,7 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 	var totalWin int64
 
 	option := gameplate.PlateOption{
-		Scotter: []int{scotter},
+		Scotter: []int{scotter1},
 		Wild:    []int{wild1},
 	}
 
@@ -97,8 +97,8 @@ func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.P
 	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
 
 	// set random wild
-	plateSymbol = setRandomWild(plateSymbol, randWild)
-	plateLineMap := gameplate.PlateToLinePlate(plateSymbol, lineMap)
+	plateSymbolInsertWild := setRandomWild(plateSymbol, randWild)
+	plateLineMap := gameplate.PlateToLinePlate(plateSymbolInsertWild, lineMap)
 
 	for lineIndex, plateLine := range plateLineMap {
 		newLine := gameplate.CutSymbolLink(plateLine, option) // cut line to win line point
@@ -123,18 +123,40 @@ func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.P
 		}
 	}
 
+	plateSymbolCollectResult := gameplate.PlateSymbolCollect(scotter1, plateSymbolInsertWild, option, map[string]interface{}{
+		"isincludewild":   false,
+		"isseachallplate": true,
+	})
+	scotterCount := foundation.InterfaceToInt(plateSymbolCollectResult["targetsymbolcount"])
+	scotterLineSymbol := plateSymbolCollectResult["symbolnumcollation"].([][]int)
+	scotterLinePoint := plateSymbolCollectResult["symbolpointcollation"].([][]int)
+
+	if scotterCount >= scotter1GameLimit {
+		infoLine := gameplate.NewInfoLine()
+
+		for i, max := 0, len(scotterLineSymbol); i < max; i++ {
+			if len(scotterLineSymbol[i]) > 0 {
+				infoLine.AddNewLine(scotterLineSymbol[i], scotterLinePoint[i], option)
+			} else {
+				infoLine.AddEmptyPoint()
+			}
+		}
+
+		winLineInfo = append(winLineInfo, infoLine)
+		otherdata["freegamecount"] = freeCount
+		otherdata["isfreegame"] = 1
+
+	} else {
+		otherdata["isfreegame"] = 0
+
+	}
+
 	result["scores"] = totalScores
 	result["gameresult"] = winLineInfo
 	if len(winLineInfo) > 0 {
 		result = gameplate.ResultMapLine(plateIndex, plateSymbol, winLineInfo)
 	} else {
 		result = gameplate.ResultMapLine(plateIndex, plateSymbol, []interface{}{})
-	}
-
-	if isFreeGame(plateSymbol, option) {
-		otherdata["isfreegame"] = 1
-	} else {
-		otherdata["isfreegame"] = 0
 	}
 	return result, otherdata, totalScores
 }
@@ -243,23 +265,6 @@ func isWin(lineSymbol []int, payLineSymbol []int, option gameplate.PlateOption) 
 	}
 
 	return isWin
-}
-
-func isFreeGame(plate [][]int, option gameplate.PlateOption) bool {
-	var scotterCount = 0
-
-	for _, colarray := range plate {
-		for _, rowSymbol := range colarray {
-			if isScotter, _ := option.IsScotter(rowSymbol); isScotter {
-				scotterCount++
-			}
-		}
-	}
-
-	if scotterCount >= scotterGameLimit {
-		return true
-	}
-	return false
 }
 
 func lockWild(plater [][]int, lockWild [][]int, option gameplate.PlateOption) [][]int {

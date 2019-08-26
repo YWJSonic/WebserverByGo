@@ -111,8 +111,8 @@ var freeCount = 10
 // Space Space item index
 const space = -1
 const wild1 = 0
-const scotter = 1
-const scotterGameLimit = 3
+const scotter1 = 1
+const scotter1GameLimit = 3
 
 var lineMap = [][]int{
 	{1, 1, 1, 1, 1},
