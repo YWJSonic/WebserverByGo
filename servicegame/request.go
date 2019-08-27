@@ -1,12 +1,12 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
 
 	"gitlab.com/WeberverByGoGame9/apithirdparty/ulg"
+	db "gitlab.com/WeberverByGoGame9/handledb"
 	"gitlab.com/WeberverByGoGame9/player"
 	"gitlab.com/WeberverByGoGame9/serversetting"
 
@@ -46,6 +46,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	token := foundation.InterfaceToString(postData["token"])
 	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	betMoney := gameRule.GetBetMoney(betIndex)
+	serverTotalPayScore := serversetting.GetServerTotalPayScore()
+	gamelimit.IsServerDayPayInLimit(serverTotalPayScore)
 
 	// gametype check
 	err := messagehandle.New()
@@ -82,8 +84,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// get thirdparty info data
 	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Error: ", ulginfo)
 		myhttp.HTTPResponse(w, "", err)
-		fmt.Println(ulginfo)
 		return
 	}
 
@@ -119,6 +121,11 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	loginfo.Msg = msg
 	log.SaveLog(loginfo)
 
+	if totalwinscore > 0 {
+		serverTotalPayScore += totalwinscore
+		serversetting.SetServerTotalPayScore(serverTotalPayScore)
+		db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRule.GameIndex), serverTotalPayScore, "")
+	}
 	myhttp.HTTPResponse(w, result, err)
 
 }

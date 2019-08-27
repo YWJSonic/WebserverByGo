@@ -181,7 +181,7 @@ func NewSetting(args ...interface{}) {
 
 // UpdateSetting ...
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
-	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettomgSet_Update", len(args)), args...)
+	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update", len(args)), args...)
 	return err
 }
 

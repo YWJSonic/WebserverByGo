@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -47,18 +46,16 @@ func ServiceStart() []myhttp.RESTfulURL {
 // CronStart cron API
 func CronStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	crontab.CronStart()
-	fmt.Println("CronStart")
 }
 
 // CronStop cron API
 func CronStop(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	crontab.CronStop()
-	fmt.Println("CronStop")
 }
 
 // CronAdd cron API
 func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Println("AddCron")
+
 }
 
 // MaintainStart Maintain API
@@ -79,7 +76,9 @@ func MaintainCheckout() {
 	}
 
 	infos, err := ulg.MaintainULGInfos()
-	fmt.Println(infos, err)
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Error: MaintainCheckout-80", infos, err)
+	}
 
 	for _, ulginfo := range infos {
 		_, err = ulg.Checkout(&ulginfo, serversetting.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
@@ -90,6 +89,7 @@ func MaintainCheckout() {
 		mycache.ClearAllCache()
 	}
 
+	db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRules.GameIndex), 0, "")
 	db.ULGMaintainCheckOutUpdate()
 }
 
@@ -98,6 +98,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet ...
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := myhttp.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])

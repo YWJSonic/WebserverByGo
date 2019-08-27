@@ -1,8 +1,6 @@
 package gamerule
 
 import (
-	"fmt"
-
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/math"
 	"gitlab.com/ServerUtility/gameplate"
@@ -26,9 +24,8 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 	totalWin += normaltotalwin
 
 	if FreeGameCount > 0 {
-		freeresult, freeotherdata, freetotalwin := outputFreeGame(betMoney, FreeGameCount, attinfo, option)
+		freeresult, _, freetotalwin := outputFreeGame(betMoney, FreeGameCount, attinfo, option)
 		result["freeresult"] = freeresult
-		result["freewildbonusrate"] = freeotherdata["wildbonusrate"]
 		result["isfreegame"] = 1
 		totalWin += freetotalwin
 	}
@@ -62,20 +59,12 @@ func outputFreeGame(betMoney int64, freeCount int, attinfo *AttachInfo, option g
 	return freeResult, otherdata, totalScores
 }
 
-var normalPayLineCount map[string]int
-var freePayLineCount map[string]int
-
-var Scotter1SymbolCount map[string]int64
-var normalgameScotter2SymbolCount map[string]int64
-var freegameScotter2SymbolCount map[string]int64
-var winLinePay map[string]string
-
 func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameType int) (map[string]interface{}, map[string]interface{}, int64) {
 
-	var winLineInfo []interface{}
-	var totalScores, bonusrate int64
+	var winLineInfo = make([]interface{}, 0)
+	var totalScores int64
 	var freeGameCount, scotterCount int
-	var paylinestr string
+	// var paylinestr string
 	var isLink bool
 	var scotterLineSymbol, scotterLinePoint [][]int
 	var plateSymbolCollectResult map[string]interface{}
@@ -111,33 +100,18 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 						tmpline := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
 						if tmpline.Score > infoLine.Score {
 							infoLine = tmpline
-							paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
+							// paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
 						}
 					}
 				}
 			}
 			if isLink {
-				if gameType == 1 {
-					normalPayLineCount[paylinestr]++
-				} else {
-					freePayLineCount[paylinestr]++
-				}
-
-				winLinePay[fmt.Sprintf("%v", newLine)] = paylinestr
 				totalScores += infoLine.Score
 				winLineInfo = append(winLineInfo, infoLine)
 			}
 		} else {
 			for _, payLine := range itemResults[len(newLine)] { // win line result group
 				if isWin(newLine, payLine, option) { // win result check
-					paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
-					winLinePay[fmt.Sprintf("%v", newLine)] = paylinestr
-					if gameType == 1 {
-						normalPayLineCount[paylinestr]++
-					} else {
-						freePayLineCount[paylinestr]++
-					}
-
 					infoLine := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
 					totalScores += infoLine.Score
 					winLineInfo = append(winLineInfo, infoLine)
@@ -172,11 +146,6 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 		freeGameCount = freeGameCountAttay[scotterCount]
 		otherdata["freegamecount"] = freeGameCount
 		otherdata["isfreegame"] = 1
-		if gameType == 1 {
-			Scotter1SymbolCount[fmt.Sprintf("%v", scotterCount)]++
-		} else {
-			Scotter1SymbolCount[fmt.Sprintf("%v", scotterCount)]++
-		}
 
 	}
 
@@ -199,19 +168,15 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 		}
 
 		infoLine.LineWinRate = scotter1LineRate[scotterCount]
-		infoLine.Score = int64(infoLine.LineWinRate) * betMoney
+		infoLine.SpecialWinRate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
+		infoLine.Score = (int64(infoLine.LineWinRate) + infoLine.SpecialWinRate) * betMoney
 		totalScores += infoLine.Score
 		winLineInfo = append(winLineInfo, infoLine)
 
-		bonusrate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
-		result["bonusrate"] = bonusrate
-		totalScores += (bonusrate * betMoney)
+		// bonusrate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
+		// result["bonusrate"] = bonusrate
+		// totalScores += (bonusrate * betMoney)
 
-		if gameType == 1 {
-			normalgameScotter2SymbolCount[fmt.Sprintf("%v", scotterCount)]++
-		} else {
-			freegameScotter2SymbolCount[fmt.Sprintf("%v", scotterCount)]++
-		}
 	}
 
 	if len(winLineInfo) > 0 {
