@@ -340,6 +340,19 @@ func ULGMaintainCheckOutUpdate() messagehandle.ErrorMsg {
 
 }
 
+// Game6ClearDBScotterCount ...
+func Game6ClearDBScotterCount() messagehandle.ErrorMsg {
+	query := "UPDATE attach	SET IValue = 0 WHERE Kind = 6 AND Type = 1;"
+	gameBDSQL.DB.Exec(query)
+	return messagehandle.New()
+}
+
+// Game6AttachGameScotterAutoFinish ...
+func Game6AttachGameScotterAutoFinish(playerid int64) ([][]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMultipleMap(gameBDSQL.DB, "AttachGameScotterAutoFinish_Read", playerid)
+	return result, err
+}
+
 /////////////////		Log DB		/////////////////
 
 // NewLogTable Create new LogTable if table alerady exists return FailedPrecondition Error
