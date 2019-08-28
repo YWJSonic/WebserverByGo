@@ -1,21 +1,23 @@
 package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
+	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/fileload"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
+	_ "gitlab.com/ServerUtility/mysql"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGo/foundation/myrestful"
-	crontab "gitlab.com/WeberverByGo/handlecrontab"
-	db "gitlab.com/WeberverByGo/handledb"
-	event "gitlab.com/WeberverByGo/handleevent"
-	"gitlab.com/WeberverByGo/serversetting"
-	login "gitlab.com/WeberverByGo/serviceaccount"
-	game "gitlab.com/WeberverByGo/servicegame"
-	lobby "gitlab.com/WeberverByGo/servicelobby"
-	"gitlab.com/WeberverByGo/servicethirdparty/api"
+	"gitlab.com/WeberverByGoGame6/foundation/myrestful"
+	"gitlab.com/WeberverByGoGame6/gamerule"
+	crontab "gitlab.com/WeberverByGoGame6/handlecrontab"
+	db "gitlab.com/WeberverByGoGame6/handledb"
+	event "gitlab.com/WeberverByGoGame6/handleevent"
+	"gitlab.com/WeberverByGoGame6/serversetting"
+	login "gitlab.com/WeberverByGoGame6/serviceaccount"
+	game "gitlab.com/WeberverByGoGame6/servicegame"
+	lobby "gitlab.com/WeberverByGoGame6/servicelobby"
+	"gitlab.com/WeberverByGoGame6/servicethirdparty/api"
 )
 
 func main() {
@@ -36,6 +38,7 @@ func main() {
 	serversetting.MaintainFinishTime = foundation.InterfaceToString(config["MaintainFinishTime"])
 	messagehandle.IsPrintLog = foundation.InterfaceToBool(config["DebugLog"])
 	serversetting.EnableMaintain(foundation.InterfaceToBool(config["Maintain"]))
+	gamerule.SetInfo(gamerule.GameIndex, config)
 
 	ulginfo.LoginURL = foundation.InterfaceToString(config["ULGLoginURL"])
 	ulginfo.GetuserURL = foundation.InterfaceToString(config["ULGGetuserURL"])
@@ -44,22 +47,28 @@ func main() {
 	ulginfo.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
 	ulginfo.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
-	var initArray [][]myhttp.RESTfulURL
-	initArray = append(initArray, login.ServiceStart())
-	initArray = append(initArray, lobby.ServiceStart())
-	initArray = append(initArray, game.ServiceStart())
-	initArray = append(initArray, api.ServiceStart())
 	db.SetDBConn()
+	go event.Update()
+
+	result, err := db.GetSetting()
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Main", err)
+		panic("DB GetSetting Error")
+	}
+	serversetting.InsertDBSetting(result, gamerule.GameIndex)
 
 	crontab.NewCron(serversetting.MaintainStartTime, func() {
 		serversetting.EnableMaintain(true)
 	})
-
 	crontab.NewCron(serversetting.MaintainFinishTime, func() {
 		serversetting.EnableMaintain(false)
 	})
 	crontab.NewCron(ulginfo.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
-	go event.Update()
+	var initArray [][]myhttp.RESTfulURL
+	initArray = append(initArray, login.ServiceStart())
+	initArray = append(initArray, lobby.ServiceStart())
+	initArray = append(initArray, game.ServiceStart())
+	initArray = append(initArray, api.ServiceStart())
 	myrestful.HTTPLisentRun(serversetting.ServerURL(), initArray...)
 }

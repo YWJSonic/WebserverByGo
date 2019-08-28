@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/dbinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
+	"gitlab.com/ServerUtility/mysql"
 	crontab "gitlab.com/WeberverByGo/handlecrontab"
 	"gitlab.com/WeberverByGo/serversetting"
 )
@@ -135,7 +135,7 @@ func SetDBConn() {
 	NewLogTable(foundation.ServerNow().AddDate(0, 0, 1).Format("20060102"))
 
 	// set Schedule check next day log table.
-	crontab.NewCronBaseJob("0 35 15 * * *",
+	crontab.NewCronBaseJob("35 15 * * *",
 		crontab.NewLogCrontab(
 			func() string { return foundation.ServerNow().AddDate(0, 0, 1).Format("20060102") },
 			NewLogTable))
@@ -181,8 +181,20 @@ func NewSetting(args ...interface{}) {
 
 // UpdateSetting ...
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
-	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettomgSet_Update", len(args)), args...)
+	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update", len(args)), args...)
 	return err
+}
+
+// GetAttachTypeRange ...
+func GetAttachTypeRange(playerid, kind, miniAttType, maxAttType int64) ([]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "AttachTypeRangeGet_Read", playerid, kind, miniAttType, maxAttType)
+	return result, err
+}
+
+// GetAttachType ...
+func GetAttachType(playerid int64, kind int64, attType int64) ([]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "AttachTypeGet_Read", playerid, kind, attType)
+	return result, err
 }
 
 // GetAttachKind get db attach kind
@@ -326,6 +338,19 @@ func ULGMaintainCheckOutUpdate() messagehandle.ErrorMsg {
 	_, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "ULGMaintainCheckOutSet_Update")
 	return err
 
+}
+
+// Game6ClearDBScotterCount ...
+func Game6ClearDBScotterCount() messagehandle.ErrorMsg {
+	query := "UPDATE attach	SET IValue = 0 WHERE Kind = 6 AND Type = 1;"
+	gameBDSQL.DB.Exec(query)
+	return messagehandle.New()
+}
+
+// Game6AttachGameScotterAutoFinish ...
+func Game6AttachGameScotterAutoFinish(playerid int64) ([][]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMultipleMap(gameBDSQL.DB, "AttachGameScotterAutoFinish_Read", playerid)
+	return result, err
 }
 
 /////////////////		Log DB		/////////////////

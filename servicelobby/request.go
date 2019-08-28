@@ -18,7 +18,7 @@ import (
 	log "gitlab.com/WeberverByGo/handlelog"
 	"gitlab.com/WeberverByGo/player"
 
-	"github.com/julienschmidt/httprouter"
+	"gitlab.com/ServerUtility/httprouter"
 	gameRule "gitlab.com/WeberverByGo/gamerule"
 )
 
@@ -87,8 +87,10 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	result["player"] = playerInfo.ToJSONClient()
 	result["reel"] = gameRule.GetInitScroll()
 	result["betrate"] = gameRule.GetInitBetRate()
-	result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
 
+	if gameRule.IsAttachInit {
+		result["attach"] = gameRule.ConvertToGameAttach(playerInfo.ID, attach.GetAttach(playerInfo.ID, gameRule.GameIndex, gameRule.IsAttachSaveToDB))
+	}
 	myhttp.HTTPResponse(w, result, err)
 }
 

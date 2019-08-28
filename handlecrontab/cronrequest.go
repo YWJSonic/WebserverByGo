@@ -3,7 +3,7 @@ package crontab
 import (
 	"time"
 
-	"github.com/robfig/cron"
+	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/WeberverByGo/serversetting"
@@ -43,7 +43,7 @@ func NewCronJob(spec string, job *crontabinfo.ParamsJob) {
 
 // SpecToTime  conver spec string to time
 func SpecToTime(spec string) time.Time {
-	target, _ := cron.Parse(serversetting.MaintainStartTime)
+	target, _ := cron.ParseStandard(serversetting.MaintainStartTime)
 	return target.Next(foundation.ServerNow())
 }
 
