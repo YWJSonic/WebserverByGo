@@ -9,12 +9,12 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGo/gamerule"
-	mycache "gitlab.com/WeberverByGo/handlecache"
-	crontab "gitlab.com/WeberverByGo/handlecrontab"
-	db "gitlab.com/WeberverByGo/handledb"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame7/apithirdparty/ulg"
+	gameRules "gitlab.com/WeberverByGoGame7/gamerule"
+	mycache "gitlab.com/WeberverByGoGame7/handlecache"
+	crontab "gitlab.com/WeberverByGoGame7/handlecrontab"
+	db "gitlab.com/WeberverByGoGame7/handledb"
+	"gitlab.com/WeberverByGoGame7/serversetting"
 
 	"gitlab.com/ServerUtility/httprouter"
 )

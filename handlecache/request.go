@@ -7,7 +7,7 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/redigo/redis"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame7/serversetting"
 )
 
 var CachePool *redis.Pool

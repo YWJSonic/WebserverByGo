@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoGame7/serversetting"
 
 	"gitlab.com/ServerUtility/httprouter"
 
@@ -12,8 +12,8 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGo/apithirdparty"
-	log "gitlab.com/WeberverByGo/handlelog"
+	"gitlab.com/WeberverByGoGame7/apithirdparty"
+	log "gitlab.com/WeberverByGoGame7/handlelog"
 )
 
 var isInit = false
