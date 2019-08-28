@@ -28,7 +28,8 @@ func connectPool() *http.Client {
 	if clientConnect == nil {
 		clientConnect = new(httpClient)
 		httptr := &http.Transport{
-			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+
 			MaxIdleConns:        50,
 			MaxIdleConnsPerHost: 50,
 		}
@@ -79,6 +80,35 @@ func HTTPLisentRun(ListenIP string, HandleURL ...[]myhttp.RESTfulURL) (err error
 	messagehandle.LogPrintln("Server run on", ListenIP)
 
 	err = http.ListenAndServe(ListenIP, router)
+	if err != nil {
+		messagehandle.ErrorLogPrintln("ListenAndServe", err)
+		return err
+	}
+	return nil
+}
+
+// HTTPSLisentRun ...
+func HTTPSLisentRun(ListenIP, certFile, keyFile string, HandleURL ...[]myhttp.RESTfulURL) (err error) {
+	router := httprouter.New()
+
+	for _, RESTfulURLArray := range HandleURL {
+		for _, RESTfulURLvalue := range RESTfulURLArray {
+			messagehandle.LogPrintf("HTTPListen %v %s\n", RESTfulURLvalue.RequestType, RESTfulURLvalue.URL)
+
+			proxyData[RESTfulURLvalue.URL] = RESTfulURLvalue
+			if RESTfulURLvalue.RequestType == "GET" {
+				router.GET("/"+RESTfulURLvalue.URL, RESTfulURLvalue.Fun)
+			} else if RESTfulURLvalue.RequestType == "POST" {
+				router.POST("/"+RESTfulURLvalue.URL, ListenProxy)
+			}
+			router.OPTIONS("/"+RESTfulURLvalue.URL, myhttp.Option)
+
+		}
+	}
+
+	messagehandle.LogPrintln("Server run on", ListenIP)
+
+	err = http.ListenAndServeTLS(ListenIP, certFile, keyFile, router)
 	if err != nil {
 		messagehandle.ErrorLogPrintln("ListenAndServe", err)
 		return err

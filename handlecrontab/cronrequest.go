@@ -3,7 +3,7 @@ package crontab
 import (
 	"time"
 
-	"gitlab.com/ServerUtility/cron"
+	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/WeberverByGoGame7/serversetting"

@@ -13,9 +13,10 @@
 "DBPassword":"123qweasdzxc",
 "AccountEncodeStr":"yrgb$",
 "RedisURL":"192.168.1.25:6379",
-"MaintainStartTime":"55 14 * * *",
+"MaintainStartTime":"9 16 * * *",
 "MaintainFinishTime": "5 15 * * *",
-"ULGMaintainCheckoutTime":"10 15 * * *",
+"ULGMaintainCheckoutTime":"10 16 * * *",
+"RTPSetting":1,
 "RespinSetting":1,
 "Maintain":false,
 "DebugLog":true

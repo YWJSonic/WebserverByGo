@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGoGame7/apithirdparty/ulg"
@@ -15,8 +16,6 @@ import (
 	crontab "gitlab.com/WeberverByGoGame7/handlecrontab"
 	db "gitlab.com/WeberverByGoGame7/handledb"
 	"gitlab.com/WeberverByGoGame7/serversetting"
-
-	"gitlab.com/ServerUtility/httprouter"
 )
 
 var isInit bool
@@ -98,6 +97,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet ...
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := myhttp.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])

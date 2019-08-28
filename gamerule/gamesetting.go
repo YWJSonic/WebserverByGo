@@ -8,6 +8,9 @@ const Version = "0.0.1"
 // GameIndex game sort id
 const GameIndex = 7
 
+// IsAttachInit is load att data
+const IsAttachInit = true
+
 // IsSingleLine game result only output one result
 var isSingleLine = true
 
