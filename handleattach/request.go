@@ -106,9 +106,11 @@ func loadAttachFromDB(playerid, gameIndex int64) []map[string]interface{} {
 func saveToCache(playerid int64, gameIndex int, info []map[string]interface{}) {
 	mycache.SetAttach(playerid, foundation.JSONToString(info))
 }
+
 func saveAttachToDB(playerid int64, gameIndex int, atttype, value int64) {
 	db.UpdateAttach(playerid, gameIndex, atttype, value)
 }
+
 func newAttach() []map[string]interface{} {
 	var attmap []map[string]interface{}
 	return attmap

@@ -51,12 +51,6 @@ var (
 // Maintain Is sow maintain time
 var maintain = false
 
-// GameResultURL gamelogic server API URL
-// const GameResultURL = "http://192.168.1.146:9781/api/entry"
-
-// CacheRef old cache not used
-// var CacheRef *cache.Cache
-
 // Setting settint from db data
 var Setting map[string]interface{}
 

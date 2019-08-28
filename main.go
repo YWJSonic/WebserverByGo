@@ -51,14 +51,15 @@ func main() {
 	go event.Update()
 
 	result, err := db.GetSetting()
-	if err.ErrorCode == code.OK {
-		serversetting.InsertDBSetting(result, gamerule.GameIndex)
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Main", err)
+		panic("DB GetSetting Error")
 	}
+	serversetting.InsertDBSetting(result, gamerule.GameIndex)
 
 	crontab.NewCron(serversetting.MaintainStartTime, func() {
 		serversetting.EnableMaintain(true)
 	})
-
 	crontab.NewCron(serversetting.MaintainFinishTime, func() {
 		serversetting.EnableMaintain(false)
 	})

@@ -165,6 +165,20 @@ func GetSettingKey(key string) ([]map[string]interface{}, messagehandle.ErrorMsg
 	return result, err
 }
 
+// NewSetting ...
+func NewSetting(args ...interface{}) {
+	qu := dbinfo.SqlQuary{
+		Quary: dbinfo.MakeProcedureQueryStr("SettingNew_Write", len(args)),
+		Args:  args,
+	}
+
+	if UseChanQueue {
+		go func() { WriteGameChan <- qu }()
+	} else {
+		dbinfo.CallWrite(gameBDSQL.DB, qu.Quary, qu.Args...)
+	}
+}
+
 // UpdateSetting ...
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
 	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update", len(args)), args...)
@@ -324,6 +338,19 @@ func ULGMaintainCheckOutUpdate() messagehandle.ErrorMsg {
 	_, err := dbinfo.CallReadOutMap(gameBDSQL.DB, "ULGMaintainCheckOutSet_Update")
 	return err
 
+}
+
+// Game6ClearDBScotterCount ...
+func Game6ClearDBScotterCount() messagehandle.ErrorMsg {
+	query := "UPDATE attach	SET IValue = 0 WHERE Kind = 6 AND Type = 1;"
+	gameBDSQL.DB.Exec(query)
+	return messagehandle.New()
+}
+
+// Game6AttachGameScotterAutoFinish ...
+func Game6AttachGameScotterAutoFinish(playerid int64) ([][]map[string]interface{}, messagehandle.ErrorMsg) {
+	result, err := dbinfo.CallReadOutMultipleMap(gameBDSQL.DB, "AttachGameScotterAutoFinish_Read", playerid)
+	return result, err
 }
 
 /////////////////		Log DB		/////////////////

@@ -1,6 +1,10 @@
 package moneypool
 
-import "fmt"
+import (
+	"fmt"
+
+	"gitlab.com/ServerUtility/messagehandle"
+)
 
 var (
 	// JPCount ...
@@ -43,5 +47,6 @@ func RTPControl(Bet, Win int64) {
 
 	poolcache.ServerPool += lastbet
 	poolcache.PlayerPool += Win
-	fmt.Println("MoneyPool", poolcache.RTP())
+	messagehandle.LogPrintln("MoneyPool", poolcache.RTP())
+	// fmt.Println("MoneyPool", poolcache.RTP())
 }
