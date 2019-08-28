@@ -8,8 +8,8 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/playerinfo"
-	mycache "gitlab.com/WeberverByGo/handlecache"
-	db "gitlab.com/WeberverByGo/handledb"
+	mycache "gitlab.com/WeberverByGoBase/handlecache"
+	db "gitlab.com/WeberverByGoBase/handledb"
 )
 
 // CachePlayer memory cache player

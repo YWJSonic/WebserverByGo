@@ -6,7 +6,7 @@ import (
 	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/foundation"
-	"gitlab.com/WeberverByGo/serversetting"
+	"gitlab.com/WeberverByGoBase/serversetting"
 )
 
 var c *cron.Cron
