@@ -3,13 +3,58 @@ package serversetting
 import (
 	"fmt"
 	"sync"
+	"time"
 
-	"gitlab.com/ServerUtility/cron"
+	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/settinginfo"
 )
 
+var mu *sync.RWMutex
+
+// CacheDeleteTime cache keep time
+const CacheDeleteTime time.Duration = time.Hour
+
+// ConnectTimeOut Client connect time out
+const ConnectTimeOut int64 = 15e9
+
+// platform api url
+var (
+	// MaintainStartTime cron maintain schedule
+	MaintainStartTime = "0 15 * * *"
+	// MaintainFinishTime cron maintain schedule
+	MaintainFinishTime = "0 16 * * *"
+	// GameTypeID this server game id
+	GameTypeID = "A173D52E01A6EB65A5D6EDFB71A8C39C"
+	// IP Server Listen address
+	IP = "127.0.0.1"
+	// PORT ServerListen PORT
+	PORT = "8000"
+	// DBIP server connect DB address
+	DBIP = "127.0.0.1"
+	// DBPORT server connect DB port
+	DBPORT = "3306"
+	// DBUser Connect name
+	DBUser = "serverConnect"
+	// DBPassword connect Password
+	DBPassword = "123qweasdzxc"
+	// AccountEncodeStr account encode noise
+	AccountEncodeStr = "yrgb$"
+	// RedisURL cache server address
+	RedisURL = "127.0.0.1:6379"
+)
+var (
+	// ServerTotalPayScore All player win score
+	serverTotalPayScore settinginfo.Info
+)
+
+// Maintain Is sow maintain time
+var maintain = false
+
+// Setting settint from db data
+var Setting map[string]interface{}
+
 func init() {
-	Setting = make(map[string]interface{})
 	mu = new(sync.RWMutex)
 }
 
@@ -36,14 +81,14 @@ func EnableMaintain(enable bool) {
 func GetServerTotalPayScore() int64 {
 	mu.RLock()
 	defer mu.RUnlock()
-	return serverTotalPayScore
+	return serverTotalPayScore.IValue
 }
 
 // SetServerTotalPayScore ...
 func SetServerTotalPayScore(value int64) {
 	mu.Lock()
 	defer mu.Unlock()
-	serverTotalPayScore = value
+	serverTotalPayScore.IValue = value
 }
 
 // ServerTime ...
@@ -57,12 +102,20 @@ func maintainTime() int64 {
 	return target.Next(foundation.ServerNow()).Unix()
 }
 
+// InsertDBSetting update setting by db setting data
+func InsertDBSetting(dbDatas []map[string]interface{}, GameIndex int) {
+	for _, settingData := range dbDatas {
+		info := settinginfo.ConvertToInfo(settingData)
+		if info.Key == foundation.ServerTotalPayScoreKey(GameIndex) {
+			serverTotalPayScore = info
+		}
+	}
+}
+
 // New ...
 func New() map[string]interface{} {
-
-	setting := map[string]interface{}{
+	return map[string]interface{}{
 		"servertime":   serverTime(),
 		"maintaintime": maintainTime(),
 	}
-	return setting
 }
