@@ -47,16 +47,12 @@ func main() {
 	ulginfo.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
 	ulginfo.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
-	var initArray [][]myhttp.RESTfulURL
-	initArray = append(initArray, login.ServiceStart())
-	initArray = append(initArray, lobby.ServiceStart())
-	initArray = append(initArray, game.ServiceStart())
-	initArray = append(initArray, api.ServiceStart())
 	db.SetDBConn()
+	go event.Update()
 
 	result, err := db.GetSetting()
 	if err.ErrorCode == code.OK {
-		serverSettingFromDB(result)
+		serversetting.InsertDBSetting(result, gamerule.GameIndex)
 	}
 
 	crontab.NewCron(serversetting.MaintainStartTime, func() {
@@ -68,17 +64,10 @@ func main() {
 	})
 	crontab.NewCron(ulginfo.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
-	go event.Update()
+	var initArray [][]myhttp.RESTfulURL
+	initArray = append(initArray, login.ServiceStart())
+	initArray = append(initArray, lobby.ServiceStart())
+	initArray = append(initArray, game.ServiceStart())
+	initArray = append(initArray, api.ServiceStart())
 	myrestful.HTTPLisentRun(serversetting.ServerURL(), initArray...)
-}
-
-func serverSettingFromDB(settingInfos []map[string]interface{}) {
-	var settingKey string
-	for _, settingInfo := range settingInfos {
-		settingKey = foundation.InterfaceToString(settingInfo["Key"])
-
-		if settingKey == foundation.ServerTotalPayScoreKey(gamerule.GameIndex) {
-			serversetting.SetServerTotalPayScore(foundation.InterfaceToInt64(settingInfo["IValue"]))
-		}
-	}
 }
