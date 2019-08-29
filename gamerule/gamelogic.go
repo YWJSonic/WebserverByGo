@@ -21,10 +21,6 @@ func logicResult(betMoney int64, attinfo *AttachInfo) (map[string]interface{}, m
 		scotterid := attinfo.NewDayScotterID()
 		scotterIDArray = append(scotterIDArray, scotterid)
 		attinfo.NewScotterInfo(scotterid, 0, betMoney)
-		// attinfo.DayScotterGameInfo[DayScotterGameInfoKey(scotterid)] = 0
-		// attinfo.FreeGameBetLockMoney[FreeGameBetLockIndexKey(scotterid)] = betMoney
-		scotterIDArray = append(scotterIDArray, scotterid)
-
 	}
 
 	result["scotterid"] = scotterIDArray
