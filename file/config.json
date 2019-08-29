@@ -4,7 +4,7 @@
 "ULGAuthorizedURL":"https://dev-new-api.ulgplay.com/api/v1/game/authorized",
 "ULGExchangeURL":"https://dev-new-api.ulgplay.com/api/v1/game/exchange",
 "ULGCheckoutURL":"https://dev-new-api.ulgplay.com/api/v1/game/checkout",
-"GameTypeID":"86A85BE09A724136E3222121706C0DA1",
+"GameTypeID":"9E866EF61E4EF58E1B5845808A04D707",
 "IP":"192.168.1.53",
 "PORT":"8000",
 "DBIP":"192.168.1.25",
