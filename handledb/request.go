@@ -264,12 +264,12 @@ func NewGameAccount(args ...interface{}) (int64, messagehandle.ErrorMsg) {
 	if err.ErrorCode != code.OK {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "NewGameAccountError"
-		messagehandle.ErrorLogPrintln("DB", err.Msg, QuertStr)
+		messagehandle.ErrorLogPrintln("NewGameAccount-1", err, QuertStr, args)
 		return -1, err
 	}
 	playerID, errMsg := request.LastInsertId()
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("DB NewGameAccount", errMsg)
+		messagehandle.ErrorLogPrintln("NewGameAccount-2", errMsg)
 	}
 	// err := messagehandle.New()
 	return playerID, err

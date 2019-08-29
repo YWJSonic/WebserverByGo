@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -55,6 +54,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if gametypeid != serversetting.GameTypeID {
 		err.ErrorCode = code.GameTypeError
 		err.Msg = "GameTypeError"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-1", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -63,12 +63,14 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-2", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-3", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -77,6 +79,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if playerInfo.Money < betMoney {
 		err.ErrorCode = code.NoMoneyToBet
 		err.Msg = "NoMoneyToBet"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-4", err, token, betIndex, betMoney, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -84,8 +87,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// get thirdparty info data
 	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-5", err, token, betIndex, betMoney, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
-		fmt.Println(ulginfo)
 		return
 	}
 
