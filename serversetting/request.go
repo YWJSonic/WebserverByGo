@@ -8,6 +8,7 @@ import (
 	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/settinginfo"
+	db "gitlab.com/WeberverByGoBase/handledb"
 )
 
 var mu *sync.RWMutex
@@ -52,7 +53,7 @@ var (
 var maintain = false
 
 // Setting settint from db data
-var Setting map[string]interface{}
+// var Setting map[string]settinginfo.Info
 
 func init() {
 	mu = new(sync.RWMutex)
@@ -109,6 +110,16 @@ func InsertDBSetting(dbDatas []map[string]interface{}, GameIndex int) {
 		if info.Key == foundation.ServerTotalPayScoreKey(GameIndex) {
 			serverTotalPayScore = info
 		}
+	}
+}
+
+// RefreshDBSetting ...
+func RefreshDBSetting(gameTypeIndex int, serverDayPayDefault int64) {
+	timeslip := foundation.ServerNowTime() - serverTotalPayScore.LastRefulsh
+	timelimit := int64(time.Hour * 24 / time.Second)
+
+	if timeslip >= timelimit {
+		db.ReflushSetting(foundation.ServerTotalPayScoreKey(gameTypeIndex), serverDayPayDefault, "")
 	}
 }
 

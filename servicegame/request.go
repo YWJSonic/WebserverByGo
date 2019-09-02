@@ -17,11 +17,10 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gamelimit"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 var mu *sync.RWMutex
