@@ -167,12 +167,15 @@ func setRandomWild(plateSymbol [][]int, randomWildPoint [][]int) [][]int {
 		return plateSymbol
 	}
 
-	for i, imax := 0, len(plateSymbol); i < imax; i++ {
-		for j, jmax := 0, len(randomWildPoint[i]); j < jmax; j++ {
-			plateSymbol[i][randomWildPoint[i][j]] = wild1
+	var result = make([][]int, len(plateSymbol))
+
+	for cIndex, colSymols := range plateSymbol {
+		result[cIndex] = foundation.CopyArray(colSymols)
+		for j, jmax := 0, len(randomWildPoint[cIndex]); j < jmax; j++ {
+			result[cIndex][randomWildPoint[cIndex][j]] = wild1
 		}
 	}
-	return plateSymbol
+	return result
 }
 
 func randWild() [][]int {
