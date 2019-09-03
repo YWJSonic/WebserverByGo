@@ -86,8 +86,6 @@ func MaintainCheckout() {
 		if err.ErrorCode != code.OK {
 			messagehandle.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}
-
-		mycache.ClearAllCache()
 	}
 
 	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
