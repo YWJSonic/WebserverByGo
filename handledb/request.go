@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/mysql"
-	crontab "gitlab.com/WeberverByGoBase/handlecrontab"
+	crontab "gitlab.com/WeberverByGoGame9/handlecrontab"
 )
 
 var gameBDSQL *dbinfo.SqlCLi

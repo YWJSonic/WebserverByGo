@@ -10,11 +10,11 @@ import (
 	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoBase/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGoBase/gamerule"
-	mycache "gitlab.com/WeberverByGoBase/handlecache"
-	crontab "gitlab.com/WeberverByGoBase/handlecrontab"
-	"gitlab.com/WeberverByGoBase/serversetting"
+	"gitlab.com/WeberverByGoGame9/apithirdparty/ulg"
+	gameRules "gitlab.com/WeberverByGoGame9/gamerule"
+	mycache "gitlab.com/WeberverByGoGame9/handlecache"
+	crontab "gitlab.com/WeberverByGoGame9/handlecrontab"
+	"gitlab.com/WeberverByGoGame9/serversetting"
 
 	"github.com/julienschmidt/httprouter"
 )
