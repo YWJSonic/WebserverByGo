@@ -6,16 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
-	db "gitlab.com/WeberverByGoGame6/handledb"
-	"gitlab.com/WeberverByGoGame6/player"
-	"gitlab.com/WeberverByGoGame6/serversetting"
-
-	gameRule "gitlab.com/WeberverByGoGame6/gamerule"
-	attach "gitlab.com/WeberverByGoGame6/handleattach"
-	mycache "gitlab.com/WeberverByGoGame6/handlecache"
-	log "gitlab.com/WeberverByGoGame6/handlelog"
-
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gamelimit"
@@ -25,6 +15,14 @@ import (
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
+	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
+	gameRule "gitlab.com/WeberverByGoGame6/gamerule"
+	attach "gitlab.com/WeberverByGoGame6/handleattach"
+	mycache "gitlab.com/WeberverByGoGame6/handlecache"
+	db "gitlab.com/WeberverByGoGame6/handledb"
+	log "gitlab.com/WeberverByGoGame6/handlelog"
+	"gitlab.com/WeberverByGoGame6/player"
+	"gitlab.com/WeberverByGoGame6/serversetting"
 )
 
 var mu *sync.RWMutex
@@ -59,6 +57,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if gametypeid != serversetting.GameTypeID {
 		err.ErrorCode = code.GameTypeError
 		err.Msg = "GameTypeError"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-1", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -67,12 +66,14 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	playerID := foundation.InterfaceToInt64(postData["playerid"])
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-2", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-3", err, token, betIndex, betMoney)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -81,6 +82,7 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if playerInfo.Money < betMoney {
 		err.ErrorCode = code.NoMoneyToBet
 		err.Msg = "NoMoneyToBet"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-4", err, token, betIndex, betMoney, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -88,8 +90,8 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// get thirdparty info data
 	ulginfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-5", err, token, betIndex, betMoney, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
-		fmt.Println(ulginfo)
 		return
 	}
 

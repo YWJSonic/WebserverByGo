@@ -54,6 +54,7 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("gameinit-1", err, token, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -62,18 +63,21 @@ func gameinit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if GameAccount == "" {
 		err.ErrorCode = code.Unauthenticated
 		err.Msg = "GameAccountError"
+		messagehandle.ErrorLogPrintln("gameinit-2", err, token, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(GameAccount), token); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("gameinit-3", err, token, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	playerInfo, err := player.GetPlayerInfoByGameAccount(GameAccount)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("gameinit-4", err, token, gametypeid)
 		myhttp.HTTPResponse(w, "Lobby", err)
 	}
 
@@ -103,6 +107,7 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	gametypeid := foundation.InterfaceToString(postData["gametypeid"])
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("refresh-1", err, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -110,13 +115,13 @@ func refresh(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	accounttoken := foundation.InterfaceToString(postData["accounttoken"])
 	userCoinQuota, err := apithirdparty.Refresh(accounttoken, gametypeid)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("refresh-2", err, gametypeid, accounttoken)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	result := make(map[string]interface{})
 	result["userCoinQuota"] = userCoinQuota
-
 	myhttp.HTTPResponse(w, result, err)
 }
 
@@ -133,6 +138,7 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	err := messagehandle.New()
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("exchange-1", err, playerID, token, accountToken, gametypeid, cointype, coinamount)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -140,18 +146,21 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// get player
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("exchange-2", err, playerID, token, accountToken, gametypeid, cointype, coinamount)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("exchange-3", err, playerID, token, accountToken, gametypeid, cointype, coinamount, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	ulgResult, err := apithirdparty.Excahnge(playerInfo, accountToken, gametypeid, cointype, coinamount)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("exchange-4", err, playerID, token, accountToken, gametypeid, cointype, coinamount, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 
@@ -178,18 +187,21 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	err := messagehandle.New()
 	if err = foundation.CheckGameType(serversetting.GameTypeID, gametypeid); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("checkout-1", err, playerID, token, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	playerInfo, err := player.GetPlayerInfoByPlayerID(playerID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("checkout-2", err, playerID, token, gametypeid)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
 
 	// check token
 	if err = foundation.CheckToken(mycache.GetToken(playerInfo.GameAccount), token); err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("checkout-2", err, playerID, token, gametypeid, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -197,6 +209,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if playerInfo.GameToken == "" {
 		err.ErrorCode = code.NoExchange
 		err.Msg = "NoExchange"
+		messagehandle.ErrorLogPrintln("checkout-3", err, playerID, token, gametypeid, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}
@@ -205,6 +218,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	ulgCheckOutResult, err := apithirdparty.CheckOut(playerInfo, serversetting.GameTypeID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("checkout-4", err, playerID, token, gametypeid, playerInfo)
 		myhttp.HTTPResponse(w, "", err)
 		return
 	}

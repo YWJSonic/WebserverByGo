@@ -7,6 +7,7 @@ import (
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
@@ -97,8 +98,7 @@ func MaintainCheckout() {
 
 	mycache.ClearAllCache()
 	db.Game6ClearDBScotterCount()
-	db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRules.GameIndex), 0, "")
-	db.ULGMaintainCheckOutUpdate()
+	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
 }
 
 // ClearAllCache clear all cache data

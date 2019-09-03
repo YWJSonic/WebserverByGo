@@ -18,6 +18,8 @@
 "ULGMaintainCheckoutTime":"5 15 * * *",
 "RTPSetting":1,
 "RespinSetting":1,
+"ServerDayPayLimit":15000000,
+"ServerDayPayDefault":0,
 "Maintain":false,
 "DebugLog":true
 }

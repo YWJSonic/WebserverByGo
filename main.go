@@ -4,6 +4,7 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/foundation/fileload"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	_ "gitlab.com/ServerUtility/mysql"
@@ -47,7 +48,16 @@ func main() {
 	ulginfo.CheckoutURL = foundation.InterfaceToString(config["ULGCheckoutURL"])
 	ulginfo.ULGMaintainCheckoutTime = foundation.InterfaceToString(config["ULGMaintainCheckoutTime"])
 
-	db.SetDBConn()
+	gamelimit.ServerDayPayLimit = foundation.InterfaceToInt64(config["ServerDayPayLimit"])
+	gamelimit.ServerDayPayDefault = foundation.InterfaceToInt64(config["ServerDayPayDefault"])
+
+	setting := struct{ DBUser, DBPassword, DBIP, DBPORT string }{
+		serversetting.DBUser,
+		serversetting.DBPassword,
+		serversetting.DBIP,
+		serversetting.DBPORT,
+	}
+	db.SetDBConn(&setting)
 	go event.Update()
 
 	result, err := db.GetSetting()
@@ -56,6 +66,7 @@ func main() {
 		panic("DB GetSetting Error")
 	}
 	serversetting.InsertDBSetting(result, gamerule.GameIndex)
+	serversetting.RefreshDBSetting(gamerule.GameIndex, gamelimit.ServerDayPayDefault)
 
 	crontab.NewCron(serversetting.MaintainStartTime, func() {
 		serversetting.EnableMaintain(true)

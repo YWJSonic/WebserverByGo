@@ -1,12 +1,9 @@
 package crontab
 
 import (
-	"time"
-
 	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/crontabinfo"
 	"gitlab.com/ServerUtility/foundation"
-	"gitlab.com/WeberverByGoGame6/serversetting"
 )
 
 var c *cron.Cron
@@ -42,10 +39,10 @@ func NewCronJob(spec string, job *crontabinfo.ParamsJob) {
 }
 
 // SpecToTime  conver spec string to time
-func SpecToTime(spec string) time.Time {
-	target, _ := cron.ParseStandard(serversetting.MaintainStartTime)
-	return target.Next(foundation.ServerNow())
-}
+// func SpecToTime(spec string) time.Time {
+// 	target, _ := cron.ParseStandard(serversetting.MaintainStartTime)
+// 	return target.Next(foundation.ServerNow())
+// }
 
 // NewLogCrontab new LogCrontab struct
 func NewLogCrontab(Params func() string, FUN func(string)) *crontabinfo.LogCrontab {
