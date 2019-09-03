@@ -7,13 +7,13 @@ import (
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGoGame8/apithirdparty/ulg"
 	gameRules "gitlab.com/WeberverByGoGame8/gamerule"
 	mycache "gitlab.com/WeberverByGoGame8/handlecache"
 	crontab "gitlab.com/WeberverByGoGame8/handlecrontab"
-	db "gitlab.com/WeberverByGoGame8/handledb"
 	"gitlab.com/WeberverByGoGame8/serversetting"
 
 	"gitlab.com/ServerUtility/httprouter"
@@ -89,8 +89,7 @@ func MaintainCheckout() {
 
 		mycache.ClearAllCache()
 	}
-	db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRules.GameIndex), 0, "")
-	db.ULGMaintainCheckOutUpdate()
+	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
 }
 
 // ClearAllCache clear all cache data
