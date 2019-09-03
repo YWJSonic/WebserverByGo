@@ -96,9 +96,11 @@ func MaintainCheckout() {
 		}
 	}
 
-	mycache.ClearAllCache()
 	db.Game6ClearDBScotterCount()
-	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+
+	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+	db.ULGMaintainCheckOutUpdate()
+	mycache.ClearAllCache()
 }
 
 // ClearAllCache clear all cache data
