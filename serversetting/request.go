@@ -9,7 +9,6 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/settinginfo"
 	db "gitlab.com/WeberverByGoBase/handledb"
-	"gitlab.com/WeberverByGoGame5/mycache"
 )
 
 var mu *sync.RWMutex
@@ -130,11 +129,4 @@ func New() map[string]interface{} {
 		"servertime":   serverTime(),
 		"maintaintime": maintainTime(),
 	}
-}
-
-// MaintainSystemRefresh at maintain last step
-func MaintainSystemRefresh(gameTypeIndex int, serverDayPayDefault int64) {
-	RefreshDBSetting(gameTypeIndex, serverDayPayDefault)
-	db.ULGMaintainCheckOutUpdate()
-	mycache.ClearAllCache()
 }

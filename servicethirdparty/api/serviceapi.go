@@ -14,6 +14,7 @@ import (
 	gameRules "gitlab.com/WeberverByGoBase/gamerule"
 	mycache "gitlab.com/WeberverByGoBase/handlecache"
 	crontab "gitlab.com/WeberverByGoBase/handlecrontab"
+	db "gitlab.com/WeberverByGoBase/handledb"
 	"gitlab.com/WeberverByGoBase/serversetting"
 
 	"github.com/julienschmidt/httprouter"
@@ -88,7 +89,9 @@ func MaintainCheckout() {
 		}
 	}
 
-	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+	db.ULGMaintainCheckOutUpdate()
+	mycache.ClearAllCache()
 }
 
 // ClearAllCache clear all cache data
