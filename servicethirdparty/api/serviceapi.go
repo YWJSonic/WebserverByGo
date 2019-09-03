@@ -7,13 +7,13 @@ import (
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGoBase/apithirdparty/ulg"
 	gameRules "gitlab.com/WeberverByGoBase/gamerule"
 	mycache "gitlab.com/WeberverByGoBase/handlecache"
 	crontab "gitlab.com/WeberverByGoBase/handlecrontab"
-	db "gitlab.com/WeberverByGoBase/handledb"
 	"gitlab.com/WeberverByGoBase/serversetting"
 
 	"github.com/julienschmidt/httprouter"
@@ -90,7 +90,7 @@ func MaintainCheckout() {
 		mycache.ClearAllCache()
 	}
 
-	db.ULGMaintainCheckOutUpdate()
+	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
 }
 
 // ClearAllCache clear all cache data
@@ -98,6 +98,7 @@ func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	mycache.ClearAllCache()
 }
 
+// GameRulesSet ...
 func GameRulesSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	postData := myhttp.PostData(r)
 	configstr := foundation.InterfaceToString(postData["configstr"])
