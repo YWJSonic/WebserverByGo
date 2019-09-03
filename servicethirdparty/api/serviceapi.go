@@ -8,15 +8,15 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gamelimit"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/WeberverByGoGame8/apithirdparty/ulg"
 	gameRules "gitlab.com/WeberverByGoGame8/gamerule"
 	mycache "gitlab.com/WeberverByGoGame8/handlecache"
 	crontab "gitlab.com/WeberverByGoGame8/handlecrontab"
+	db "gitlab.com/WeberverByGoGame8/handledb"
 	"gitlab.com/WeberverByGoGame8/serversetting"
-
-	"gitlab.com/ServerUtility/httprouter"
 )
 
 var isInit bool
@@ -86,10 +86,10 @@ func MaintainCheckout() {
 		if err.ErrorCode != code.OK {
 			messagehandle.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
 		}
-
-		mycache.ClearAllCache()
 	}
-	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
+	db.ULGMaintainCheckOutUpdate()
+	mycache.ClearAllCache()
 }
 
 // ClearAllCache clear all cache data

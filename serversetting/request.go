@@ -130,9 +130,3 @@ func New() map[string]interface{} {
 		"maintaintime": maintainTime(),
 	}
 }
-
-// MaintainSystemRefresh at maintain last step
-func MaintainSystemRefresh(gameTypeIndex int, serverDayPayDefault int64) {
-	RefreshDBSetting(gameTypeIndex, serverDayPayDefault)
-	db.ULGMaintainCheckOutUpdate()
-}
