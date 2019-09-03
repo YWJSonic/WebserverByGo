@@ -69,7 +69,8 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 	var scotterLineSymbol, scotterLinePoint [][]int
 	var plateSymbolCollectResult map[string]interface{}
 	result := map[string]interface{}{
-		"bonusrate": int64(0),
+		"bonusrate":  int64(0),
+		"bonusscore": int64(0),
 	}
 	otherdata := map[string]interface{}{
 		"isfreegame":    0,
@@ -168,14 +169,14 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 		}
 
 		infoLine.LineWinRate = scotter1LineRate[scotterCount]
-		infoLine.SpecialWinRate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
-		infoLine.Score = (int64(infoLine.LineWinRate) + infoLine.SpecialWinRate) * betMoney
+		infoLine.Score = int64(infoLine.LineWinRate) * betMoney
 		totalScores += infoLine.Score
 		winLineInfo = append(winLineInfo, infoLine)
 
-		// bonusrate = bonusRate[foundation.RangeRandom(getScotter2Weightings())]
-		// result["bonusrate"] = bonusrate
-		// totalScores += (bonusrate * betMoney)
+		bonusrate := bonusRate[foundation.RangeRandom(getScotter2Weightings())]
+		result["bonusrate"] = bonusrate
+		result["bonusscore"] = bonusrate * betMoney
+		totalScores += bonusrate * betMoney
 
 	}
 
