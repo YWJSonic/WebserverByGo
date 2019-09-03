@@ -1,21 +1,22 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame9/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGoGame9/gamerule"
-	mycache "gitlab.com/WeberverByGoGame9/handlecache"
-	crontab "gitlab.com/WeberverByGoGame9/handlecrontab"
-	db "gitlab.com/WeberverByGoGame9/handledb"
-	"gitlab.com/WeberverByGoGame9/serversetting"
+	"gitlab.com/WeberverByGoBase/apithirdparty/ulg"
+	gameRules "gitlab.com/WeberverByGoBase/gamerule"
+	mycache "gitlab.com/WeberverByGoBase/handlecache"
+	crontab "gitlab.com/WeberverByGoBase/handlecrontab"
+	"gitlab.com/WeberverByGoBase/serversetting"
 
-	"gitlab.com/ServerUtility/httprouter"
+	"github.com/julienschmidt/httprouter"
 )
 
 var isInit bool
@@ -46,16 +47,18 @@ func ServiceStart() []myhttp.RESTfulURL {
 // CronStart cron API
 func CronStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	crontab.CronStart()
+	fmt.Println("CronStart")
 }
 
 // CronStop cron API
 func CronStop(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	crontab.CronStop()
+	fmt.Println("CronStop")
 }
 
 // CronAdd cron API
 func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	fmt.Println("AddCron")
 }
 
 // MaintainStart Maintain API
@@ -76,9 +79,7 @@ func MaintainCheckout() {
 	}
 
 	infos, err := ulg.MaintainULGInfos()
-	if err.ErrorCode != code.OK {
-		messagehandle.ErrorLogPrintln("Error: MaintainCheckout-80", infos, err)
-	}
+	fmt.Println(infos, err)
 
 	for _, ulginfo := range infos {
 		_, err = ulg.Checkout(&ulginfo, serversetting.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
@@ -89,8 +90,7 @@ func MaintainCheckout() {
 		mycache.ClearAllCache()
 	}
 
-	db.UpdateSetting(foundation.ServerTotalPayScoreKey(gameRules.GameIndex), 0, "")
-	db.ULGMaintainCheckOutUpdate()
+	serversetting.MaintainSystemRefresh(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
 }
 
 // ClearAllCache clear all cache data

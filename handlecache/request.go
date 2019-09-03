@@ -84,9 +84,9 @@ func GetAccountInfo(gameAccount string) (interface{}, messagehandle.ErrorMsg) {
 	info, errMsg := cacheinfo.Get(CachePool, fmt.Sprintf("ACC%s", gameAccount))
 
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("Cache GetAccountInfo", gameAccount, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
+		messagehandle.ErrorLogPrintln("GetAccountInfo-1", errMsg, gameAccount)
 		return nil, err
 	}
 
@@ -104,9 +104,9 @@ func GetPlayerInfo(playerid int64) (interface{}, messagehandle.ErrorMsg) {
 	info, errMsg := cacheinfo.Get(CachePool, fmt.Sprintf("ID%dJS", playerid))
 
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("Cache GetPlayerInfo", playerid, errMsg)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
+		messagehandle.ErrorLogPrintln("GetPlayerInfo-1", errMsg, playerid)
 		return nil, err
 	}
 
@@ -145,9 +145,9 @@ func GetULGInfoCache(playerid int64) interface{} {
 	info, errMsg := cacheinfo.Get(CachePool, key)
 
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("Cache GetULGInfoCache", key)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
+		messagehandle.ErrorLogPrintln("GetULGInfoCache-1", errMsg, playerid)
 		return nil
 	}
 
@@ -169,9 +169,9 @@ func GetAttach(playerid int64) interface{} {
 	info, errMsg := cacheinfo.Get(CachePool, key)
 
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("Cache GetULGInfoCache", key)
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = fmt.Sprintln(errMsg)
+		messagehandle.ErrorLogPrintln("GetAttach-1", errMsg, key)
 		return nil
 	}
 
