@@ -50,6 +50,14 @@ func gameresult(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	betIndex := foundation.InterfaceToInt64(postData["bet"])
 	betMoney := gameRule.GetBetMoney(betIndex)
 	serverTotalPayScore := serversetting.GetServerTotalPayScore()
+	if !gamelimit.IsServerDayPayInLimit(serverTotalPayScore) {
+		serversetting.EnableMaintain(true)
+		err := messagehandle.New()
+		err.ErrorCode = code.Maintain
+		err.Msg = "Maintain"
+		myhttp.HTTPResponse(w, "", err)
+		return
+	}
 
 	// gametype check
 	err := messagehandle.New()
