@@ -4,22 +4,19 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGoGame8/apithirdparty"
-	attach "gitlab.com/WeberverByGoGame8/handleattach"
-
-	"gitlab.com/WeberverByGoGame8/serversetting"
-
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
+	"gitlab.com/WeberverByGoGame8/apithirdparty"
+	gameRule "gitlab.com/WeberverByGoGame8/gamerule"
+	attach "gitlab.com/WeberverByGoGame8/handleattach"
 	mycache "gitlab.com/WeberverByGoGame8/handlecache"
 	log "gitlab.com/WeberverByGoGame8/handlelog"
 	"gitlab.com/WeberverByGoGame8/player"
-
-	"gitlab.com/ServerUtility/httprouter"
-	gameRule "gitlab.com/WeberverByGoGame8/gamerule"
+	"gitlab.com/WeberverByGoGame8/serversetting"
 )
 
 var isInit = false
