@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/gamelimit"
+	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
@@ -20,8 +21,6 @@ import (
 	"gitlab.com/WeberverByGoGame6/player"
 	"gitlab.com/WeberverByGoGame6/serversetting"
 	game "gitlab.com/WeberverByGoGame6/servicegame"
-
-	"gitlab.com/ServerUtility/httprouter"
 )
 
 var isInit bool
