@@ -20,6 +20,8 @@
 "RespinSetting":1,
 "ServerDayPayLimit":15000000,
 "ServerDayPayDefault":0,
+"WinScoreLimit":1000000,
+"WinBetRateLimit":80,
 "Maintain":false,
 "DebugLog":true
 }
