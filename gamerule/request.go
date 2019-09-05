@@ -28,6 +28,12 @@ func SetInfo(gameIndex int, att map[string]interface{}) {
 	if value, ok := att["RTPSetting"]; ok {
 		RTPSetting = foundation.InterfaceToInt(value)
 	}
+	if value, ok := att["WinScoreLimit"]; ok {
+		WinScoreLimit = foundation.InterfaceToInt64(value)
+	}
+	if value, ok := att["WinBetRateLimit"]; ok {
+		WinBetRateLimit = foundation.InterfaceToInt64(value)
+	}
 }
 
 // GetInitScroll ...
