@@ -86,7 +86,7 @@ func outRespin(betMoney int64, attinfo *AttachInfo) ([]interface{}, int64) {
 	var WinRateIndex int
 	var ScrollIndex, plate []int
 	var result []interface{}
-	respintScrollData := GetRespinScroll(RespinSetting)
+	respintScrollData := GetRespinScroll(RTPSetting)
 	islink := false
 
 	for index, max := 0, 200; index < max; index++ {
