@@ -82,14 +82,15 @@ func GetPlayerInfoByPlayerID(playerid int64) (*playerinfo.Info, messagehandle.Er
 	if info == nil {
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "NoThisPlayer"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-1", err, playerid)
 		return nil, err
 	}
 
 	var player playerinfo.Info
 	if errMsg := json.Unmarshal(info.([]byte), &player); errMsg != nil {
-		messagehandle.ErrorLogPrintln("Player", errMsg)
 		err.ErrorCode = code.NoThisPlayer
 		err.Msg = "PlayerFormatError"
+		messagehandle.ErrorLogPrintln("GetPlayerInfoByPlayerID-2", errMsg, playerid)
 		return nil, err
 	}
 

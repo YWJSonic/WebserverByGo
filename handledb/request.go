@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/mysql"
 	crontab "gitlab.com/WeberverByGoGame7/handlecrontab"
-	"gitlab.com/WeberverByGoGame7/serversetting"
 )
 
 var gameBDSQL *dbinfo.SqlCLi
@@ -31,10 +30,10 @@ var WritePayChan chan dbinfo.SqlQuary
 var UseChanQueue = false
 
 // Connect New connect
-func connectGameDB() (db *sql.DB, err error) {
+func connectGameDB(setting *struct{ DBUser, DBPassword, DBIP, DBPORT string }) (db *sql.DB, err error) {
 	if gameBDSQL == nil {
 		gameBDSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "gamedb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", setting.DBUser, setting.DBPassword, setting.DBIP, setting.DBPORT, "gamedb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -62,10 +61,10 @@ func connectGameDB() (db *sql.DB, err error) {
 }
 
 // Connect New connect
-func connectLogDB() (db *sql.DB, err error) {
+func connectLogDB(setting *struct{ DBUser, DBPassword, DBIP, DBPORT string }) (db *sql.DB, err error) {
 	if logDBSQL == nil {
 		logDBSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "logdb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", setting.DBUser, setting.DBPassword, setting.DBIP, setting.DBPORT, "logdb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -92,10 +91,10 @@ func connectLogDB() (db *sql.DB, err error) {
 }
 
 // Connect New connect
-func connectPayDB() (db *sql.DB, err error) {
+func connectPayDB(setting *struct{ DBUser, DBPassword, DBIP, DBPORT string }) (db *sql.DB, err error) {
 	if payDBSQL == nil {
 		payDBSQL = new(dbinfo.SqlCLi)
-		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", serversetting.DBUser, serversetting.DBPassword, serversetting.DBIP, serversetting.DBPORT, "paydb")
+		sqlstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&timeout=30s", setting.DBUser, setting.DBPassword, setting.DBIP, setting.DBPORT, "paydb")
 		messagehandle.LogPrintln("DB Connect:", sqlstr)
 		db, err := sql.Open("mysql", sqlstr)
 
@@ -122,13 +121,13 @@ func connectPayDB() (db *sql.DB, err error) {
 }
 
 // SetDBConn init value
-func SetDBConn() {
+func SetDBConn(setting *struct{ DBUser, DBPassword, DBIP, DBPORT string }) {
 	QueryLogChan = make(chan string)
 	WriteGameChan = make(chan dbinfo.SqlQuary)
 	WritePayChan = make(chan dbinfo.SqlQuary)
-	connectGameDB()
-	connectLogDB()
-	connectPayDB()
+	connectGameDB(setting)
+	connectLogDB(setting)
+	connectPayDB(setting)
 
 	// server start check today log table.
 	NewLogTable(foundation.ServerNow().Format("20060102"))
@@ -182,6 +181,13 @@ func NewSetting(args ...interface{}) {
 // UpdateSetting ...
 func UpdateSetting(args ...interface{}) messagehandle.ErrorMsg {
 	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update", len(args)), args...)
+	return err
+}
+
+// ReflushSetting ...
+func ReflushSetting(args ...interface{}) messagehandle.ErrorMsg {
+	args = append(args, foundation.ServerNowTime())
+	_, err := dbinfo.CallWrite(gameBDSQL.DB, dbinfo.MakeProcedureQueryStr("SettingSet_Update_v2", len(args)), args...)
 	return err
 }
 
@@ -264,12 +270,12 @@ func NewGameAccount(args ...interface{}) (int64, messagehandle.ErrorMsg) {
 	if err.ErrorCode != code.OK {
 		err.ErrorCode = code.FailedPrecondition
 		err.Msg = "NewGameAccountError"
-		messagehandle.ErrorLogPrintln("DB", err.Msg, QuertStr)
+		messagehandle.ErrorLogPrintln("NewGameAccount-1", err, QuertStr, args)
 		return -1, err
 	}
 	playerID, errMsg := request.LastInsertId()
 	if errMsg != nil {
-		messagehandle.ErrorLogPrintln("DB NewGameAccount", errMsg)
+		messagehandle.ErrorLogPrintln("NewGameAccount-2", errMsg)
 	}
 	// err := messagehandle.New()
 	return playerID, err

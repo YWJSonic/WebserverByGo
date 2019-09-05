@@ -13,11 +13,15 @@
 "DBPassword":"123qweasdzxc",
 "AccountEncodeStr":"yrgb$",
 "RedisURL":"192.168.1.25:6379",
-"MaintainStartTime":"9 16 * * *",
-"MaintainFinishTime": "5 15 * * *",
-"ULGMaintainCheckoutTime":"10 16 * * *",
+"MaintainStartTime":"10 16 * * *",
+"MaintainFinishTime": "15 16 * * *",
+"ULGMaintainCheckoutTime":"12 16 * * *",
 "RTPSetting":1,
 "RespinSetting":1,
+"ServerDayPayLimit":15000000,
+"ServerDayPayDefault":0,
+"WinScoreLimit":1000000,
+"WinBetRateLimit":80,
 "Maintain":false,
 "DebugLog":true
 }

@@ -22,6 +22,7 @@ func GetAccount(logintype int, accounttoken, gametypeid string) (map[string]inte
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
 			err.ErrorCode = code.FailedPrecondition
+			messagehandle.ErrorLogPrintln("GetAccount-1", logintype, gametypeid, logintype, accounttoken)
 			return result, nil, err
 		}
 
@@ -29,7 +30,7 @@ func GetAccount(logintype int, accounttoken, gametypeid string) (map[string]inte
 		result["userCoinQuota"] = UserInfo.UserCoinQuota
 		result["gameInfo"] = UserInfo.GameInfo
 	default:
-		messagehandle.ErrorLogPrintln("logintype Error", logintype, gametypeid, logintype, accounttoken)
+		messagehandle.ErrorLogPrintln("GetAccount-2", logintype, gametypeid, logintype, accounttoken)
 		err := messagehandle.New()
 		err.ErrorCode = code.LoginTypeError
 		err.Msg = "logintype Error"
@@ -38,6 +39,7 @@ func GetAccount(logintype int, accounttoken, gametypeid string) (map[string]inte
 
 	Info, err := db.GetAccountInfo(iPratyAccount.PartyAccount())
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("GetAccount-3", iPratyAccount)
 		return result, nil, err
 	}
 
@@ -63,18 +65,20 @@ func Excahnge(playerInfo *playerinfo.Info, accountToken, gametypeid string, coin
 	ulguser, err := ulg.Authorized(accountToken, gametypeid)
 	if err.ErrorCode != code.OK {
 		err.ErrorCode = code.FailedPrecondition
+		messagehandle.ErrorLogPrintln("Excahnge-1", err, playerInfo, accountToken, gametypeid, cointype, coinamount)
 		return nil, err
 	}
 
 	// exchange
-	messagehandle.LogPrintln("AccountUserInfo.GameToken", ulguser.GameToken)
 	ulgResult, err := ulg.Exchange(ulguser.GameToken, gametypeid, accountToken, cointype, coinamount)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Excahnge-2", err, ulguser, playerInfo, accountToken, gametypeid, cointype, coinamount)
 		return nil, err
 	}
 
 	_, err = ulg.NewULGInfo(playerInfo.ID, cointype, coinamount, ulguser.GameToken, accountToken)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Excahnge-3", err, ulguser, playerInfo, accountToken, gametypeid, cointype, coinamount)
 		return nil, err
 	}
 
@@ -91,17 +95,20 @@ func CheckOut(playerInfo *playerinfo.Info, gameTypeID string) (interface{}, mess
 
 	ulgInfo, err := ulg.GetULGInfo(playerInfo.ID, playerInfo.GameToken)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("CheckOut-1", err, playerInfo, ulgInfo, gameTypeID)
 		return nil, err
 	}
 	if ulgInfo.IsCheckOut {
 		playerInfo.Money = 0
 		playerInfo.GameToken = ""
 		player.SavePlayerInfo(playerInfo)
+		messagehandle.ErrorLogPrintln("CheckOut-2", err, playerInfo)
 		return nil, err
 	}
 
 	ulgCheckOutResult, err := ulg.Checkout(ulgInfo, gameTypeID)
 	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
+		messagehandle.ErrorLogPrintln("CheckOut-3", err, playerInfo, ulgCheckOutResult)
 		return nil, err
 	}
 
@@ -113,6 +120,7 @@ func CheckOut(playerInfo *playerinfo.Info, gameTypeID string) (interface{}, mess
 func Refresh(accountToken, gameTypeID string) (interface{}, messagehandle.ErrorMsg) {
 	UserInfo, err := ulg.GetUser(accountToken, gameTypeID)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("Refresh-1", err, accountToken, gameTypeID)
 		return nil, err
 	}
 

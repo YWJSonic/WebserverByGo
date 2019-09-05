@@ -40,6 +40,7 @@ func NewULGInfo(playerid, cointype, exchangAmount int64, gameToken, accountToken
 	}
 	err := db.NewULGInfoRow(playerid, gameToken, accountToken, exchangAmount, cointype)
 	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("NewULGInfo-1", err)
 		return nil, err
 	}
 	mycache.SetULGInfo(info.PlayerID, foundation.JSONToString(info))
@@ -59,22 +60,22 @@ func GetULGInfo(playerid int64, gametoken string) (*ulginfo.Info, messagehandle.
 
 		// db no data
 		if err.ErrorCode != code.OK {
-			messagehandle.ErrorLogPrintln("DB GetULGInfo", err)
+			messagehandle.ErrorLogPrintln("GetULGInfo-1", err)
 			return nil, err
 		}
 		if len(ulginfomap) < 1 {
-			messagehandle.ErrorLogPrintln("DB GetULGInfo", err)
 			err.ErrorCode = code.NoExchange
 			err.Msg = "NoExchange"
+			messagehandle.ErrorLogPrintln("GetULGInfo-2", err, playerid, gametoken)
 			return nil, err
 		}
 		ulginfo = MakeULGInfo(ulginfomap[0])
 
 	} else {
 		if errMsg := json.Unmarshal(ULGJsStr.([]byte), &ulginfo); errMsg != nil {
-			messagehandle.ErrorLogPrintln("Cache ULGInfoFormatError", errMsg)
 			err.ErrorCode = code.ULGInfoFormatError
 			err.Msg = "ULGInfoFormatError"
+			messagehandle.ErrorLogPrintln("GetULGInfo-3", errMsg, playerid, gametoken)
 			return nil, err
 		}
 	}
@@ -89,13 +90,12 @@ func MaintainULGInfos() ([]ulginfo.Info, messagehandle.ErrorMsg) {
 
 	// db no data
 	if err.ErrorCode != code.OK {
-		messagehandle.ErrorLogPrintln("Cache GetULGInfo", err)
+		messagehandle.ErrorLogPrintln("MaintainULGInfos-1", err)
 		return nil, err
 	}
 
 	Infos = make([]ulginfo.Info, len(result))
 	for i, row := range result {
-
 		Infos[i] = *MakeULGInfo(row)
 	}
 
@@ -160,6 +160,7 @@ func GetUser(token, gameid string) (ulginfo.Result, messagehandle.ErrorMsg) {
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.GetUserError
 		err.Msg = "UserFormatError"
+		messagehandle.ErrorLogPrintln("GetUser-1", token, gameid, err)
 	}
 
 	if info.Result == 1 {
@@ -167,6 +168,7 @@ func GetUser(token, gameid string) (ulginfo.Result, messagehandle.ErrorMsg) {
 	} else {
 		err.ErrorCode = code.GetUserError
 		err.Msg = info.ErrorMsg
+		messagehandle.ErrorLogPrintln("GetUser-2", token, gameid, err)
 	}
 	return info, err
 }
@@ -184,6 +186,7 @@ func Authorized(token, gametypeid string) (ulginfo.Result, messagehandle.ErrorMs
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = "AuthorizedFormatError"
+		messagehandle.ErrorLogPrintln("Authorized-1", token, gametypeid, err)
 	}
 
 	if info.Result == 1 {
@@ -191,6 +194,7 @@ func Authorized(token, gametypeid string) (ulginfo.Result, messagehandle.ErrorMs
 	} else {
 		err.ErrorCode = code.AuthorizedError
 		err.Msg = info.ErrorMsg
+		messagehandle.ErrorLogPrintln("Authorized-2", token, gametypeid, err)
 	}
 	return info, err
 }
@@ -211,6 +215,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = "ExchangeFormatError"
+		messagehandle.ErrorLogPrintln("Exchange-1", err, gametoken, gametypeid, accounttoken, cointype, coinamount)
 	}
 
 	if info.Result == 1 {
@@ -218,6 +223,7 @@ func Exchange(gametoken, gametypeid, accounttoken string, cointype, coinamount i
 	} else {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = info.ErrorMsg
+		messagehandle.ErrorLogPrintln("Exchange-2", err, gametoken, gametypeid, accounttoken, cointype, coinamount)
 	}
 	return info, err
 }
@@ -234,11 +240,11 @@ func Checkout(ulgInfo *ulginfo.Info, gameid string) (ulginfo.CheckOutResult, mes
 		"win":        fmt.Sprint(ulgInfo.TotalWin),
 		"lost":       fmt.Sprint(ulgInfo.TotalLost),
 	}
-	messagehandle.LogPrintln("Ulg", postData)
 	jsbyte := myrestful.PostRawRequest(ulginfo.CheckoutURL, foundation.ToJSONStr(postData))
 	if jserr := json.Unmarshal(jsbyte, &info); jserr != nil {
 		err.ErrorCode = code.CheckoutError
 		err.Msg = "CheckoutError"
+		messagehandle.ErrorLogPrintln("Checkout-1", jserr, ulgInfo, gameid)
 	}
 
 	if info.Result == 1 {
@@ -256,6 +262,7 @@ func Checkout(ulgInfo *ulginfo.Info, gameid string) (ulginfo.CheckOutResult, mes
 	} else {
 		err.ErrorCode = code.ExchangeError
 		err.Msg = info.ErrorMsg
+		messagehandle.ErrorLogPrintln("Checkout-2", err, ulgInfo, gameid)
 	}
 	return info, err
 }
