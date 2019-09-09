@@ -254,7 +254,7 @@ func checkout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var ulgCheckOutResult ulg.UlgCheckOutResult
 	ulgCheckOutResult, err = ulg.Checkout(ulginfo, gametypeid) //ulg.Checkout(ulginfo.AccountToken, playerInfo.GameToken, gametypeid, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
-	if err.ErrorCode != code.OK && err.ErrorCode != code.ExchangeError {
+	if err.ErrorCode != code.OK {
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
