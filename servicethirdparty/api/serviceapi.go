@@ -79,12 +79,14 @@ func MaintainCheckout() {
 	}
 
 	infos, err := ulg.MaintainULGInfos()
-	fmt.Println(infos, err)
+	if err.ErrorCode != code.OK {
+		messagehandle.ErrorLogPrintln("MaintainCheckout-1", err, infos)
+	}
 
 	for _, ulginfo := range infos {
 		_, err = ulg.Checkout(&ulginfo, serversetting.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
-			messagehandle.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
+			messagehandle.ErrorLogPrintln("MaintainCheckout-2", err, ulginfo)
 		}
 	}
 	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
