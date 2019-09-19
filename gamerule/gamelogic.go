@@ -79,11 +79,11 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 
 	plateIndex, plateSymbol := gameplate.NewPlate2D(scrollSize, scorll)
 	// plateSymbol = [][]int{
-	// 	{5, 7, 8},
-	// 	{2, 1, 2},
-	// 	{1, 2, 1},
-	// 	{1, 2, 1},
-	// 	{7, 10, 8},
+	// 	{11, 0, 9},
+	// 	{0, 11, 6},
+	// 	{13, 4, 12},
+	// 	{0, 14, 12},
+	// 	{12, 10, 1},
 	// }
 	plateLineMap := gameplate.PlateToLinePlate(plateSymbol, lineMap)
 
@@ -100,8 +100,8 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 						isLink = true
 						tmpline := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
 						if tmpline.Score > infoLine.Score {
-							infoLine.LineWinIndex = lineIndex
 							infoLine = tmpline
+							infoLine.LineWinIndex = lineIndex
 							// paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
 						}
 					}
