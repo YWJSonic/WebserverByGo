@@ -89,8 +89,8 @@ var freeWildBonusRateCount map[string]int
 
 func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.PlateOption, gameType int) (map[string]interface{}, map[string]interface{}, int64) {
 
-	var winLineInfo []interface{}
 	var totalScores int64
+	winLineInfo := []interface{}{}
 	otherdata := make(map[string]interface{})
 	result := make(map[string]interface{})
 
@@ -154,10 +154,10 @@ func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.P
 
 	result["scores"] = totalScores
 	result["gameresult"] = winLineInfo
-	if len(winLineInfo) > 0 {
+	if gameType == 1 {
 		result = gameplate.ResultMapLine(plateIndex, plateSymbol, winLineInfo)
 	} else {
-		result = gameplate.ResultMapLine(plateIndex, plateSymbol, []interface{}{})
+		result = gameplate.ResultMapLine(plateIndex, plateSymbolInsertWild, winLineInfo)
 	}
 	return result, otherdata, totalScores
 }
