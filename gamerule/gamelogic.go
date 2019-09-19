@@ -115,6 +115,7 @@ func aRound(betMoney int64, scorll [][]int, randWild [][]int, option gameplate.P
 				for i, max := 0, len(payLine)-1; i < max; i++ {
 					infoLine.AddNewPoint(newLine[i], lineMap[lineIndex][i], option)
 				}
+				infoLine.LineWinIndex = lineIndex
 				infoLine.LineWinRate = payLine[len(payLine)-1]
 				infoLine.Score = int64(infoLine.LineWinRate) * (betMoney / betLine)
 				totalScores += infoLine.Score
