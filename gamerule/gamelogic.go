@@ -100,6 +100,7 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 						isLink = true
 						tmpline := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
 						if tmpline.Score > infoLine.Score {
+							infoLine.LineWinIndex = lineIndex
 							infoLine = tmpline
 							// paylinestr = fmt.Sprintf("%v", payLine[:len(payLine)-1])
 						}
@@ -114,6 +115,7 @@ func aRound(betMoney int64, scorll [][]int, option gameplate.PlateOption, gameTy
 			for _, payLine := range itemResults[len(newLine)] { // win line result group
 				if isWin(newLine, payLine, option) { // win result check
 					infoLine := winResult(betMoney, lineIndex, newLine, payLine, option, gameType)
+					infoLine.LineWinIndex = lineIndex
 					totalScores += infoLine.Score
 					winLineInfo = append(winLineInfo, infoLine)
 				}
