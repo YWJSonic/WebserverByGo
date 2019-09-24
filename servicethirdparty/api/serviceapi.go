@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -48,33 +47,6 @@ func ServiceStart() []myhttp.RESTfulURL {
 	return HandleURL
 }
 
-// CronStart cron API
-func CronStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	crontab.CronStart()
-	fmt.Println("CronStart")
-}
-
-// CronStop cron API
-func CronStop(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	crontab.CronStop()
-	fmt.Println("CronStop")
-}
-
-// CronAdd cron API
-func CronAdd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Println("AddCron")
-}
-
-// MaintainStart Maintain API
-func MaintainStart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	serversetting.EnableMaintain(true)
-}
-
-// MaintainEnd Maintain API
-func MaintainEnd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	serversetting.EnableMaintain(false)
-}
-
 // MaintainCheckout auto checkout ulg
 func MaintainCheckout() {
 	if !serversetting.IsMaintain() {
@@ -87,23 +59,25 @@ func MaintainCheckout() {
 		messagehandle.ErrorLogPrintln("MaintainCheckout-1", err, infos)
 	}
 
+	CheckoutErrorPlayerIDs := make([]int64, 0)
 	for _, ulginfo := range infos {
 		RunNotFinishSoctter(ulginfo.PlayerID)
 		_, err = ulg.Checkout(&ulginfo, serversetting.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
 		if err.ErrorCode != code.OK {
 			messagehandle.ErrorLogPrintln("MaintainCheckout-2", err, ulginfo)
+			CheckoutErrorPlayerIDs = append(CheckoutErrorPlayerIDs, ulginfo.PlayerID)
 		}
 	}
 
 	db.Game6ClearDBScotterCount()
 
-	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
-	db.ULGMaintainCheckOutUpdate()
-	mycache.ClearAllCache()
-}
+	if len(CheckoutErrorPlayerIDs) <= 0 {
+		db.ULGMaintainCheckOutUpdate()
+	} else {
+		db.ULGMaintainCheckOutUpdateByPlayerID(CheckoutErrorPlayerIDs)
+	}
 
-// ClearAllCache clear all cache data
-func ClearAllCache(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	serversetting.RefreshDBSetting(gameRules.GameIndex, gamelimit.ServerDayPayDefault)
 	mycache.ClearAllCache()
 }
 
