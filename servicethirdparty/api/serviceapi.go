@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -15,7 +16,6 @@ import (
 	gameRules "gitlab.com/WeberverByGoGame6/gamerule"
 	attach "gitlab.com/WeberverByGoGame6/handleattach"
 	mycache "gitlab.com/WeberverByGoGame6/handlecache"
-	crontab "gitlab.com/WeberverByGoGame6/handlecrontab"
 	db "gitlab.com/WeberverByGoGame6/handledb"
 	"gitlab.com/WeberverByGoGame6/player"
 	"gitlab.com/WeberverByGoGame6/serversetting"
