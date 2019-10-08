@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/data"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
 )
 
 var CachePool *redis.Pool

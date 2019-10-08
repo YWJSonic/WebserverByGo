@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/WeberverByGo/code"
+	"gitlab.com/WeberverByGoGame5/code"
 )
 
 var (

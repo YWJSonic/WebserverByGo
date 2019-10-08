@@ -3,7 +3,7 @@ package player
 import (
 	"time"
 
-	"gitlab.com/WeberverByGo/data"
+	"gitlab.com/WeberverByGoGame5/data"
 )
 
 // CachePlayer memory cache player

@@ -3,8 +3,8 @@ package ulg
 import (
 	"strconv"
 
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/player"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/player"
 )
 
 // ULGInfo plant ULG game play data

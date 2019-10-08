@@ -1,9 +1,9 @@
 package setting
 
 import (
-	"gitlab.com/WeberverByGo/crontab"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGoGame5/crontab"
+	"gitlab.com/WeberverByGoGame5/data"
+	"gitlab.com/WeberverByGoGame5/foundation"
 )
 
 // ServerTime ...

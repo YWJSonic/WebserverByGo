@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game/gamesystem"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/game/gamesystem"
 )
 
 func init() {

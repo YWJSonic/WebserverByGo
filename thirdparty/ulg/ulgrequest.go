@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/mycache"
+	"gitlab.com/WeberverByGoGame5/code"
+	"gitlab.com/WeberverByGoGame5/db"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/mycache"
 )
 
 /////// API interface process

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/code"
+	"gitlab.com/WeberverByGoGame5/data"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
 )
 
 // SetToken ...

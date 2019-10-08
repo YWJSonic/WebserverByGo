@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"sync"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/messagehandle/log"
-	"gitlab.com/WeberverByGo/player"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
+	"gitlab.com/WeberverByGoGame5/code"
+	"gitlab.com/WeberverByGoGame5/db"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/game"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/messagehandle/log"
+	"gitlab.com/WeberverByGoGame5/player"
+	"gitlab.com/WeberverByGoGame5/thirdparty/ulg"
 
 	"github.com/julienschmidt/httprouter"
 )

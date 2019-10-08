@@ -6,15 +6,15 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/messagehandle/log"
-	"gitlab.com/WeberverByGo/player"
-	"gitlab.com/WeberverByGo/setting"
-	"gitlab.com/WeberverByGo/thirdparty/guest"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
+	"gitlab.com/WeberverByGoGame5/code"
+	"gitlab.com/WeberverByGoGame5/db"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/messagehandle/log"
+	"gitlab.com/WeberverByGoGame5/player"
+	"gitlab.com/WeberverByGoGame5/setting"
+	"gitlab.com/WeberverByGoGame5/thirdparty/guest"
+	"gitlab.com/WeberverByGoGame5/thirdparty/ulg"
 )
 
 var isInit = false

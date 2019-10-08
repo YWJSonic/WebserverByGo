@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"strings"
 
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/messagehandle/log"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/messagehandle/log"
 
-	"gitlab.com/WeberverByGo/foundation"
-	gameRules "gitlab.com/WeberverByGo/game/game5"
-	"gitlab.com/WeberverByGo/game/gamesystem"
-	"gitlab.com/WeberverByGo/mycache"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	gameRules "gitlab.com/WeberverByGoGame5/game/game5"
+	"gitlab.com/WeberverByGoGame5/game/gamesystem"
+	"gitlab.com/WeberverByGoGame5/mycache"
 )
 
 // GetInitScroll ...

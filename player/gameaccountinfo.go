@@ -3,7 +3,7 @@ package player
 import (
 	"time"
 
-	"gitlab.com/WeberverByGo/foundation"
+	"gitlab.com/WeberverByGoGame5/foundation"
 )
 
 // Account Type

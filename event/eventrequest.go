@@ -3,7 +3,7 @@ package event
 import (
 	"time"
 
-	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGoGame5/db"
 )
 
 var eventList []EventInfo

@@ -1,9 +1,9 @@
 package game5
 
 import (
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/game/gamesystem"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/game/gamesystem"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
 )
 
 // BetInitInfo init info

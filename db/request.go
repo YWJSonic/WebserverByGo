@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	"gitlab.com/WeberverByGo/code"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/code"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
 )
 
 // GetSetting get db setting

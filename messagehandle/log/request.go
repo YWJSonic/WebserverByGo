@@ -3,7 +3,7 @@ package log
 import (
 	"time"
 
-	"gitlab.com/WeberverByGo/db"
+	"gitlab.com/WeberverByGoGame5/db"
 )
 
 // New Default log

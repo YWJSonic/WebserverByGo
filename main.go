@@ -2,19 +2,19 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"gitlab.com/WeberverByGo/crontab"
-	"gitlab.com/WeberverByGo/data"
-	"gitlab.com/WeberverByGo/db"
-	"gitlab.com/WeberverByGo/event"
-	"gitlab.com/WeberverByGo/foundation"
-	"gitlab.com/WeberverByGo/foundation/fileload"
-	"gitlab.com/WeberverByGo/game"
-	gameRules "gitlab.com/WeberverByGo/game/game5"
-	"gitlab.com/WeberverByGo/lobby"
-	"gitlab.com/WeberverByGo/login"
-	"gitlab.com/WeberverByGo/messagehandle/errorlog"
-	"gitlab.com/WeberverByGo/service/api"
-	"gitlab.com/WeberverByGo/thirdparty/ulg"
+	"gitlab.com/WeberverByGoGame5/crontab"
+	"gitlab.com/WeberverByGoGame5/data"
+	"gitlab.com/WeberverByGoGame5/db"
+	"gitlab.com/WeberverByGoGame5/event"
+	"gitlab.com/WeberverByGoGame5/foundation"
+	"gitlab.com/WeberverByGoGame5/foundation/fileload"
+	"gitlab.com/WeberverByGoGame5/game"
+	gameRules "gitlab.com/WeberverByGoGame5/game/game5"
+	"gitlab.com/WeberverByGoGame5/lobby"
+	"gitlab.com/WeberverByGoGame5/login"
+	"gitlab.com/WeberverByGoGame5/messagehandle/errorlog"
+	"gitlab.com/WeberverByGoGame5/service/api"
+	"gitlab.com/WeberverByGoGame5/thirdparty/ulg"
 )
 
 func main() {
