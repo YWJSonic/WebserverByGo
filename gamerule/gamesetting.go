@@ -31,7 +31,7 @@ var RTPSetting = 1
 // RespinSetting respint select 1 is first
 var RespinSetting = 1
 
-var betRate = []int64{20, 100, 300, 500, 1500}
+var betRate = []int64{200, 1000, 10000, 100000, 500000, 1000000}
 var betRateLinkIndex = []int64{0, 1, 2, 3, 4}
 var betRateDefaultIndex int64 = 1
 
