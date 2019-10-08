@@ -24,7 +24,7 @@ var WinScoreLimit int64
 var WinBetRateLimit int64
 
 // BetRate ...
-var betRate = []int64{1000, 5000, 10000, 20000, 30000}
+var betRate = []int64{100, 1000, 10000, 100000, 1000000}
 var betRateLinkIndex = []int64{0, 1, 2, 3, 4}
 var betRateDefaultIndex int64 = 1
 
