@@ -31,7 +31,7 @@ var WinScoreLimit int64
 // WinBetRateLimit game round win rate limit
 var WinBetRateLimit int64
 
-var betRate = []int64{30, 150, 300, 750, 1500}
+var betRate = []int64{300, 1500, 3000, 7500, 15000, 150000, 1500000}
 var betRateLinkIndex = []int64{0, 1, 2, 3, 4}
 var betRateDefaultIndex int64 = 1
 
