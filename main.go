@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"gitlab.com/WeberverByGoGame5/backend"
 	"gitlab.com/WeberverByGoGame5/crontab"
 	"gitlab.com/WeberverByGoGame5/data"
 	"gitlab.com/WeberverByGoGame5/db"
@@ -62,5 +63,10 @@ func main() {
 	crontab.NewCron(ulg.ULGMaintainCheckoutTime, api.MaintainCheckout)
 
 	go event.Update()
+	go func() {
+		var initbackendArray [][]foundation.RESTfulURL
+		initbackendArray = append(initbackendArray, backend.ServiceStart())
+		foundation.HTTPLisentRun(data.BackendURL(), initbackendArray...)
+	}()
 	foundation.HTTPLisentRun(data.ServerURL(), initArray...)
 }

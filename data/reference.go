@@ -26,6 +26,8 @@ var (
 	IP = "127.0.0.1"
 	// PORT ServerListen PORT
 	PORT = "8000"
+	// PORT BackendListen PORT
+	BackendPORT = "9000"
 	// DBIP server connect DB address
 	DBIP = "127.0.0.1"
 	// DBPORT server connect DB port
@@ -60,6 +62,11 @@ func init() {
 // ServerURL ...
 func ServerURL() string {
 	return fmt.Sprintf("%s:%s", IP, PORT)
+}
+
+// BackendURL ...
+func BackendURL() string {
+	return fmt.Sprintf("%s:%s", IP, BackendPORT)
 }
 
 // IsMaintain ...

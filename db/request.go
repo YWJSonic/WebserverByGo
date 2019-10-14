@@ -185,6 +185,26 @@ func ULGMaintainCheckOutUpdate() errorlog.ErrorMsg {
 
 }
 
+// ULGSetFlagFalse ...
+func ULGSetFlagFalse(gametoken string, playerID int64) errorlog.ErrorMsg {
+	var err errorlog.ErrorMsg
+
+	query1 := "UPDATE ulgdata SET CheckOut = 0 WHERE GameToken ='" + gametoken + "' AND PlayerID = " + fmt.Sprint(playerID) + ";"
+	fmt.Println(query1)
+	_, err = CallWrite(gameBDSQL.DB, query1)
+	if err.ErrorCode != code.OK {
+		return err
+	}
+
+	query2 := "UPDATE gameaccount SET GameToken = '" + gametoken + "' WHERE PlayerID = " + fmt.Sprint(playerID) + ";"
+	fmt.Println(query2)
+	_, err = CallWrite(gameBDSQL.DB, query2)
+	if err.ErrorCode != code.OK {
+		return err
+	}
+	return err
+}
+
 // ULGMaintainCheckOutUpdateByPlayerID ...
 func ULGMaintainCheckOutUpdateByPlayerID(CheckoutErrorplayerIDs []int64) errorlog.ErrorMsg {
 
