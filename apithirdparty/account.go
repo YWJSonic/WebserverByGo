@@ -21,7 +21,6 @@ func GetAccount(logintype int, accounttoken, gametypeid string) (map[string]inte
 	case playerinfo.Ulg:
 		UserInfo, err := ulg.GetUser(accounttoken, gametypeid)
 		if err.ErrorCode != code.OK {
-			err.ErrorCode = code.FailedPrecondition
 			messagehandle.ErrorLogPrintln("GetAccount-1", logintype, gametypeid, logintype, accounttoken)
 			return result, nil, err
 		}
@@ -64,7 +63,6 @@ func Excahnge(playerInfo *playerinfo.Info, accountToken, gametypeid string, coin
 	// new thirdparty token
 	ulguser, err := ulg.Authorized(accountToken, gametypeid)
 	if err.ErrorCode != code.OK {
-		err.ErrorCode = code.FailedPrecondition
 		messagehandle.ErrorLogPrintln("Excahnge-1", err, playerInfo, accountToken, gametypeid, cointype, coinamount)
 		return nil, err
 	}
