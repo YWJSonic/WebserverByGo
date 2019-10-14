@@ -78,19 +78,26 @@ func MaintainCheckout() {
 	}
 
 	infos, err := ulg.MaintainULGInfos()
-	fmt.Println(infos, err)
-
-	for _, ulginfo := range infos {
-		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, data.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
-		if err.ErrorCode != code.OK {
-			errorlog.ErrorLogPrintln("Crontab MaintainCheckout", err, ulginfo)
-		}
-
-		mycache.ClearAllCache()
+	if err.ErrorCode != code.OK {
+		errorlog.ErrorLogPrintln("MaintainCheckout-1", err, infos)
 	}
 
-	db.ULGMaintainCheckOutUpdate()
-	errorlog.TipPrintln("MaintainCheckout Finish!!")
+	CheckoutErrorPlayerIDs := make([]int64, 0)
+	for _, ulginfo := range infos {
+		_, err = ulg.Checkout(&ulginfo, data.GameTypeID) //(ulginfo.AccountToken, ulginfo.GameToken, serversetting.GameTypeID, fmt.Sprint(ulginfo.TotalBet), fmt.Sprint(ulginfo.TotalWin), fmt.Sprint(ulginfo.TotalLost))
+		if err.ErrorCode != code.OK {
+			errorlog.ErrorLogPrintln("MaintainCheckout-2", err, ulginfo)
+			CheckoutErrorPlayerIDs = append(CheckoutErrorPlayerIDs, ulginfo.PlayerID)
+		}
+	}
+
+	if len(CheckoutErrorPlayerIDs) <= 0 {
+		db.ULGMaintainCheckOutUpdate()
+	} else {
+		db.ULGMaintainCheckOutUpdateByPlayerID(CheckoutErrorPlayerIDs)
+	}
+
+	mycache.ClearAllCache()
 }
 
 // ClearAllCache clear all cache data

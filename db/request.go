@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 	"gitlab.com/WeberverByGoGame5/code"
@@ -182,6 +183,35 @@ func ULGMaintainCheckOutUpdate() errorlog.ErrorMsg {
 	_, err := CallReadOutMap(gameBDSQL.DB, "ULGMaintainCheckOutSet_Update")
 	return err
 
+}
+
+// ULGMaintainCheckOutUpdateByPlayerID ...
+func ULGMaintainCheckOutUpdateByPlayerID(CheckoutErrorplayerIDs []int64) errorlog.ErrorMsg {
+
+	if len(CheckoutErrorplayerIDs) <= 0 {
+		return errorlog.New()
+	}
+
+	query1 := "UPDATE ulgdata SET CheckOut = 1 WHERE PlayerID not in (%s) AND CheckOut = 0 AND GameToken != '';"
+	query2 := "UPDATE gameaccount SET GameMoney = 0,GameToken = '' WHERE PlayerID not in (%s);"
+
+	playerIDStr := ""
+	for _, playerid := range CheckoutErrorplayerIDs {
+		playerIDStr += fmt.Sprint(playerid)
+		playerIDStr += ","
+	}
+	playerIDStr = playerIDStr[:len(playerIDStr)-1]
+	query1 = strings.ReplaceAll(query1, "%s", playerIDStr)
+	query2 = strings.ReplaceAll(query2, "%s", playerIDStr)
+
+	var err errorlog.ErrorMsg
+	_, err = CallWrite(gameBDSQL.DB, query1)
+	if err.ErrorCode != code.OK {
+		return err
+	}
+
+	_, err = CallWrite(gameBDSQL.DB, query2)
+	return err
 }
 
 /////////////////		Log DB		/////////////////
