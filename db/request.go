@@ -107,8 +107,6 @@ func NewGameAccount(args ...interface{}) (int64, errorlog.ErrorMsg) {
 
 	request, err := exec(gameBDSQL.DB, QuertStr, args...)
 	if err.ErrorCode != code.OK {
-		err.ErrorCode = code.FailedPrecondition
-		err.Msg = "NewGameAccountError"
 		errorlog.ErrorLogPrintln("DB", err.Msg, QuertStr)
 		return -1, err
 	}

@@ -171,7 +171,6 @@ func exchange(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// new thirdparty token
 	ulguser, err := ulg.Authorized(accountToken, gametypeid)
 	if err.ErrorCode != code.OK {
-		err.ErrorCode = code.FailedPrecondition
 		foundation.HTTPResponse(w, "", err)
 		return
 	}
