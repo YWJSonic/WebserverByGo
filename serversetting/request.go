@@ -118,7 +118,7 @@ func RefreshDBSetting(gameTypeIndex int, serverDayPayDefault int64) {
 	timeslip := foundation.ServerNowTime() - serverTotalPayScore.LastRefulsh
 	timelimit := int64(time.Hour * 24 / time.Second)
 
-	if timeslip >= timelimit {
+	if timelimit-timeslip <= 200 {
 		db.ReflushSetting(foundation.ServerTotalPayScoreKey(gameTypeIndex), serverDayPayDefault, "")
 	}
 }
