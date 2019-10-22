@@ -92,6 +92,15 @@ func SetServerTotalPayScore(value int64) {
 	serverTotalPayScore.IValue = value
 }
 
+// ResetServerTotalPayScore ..
+func resetServerTotalPayScore(value int64) {
+	mu.Lock()
+	defer mu.Unlock()
+	serverTotalPayScore.LastRefulsh = foundation.ServerNowTime()
+	serverTotalPayScore.IValue = value
+
+}
+
 // ServerTime ...
 func serverTime() int64 {
 	return foundation.ServerNowTime()
@@ -119,6 +128,7 @@ func RefreshDBSetting(gameTypeIndex int, serverDayPayDefault int64) {
 	timelimit := int64(time.Hour * 24 / time.Second)
 
 	if timelimit-timeslip <= 200 {
+		resetServerTotalPayScore(serverDayPayDefault)
 		db.ReflushSetting(foundation.ServerTotalPayScoreKey(gameTypeIndex), serverDayPayDefault, "")
 	}
 }
