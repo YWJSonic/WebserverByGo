@@ -15,14 +15,14 @@ import (
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
-	gameRule "gitlab.com/WeberverByGoGame6/gamerule"
-	attach "gitlab.com/WeberverByGoGame6/handleattach"
-	mycache "gitlab.com/WeberverByGoGame6/handlecache"
-	db "gitlab.com/WeberverByGoGame6/handledb"
-	log "gitlab.com/WeberverByGoGame6/handlelog"
-	"gitlab.com/WeberverByGoGame6/player"
-	"gitlab.com/WeberverByGoGame6/serversetting"
+	"gitlab.com/WebserverByGoGame6/apithirdparty/ulg"
+	gameRule "gitlab.com/WebserverByGoGame6/gamerule"
+	attach "gitlab.com/WebserverByGoGame6/handleattach"
+	mycache "gitlab.com/WebserverByGoGame6/handlecache"
+	db "gitlab.com/WebserverByGoGame6/handledb"
+	log "gitlab.com/WebserverByGoGame6/handlelog"
+	"gitlab.com/WebserverByGoGame6/player"
+	"gitlab.com/WebserverByGoGame6/serversetting"
 )
 
 var mu *sync.RWMutex

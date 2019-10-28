@@ -12,14 +12,14 @@ import (
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
 	"gitlab.com/ServerUtility/playerinfo"
-	"gitlab.com/WeberverByGoGame6/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGoGame6/gamerule"
-	attach "gitlab.com/WeberverByGoGame6/handleattach"
-	mycache "gitlab.com/WeberverByGoGame6/handlecache"
-	db "gitlab.com/WeberverByGoGame6/handledb"
-	"gitlab.com/WeberverByGoGame6/player"
-	"gitlab.com/WeberverByGoGame6/serversetting"
-	game "gitlab.com/WeberverByGoGame6/servicegame"
+	"gitlab.com/WebserverByGoGame6/apithirdparty/ulg"
+	gameRules "gitlab.com/WebserverByGoGame6/gamerule"
+	attach "gitlab.com/WebserverByGoGame6/handleattach"
+	mycache "gitlab.com/WebserverByGoGame6/handlecache"
+	db "gitlab.com/WebserverByGoGame6/handledb"
+	"gitlab.com/WebserverByGoGame6/player"
+	"gitlab.com/WebserverByGoGame6/serversetting"
+	game "gitlab.com/WebserverByGoGame6/servicegame"
 )
 
 var isInit bool
