@@ -5,15 +5,15 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/WeberverByGoGame7/apithirdparty/ulg"
-	db "gitlab.com/WeberverByGoGame7/handledb"
-	"gitlab.com/WeberverByGoGame7/player"
-	"gitlab.com/WeberverByGoGame7/serversetting"
+	"gitlab.com/WebserverByGoGame7/apithirdparty/ulg"
+	db "gitlab.com/WebserverByGoGame7/handledb"
+	"gitlab.com/WebserverByGoGame7/player"
+	"gitlab.com/WebserverByGoGame7/serversetting"
 
-	gameRule "gitlab.com/WeberverByGoGame7/gamerule"
-	attach "gitlab.com/WeberverByGoGame7/handleattach"
-	mycache "gitlab.com/WeberverByGoGame7/handlecache"
-	log "gitlab.com/WeberverByGoGame7/handlelog"
+	gameRule "gitlab.com/WebserverByGoGame7/gamerule"
+	attach "gitlab.com/WebserverByGoGame7/handleattach"
+	mycache "gitlab.com/WebserverByGoGame7/handlecache"
+	log "gitlab.com/WebserverByGoGame7/handlelog"
 
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/foundation"

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"gitlab.com/ServerUtility/foundation"
-	moneypool "gitlab.com/WeberverByGoGame7/servercontrol"
+	moneypool "gitlab.com/WebserverByGoGame7/servercontrol"
 )
 
 // TestGameRequest ...
