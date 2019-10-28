@@ -2,7 +2,7 @@ package log
 
 import (
 	"gitlab.com/ServerUtility/loginfo"
-	db "gitlab.com/WeberverByGoGame9/handledb"
+	db "gitlab.com/WebserverByGoGame9/handledb"
 )
 
 // AcouuntLogin log account

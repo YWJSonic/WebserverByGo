@@ -11,7 +11,7 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/mysql"
-	crontab "gitlab.com/WeberverByGoGame9/handlecrontab"
+	crontab "gitlab.com/WebserverByGoGame9/handlecrontab"
 )
 
 var gameBDSQL *dbinfo.SqlCLi

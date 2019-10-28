@@ -8,9 +8,9 @@ import (
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGoGame9/foundation/myrestful"
-	mycache "gitlab.com/WeberverByGoGame9/handlecache"
-	db "gitlab.com/WeberverByGoGame9/handledb"
+	"gitlab.com/WebserverByGoGame9/foundation/myrestful"
+	mycache "gitlab.com/WebserverByGoGame9/handlecache"
+	db "gitlab.com/WebserverByGoGame9/handledb"
 )
 
 /////// API interface process

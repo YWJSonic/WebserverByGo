@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ServerUtility/code"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/redigo/redis"
-	"gitlab.com/WeberverByGoGame9/serversetting"
+	"gitlab.com/WebserverByGoGame9/serversetting"
 )
 
 // CachePool redis conn pool

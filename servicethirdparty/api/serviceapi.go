@@ -9,11 +9,11 @@ import (
 	"gitlab.com/ServerUtility/gamelimit"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame9/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGoGame9/gamerule"
-	mycache "gitlab.com/WeberverByGoGame9/handlecache"
-	db "gitlab.com/WeberverByGoGame9/handledb"
-	"gitlab.com/WeberverByGoGame9/serversetting"
+	"gitlab.com/WebserverByGoGame9/apithirdparty/ulg"
+	gameRules "gitlab.com/WebserverByGoGame9/gamerule"
+	mycache "gitlab.com/WebserverByGoGame9/handlecache"
+	db "gitlab.com/WebserverByGoGame9/handledb"
+	"gitlab.com/WebserverByGoGame9/serversetting"
 
 	"github.com/julienschmidt/httprouter"
 )

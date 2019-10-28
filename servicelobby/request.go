@@ -10,13 +10,13 @@ import (
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame9/apithirdparty"
-	gameRule "gitlab.com/WeberverByGoGame9/gamerule"
-	attach "gitlab.com/WeberverByGoGame9/handleattach"
-	mycache "gitlab.com/WeberverByGoGame9/handlecache"
-	log "gitlab.com/WeberverByGoGame9/handlelog"
-	"gitlab.com/WeberverByGoGame9/player"
-	"gitlab.com/WeberverByGoGame9/serversetting"
+	"gitlab.com/WebserverByGoGame9/apithirdparty"
+	gameRule "gitlab.com/WebserverByGoGame9/gamerule"
+	attach "gitlab.com/WebserverByGoGame9/handleattach"
+	mycache "gitlab.com/WebserverByGoGame9/handlecache"
+	log "gitlab.com/WebserverByGoGame9/handlelog"
+	"gitlab.com/WebserverByGoGame9/player"
+	"gitlab.com/WebserverByGoGame9/serversetting"
 )
 
 var isInit = false
