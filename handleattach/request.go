@@ -7,8 +7,8 @@ import (
 
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/messagehandle"
-	mycache "gitlab.com/WeberverByGoGame8/handlecache"
-	db "gitlab.com/WeberverByGoGame8/handledb"
+	mycache "gitlab.com/WebserverByGoGame8/handlecache"
+	db "gitlab.com/WebserverByGoGame8/handledb"
 )
 
 // GetAttach 0:free game count

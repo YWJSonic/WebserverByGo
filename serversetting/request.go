@@ -8,7 +8,7 @@ import (
 	cron "gitlab.com/ServerUtility/cron.v3"
 	"gitlab.com/ServerUtility/foundation"
 	"gitlab.com/ServerUtility/settinginfo"
-	db "gitlab.com/WeberverByGoGame8/handledb"
+	db "gitlab.com/WebserverByGoGame8/handledb"
 )
 
 var mu *sync.RWMutex

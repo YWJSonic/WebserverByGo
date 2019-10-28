@@ -12,13 +12,13 @@ import (
 	"gitlab.com/ServerUtility/loginfo"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame8/apithirdparty/ulg"
-	gameRule "gitlab.com/WeberverByGoGame8/gamerule"
-	mycache "gitlab.com/WeberverByGoGame8/handlecache"
-	db "gitlab.com/WeberverByGoGame8/handledb"
-	log "gitlab.com/WeberverByGoGame8/handlelog"
-	"gitlab.com/WeberverByGoGame8/player"
-	"gitlab.com/WeberverByGoGame8/serversetting"
+	"gitlab.com/WebserverByGoGame8/apithirdparty/ulg"
+	gameRule "gitlab.com/WebserverByGoGame8/gamerule"
+	mycache "gitlab.com/WebserverByGoGame8/handlecache"
+	db "gitlab.com/WebserverByGoGame8/handledb"
+	log "gitlab.com/WebserverByGoGame8/handlelog"
+	"gitlab.com/WebserverByGoGame8/player"
+	"gitlab.com/WebserverByGoGame8/serversetting"
 )
 
 var mu *sync.RWMutex

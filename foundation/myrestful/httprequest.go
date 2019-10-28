@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame8/serversetting"
+	"gitlab.com/WebserverByGoGame8/serversetting"
 )
 
 var proxyData map[string]myhttp.RESTfulURL

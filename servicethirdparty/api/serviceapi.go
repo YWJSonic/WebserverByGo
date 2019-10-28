@@ -10,11 +10,11 @@ import (
 	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoGame8/apithirdparty/ulg"
-	gameRules "gitlab.com/WeberverByGoGame8/gamerule"
-	mycache "gitlab.com/WeberverByGoGame8/handlecache"
-	db "gitlab.com/WeberverByGoGame8/handledb"
-	"gitlab.com/WeberverByGoGame8/serversetting"
+	"gitlab.com/WebserverByGoGame8/apithirdparty/ulg"
+	gameRules "gitlab.com/WebserverByGoGame8/gamerule"
+	mycache "gitlab.com/WebserverByGoGame8/handlecache"
+	db "gitlab.com/WebserverByGoGame8/handledb"
+	"gitlab.com/WebserverByGoGame8/serversetting"
 )
 
 var isInit bool
