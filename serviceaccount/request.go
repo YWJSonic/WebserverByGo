@@ -9,9 +9,9 @@ import (
 	"gitlab.com/ServerUtility/httprouter"
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/myhttp"
-	"gitlab.com/WeberverByGoBase/apithirdparty"
-	log "gitlab.com/WeberverByGoBase/handlelog"
-	"gitlab.com/WeberverByGoBase/serversetting"
+	"gitlab.com/WebserverByGoBase/apithirdparty"
+	log "gitlab.com/WebserverByGoBase/handlelog"
+	"gitlab.com/WebserverByGoBase/serversetting"
 )
 
 var isInit = false

@@ -6,10 +6,10 @@ import (
 	"gitlab.com/ServerUtility/messagehandle"
 	"gitlab.com/ServerUtility/playerinfo"
 	"gitlab.com/ServerUtility/thirdparty/ulginfo"
-	"gitlab.com/WeberverByGoBase/apithirdparty/ulg"
-	db "gitlab.com/WeberverByGoBase/handledb"
-	"gitlab.com/WeberverByGoBase/player"
-	"gitlab.com/WeberverByGoBase/serversetting"
+	"gitlab.com/WebserverByGoBase/apithirdparty/ulg"
+	db "gitlab.com/WebserverByGoBase/handledb"
+	"gitlab.com/WebserverByGoBase/player"
+	"gitlab.com/WebserverByGoBase/serversetting"
 )
 
 // GetAccount ...
